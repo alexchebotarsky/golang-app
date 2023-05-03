@@ -5,14 +5,19 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/goodleby/pure-go-server/client/database"
 )
 
-func DeleteArticle(db *database.Client) http.HandlerFunc {
+// ArticleRemover is an interface that removes an article.
+type ArticleRemover interface {
+	RemoveArticle(id string) error
+}
+
+// RemoveArticle is a handler that removes an article.
+func RemoveArticle(articleRemover ArticleRemover) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := chi.URLParam(r, "id")
 
-		if err := db.DeleteArticle(id); err != nil {
+		if err := articleRemover.RemoveArticle(id); err != nil {
 			handleError(w, fmt.Errorf("error deleting article: %v", err), http.StatusInternalServerError, true)
 			return
 		}

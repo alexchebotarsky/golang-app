@@ -9,7 +9,13 @@ import (
 	"github.com/goodleby/pure-go-server/client/database"
 )
 
-func CreateArticle(db *database.Client) http.HandlerFunc {
+// ArticleCreator is an interface that creates an article.
+type ArticleCreator interface {
+	CreateArticle(article database.Article) (database.Article, error)
+}
+
+// CreateArticle is a handler that creates an article.
+func CreateArticle(articleCreator ArticleCreator) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var article database.Article
 		if err := json.NewDecoder(r.Body).Decode(&article); err != nil {
@@ -17,7 +23,7 @@ func CreateArticle(db *database.Client) http.HandlerFunc {
 			return
 		}
 
-		article, err := db.CreateArticle(article)
+		article, err := articleCreator.CreateArticle(article)
 		if err != nil {
 			handleError(w, fmt.Errorf("error creating article: %v", err), http.StatusInternalServerError, true)
 			return

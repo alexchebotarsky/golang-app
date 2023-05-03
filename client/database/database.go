@@ -2,6 +2,7 @@ package database
 
 import "fmt"
 
+// Article is a database article.
 type Article struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
@@ -9,10 +10,12 @@ type Article struct {
 	Id          string `json:"id"`
 }
 
+// Client is a database client.
 type Client struct {
 	Articles []Article
 }
 
+// New creates a new database client.
 func New() (*Client, error) {
 	var c Client
 
@@ -24,10 +27,12 @@ func New() (*Client, error) {
 	return &c, nil
 }
 
-func (c *Client) FetchArticles() ([]Article, error) {
+// FetchAllArticles fetches all articles.
+func (c *Client) FetchAllArticles() ([]Article, error) {
 	return c.Articles, nil
 }
 
+// FetchArticle fetches an article by id.
 func (c *Client) FetchArticle(id string) (Article, error) {
 	for _, article := range c.Articles {
 		if article.Id == id {
@@ -38,12 +43,14 @@ func (c *Client) FetchArticle(id string) (Article, error) {
 	return Article{}, fmt.Errorf("Article with id '%s' not found", id)
 }
 
+// CreateArticle creates an article.
 func (c *Client) CreateArticle(article Article) (Article, error) {
 	c.Articles = append(c.Articles, article)
 
 	return article, nil
 }
 
+// UpdateArticle updates an article.
 func (c *Client) UpdateArticle(id string, article Article) (Article, error) {
 	for i, a := range c.Articles {
 		if a.Id == id {
@@ -55,7 +62,8 @@ func (c *Client) UpdateArticle(id string, article Article) (Article, error) {
 	return Article{}, fmt.Errorf("Article with id '%s' not found", id)
 }
 
-func (c *Client) DeleteArticle(id string) error {
+// RemoveArticle removes an article.
+func (c *Client) RemoveArticle(id string) error {
 	for i, article := range c.Articles {
 		if article.Id == id {
 			c.Articles = append(c.Articles[:i], c.Articles[i+1:]...)

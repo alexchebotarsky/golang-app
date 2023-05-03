@@ -10,7 +10,13 @@ import (
 	"github.com/goodleby/pure-go-server/client/database"
 )
 
-func UpdateArticle(db *database.Client) http.HandlerFunc {
+// ArticleUpdater is an interface that updates an article.
+type ArticleUpdater interface {
+	UpdateArticle(id string, article database.Article) (database.Article, error)
+}
+
+// UpdateArticle is a handler that updates an article.
+func UpdateArticle(articleUpdater ArticleUpdater) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := chi.URLParam(r, "id")
 
@@ -20,7 +26,7 @@ func UpdateArticle(db *database.Client) http.HandlerFunc {
 			return
 		}
 
-		upd, err := db.UpdateArticle(id, article)
+		upd, err := articleUpdater.UpdateArticle(id, article)
 		if err != nil {
 			handleError(w, fmt.Errorf("error updating article: %v", err), http.StatusInternalServerError, true)
 			return

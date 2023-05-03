@@ -9,12 +9,15 @@ import (
 	"github.com/sethvargo/go-envconfig"
 )
 
+// Config contains all environment configuration.
 type Config struct {
 	Port Port `env:"PORT,default=8000"`
 }
 
+// Port is a valid port.
 type Port = uint16
 
+// Load loads the environment configuration.
 func Load(ctx context.Context) (*Config, error) {
 	var c Config
 

@@ -21,5 +21,7 @@ func main() {
 		log.Printf("error creating server: %v", err)
 	}
 
-	server.Start()
+	if err := server.Start(); err != nil {
+		log.Printf("error starting server: %v", err)
+	}
 }

@@ -10,11 +10,17 @@ import (
 	"github.com/goodleby/pure-go-server/client/database"
 )
 
-func GetArticle(db *database.Client) http.HandlerFunc {
+// ArticleFetcher is an interface that fetches an article.
+type ArticleFetcher interface {
+	FetchArticle(id string) (database.Article, error)
+}
+
+// GetArticle is a handler that fetches an article.
+func GetArticle(articleFetcher ArticleFetcher) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := chi.URLParam(r, "id")
 
-		article, err := db.FetchArticle(id)
+		article, err := articleFetcher.FetchArticle(id)
 		if err != nil {
 			handleError(w, fmt.Errorf("error fetching article: %v", err), http.StatusInternalServerError, true)
 			return

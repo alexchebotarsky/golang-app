@@ -14,6 +14,7 @@ import (
 
 const v1API string = "/api/v1"
 
+// Server is a server.
 type Server struct {
 	Config *config.Config
 	Router *chi.Mux
@@ -21,6 +22,7 @@ type Server struct {
 	DB     *database.Client
 }
 
+// New creates a new server.
 func New(ctx context.Context, config *config.Config) (*Server, error) {
 	var s Server
 
@@ -42,6 +44,7 @@ func New(ctx context.Context, config *config.Config) (*Server, error) {
 	return &s, nil
 }
 
+// Start starts the server.
 func (s *Server) Start() error {
 	log.Printf("Server is listening on port :%d", s.Config.Port)
 	if err := s.HTTP.ListenAndServe(); err != http.ErrServerClosed {
@@ -51,15 +54,16 @@ func (s *Server) Start() error {
 	return nil
 }
 
+// setupRoutes sets up the routes for the server.
 func (s *Server) setupRoutes() {
 	s.Router.Get("/_healthz", handler.Healthz)
 
 	s.Router.Route(v1API, func(r chi.Router) {
-		r.Get("/articles", handler.GetArticles(s.DB))
+		r.Get("/articles", handler.GetAllArticles(s.DB))
 		r.Post("/articles", handler.CreateArticle(s.DB))
 
 		r.Get("/articles/{id}", handler.GetArticle(s.DB))
-		r.Delete("/articles/{id}", handler.DeleteArticle(s.DB))
+		r.Delete("/articles/{id}", handler.RemoveArticle(s.DB))
 		r.Patch("/articles/{id}", handler.UpdateArticle(s.DB))
 	})
 }
