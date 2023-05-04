@@ -1,10 +1,10 @@
 package handler
 
 import (
-	"bytes"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"testing"
 )
 
@@ -39,13 +39,13 @@ func TestHealthz(t *testing.T) {
 				t.Errorf("Healthz() status = %v, want %v", w.Code, tt.wantStatus)
 			}
 
-			var wantBody bytes.Buffer
-			if err := json.NewEncoder(&wantBody).Encode(tt.wantBody); err != nil {
-				t.Errorf("Healthz() error json encoding wantBody: %v", err)
+			var resBody HealthStatus
+			if err := json.NewDecoder(w.Body).Decode(&resBody); err != nil {
+				t.Errorf("Healthz() error json decoding response body: %v", err)
 			}
 
-			if w.Body.String() != wantBody.String() {
-				t.Errorf("Healthz() response body = %v, want %v", w.Body.String(), wantBody.Bytes())
+			if !reflect.DeepEqual(resBody, tt.wantBody) {
+				t.Errorf("Healthz() response body = %v, want %v", resBody, tt.wantBody)
 			}
 		})
 	}

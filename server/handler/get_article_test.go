@@ -1,0 +1,123 @@
+package handler
+
+import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"reflect"
+	"testing"
+
+	"github.com/goodleby/pure-go-server/client/database"
+)
+
+type fakeArticleFetcher struct {
+	articles []database.Article
+}
+
+func (m *fakeArticleFetcher) FetchArticle(id string) (*database.Article, error) {
+	for _, a := range m.articles {
+		if a.ID == id {
+			return &a, nil
+		}
+	}
+
+	return nil, fmt.Errorf("Article with id '%s' not found", id)
+}
+
+func TestGetArticle(t *testing.T) {
+	type args struct {
+		articleFetcher ArticleFetcher
+		req            *http.Request
+	}
+	tests := []struct {
+		name       string
+		args       args
+		wantStatus int
+		wantErr    bool
+		wantBody   *database.Article
+	}{
+		{
+			name: "should return an article from the database",
+			args: args{
+				articleFetcher: &fakeArticleFetcher{
+					articles: []database.Article{
+						{
+							ID:          "other_id",
+							Title:       "Other test title",
+							Description: "Other test description",
+							Body:        "Other test body",
+						},
+						{
+							ID:          "test_id",
+							Title:       "Test title",
+							Description: "Test description",
+							Body:        "Test body",
+						},
+					},
+				},
+				req: addChiURLParams(httptest.NewRequest(http.MethodGet, "/articles/test_id", nil), map[string]string{
+					"id": "test_id",
+				}),
+			},
+			wantErr:    false,
+			wantStatus: http.StatusOK,
+			wantBody: &database.Article{
+				ID:          "test_id",
+				Title:       "Test title",
+				Description: "Test description",
+				Body:        "Test body",
+			},
+		},
+		{
+			name: "should return an internal error if no article with the id found in the database",
+			args: args{
+				articleFetcher: &fakeArticleFetcher{
+					articles: []database.Article{
+						{
+							ID:          "test_id",
+							Title:       "Test title",
+							Description: "Test description",
+							Body:        "Test body",
+						},
+					},
+				},
+				req: addChiURLParams(httptest.NewRequest(http.MethodGet, "/articles/some_id", nil), map[string]string{
+					"id": "some_id",
+				}),
+			},
+			wantErr:    true,
+			wantStatus: http.StatusInternalServerError,
+			wantBody:   nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			w := httptest.NewRecorder()
+			handler := GetArticle(tt.args.articleFetcher)
+			handler(w, tt.args.req)
+
+			if w.Code != tt.wantStatus {
+				t.Errorf("GetArticle() status = %v, want %v", w.Code, tt.wantStatus)
+			}
+
+			// If we expect an error, we just need to check the response body is not empty.
+			if tt.wantErr {
+				if w.Body.Len() == 0 {
+					t.Errorf("GetArticle() response body is empty, want error")
+				}
+				return
+			}
+
+			// Decode the response body into a database.Article struct for comparison.
+			var resBody database.Article
+			if err := json.NewDecoder(w.Body).Decode(&resBody); err != nil {
+				t.Errorf("GetArticle() error json decoding response body: %v", err)
+			}
+
+			if !reflect.DeepEqual(&resBody, tt.wantBody) {
+				t.Errorf("GetArticle() response body = %v, want %v", resBody, tt.wantBody)
+			}
+		})
+	}
+}

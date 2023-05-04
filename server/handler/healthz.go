@@ -17,8 +17,8 @@ func Healthz(w http.ResponseWriter, r *http.Request) {
 		Status: http.StatusText(http.StatusOK),
 	}
 
-	w.WriteHeader(http.StatusOK)
 	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(hs); err != nil {
 		log.Printf("%s: %v", logMsgWriteResponse, err)
 	}

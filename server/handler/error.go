@@ -6,7 +6,6 @@ import (
 	"net/http"
 )
 
-// handleError is a helper function that writes an error to the response.
 func handleError(w http.ResponseWriter, err error, statusCode int, shouldLog bool) {
 	if shouldLog {
 		log.Print(err)

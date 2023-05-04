@@ -3,7 +3,6 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -12,7 +11,7 @@ import (
 
 // ArticleUpdater is an interface that updates an article.
 type ArticleUpdater interface {
-	UpdateArticle(id string, article database.Article) (database.Article, error)
+	UpdateArticle(id string, article database.Article) error
 }
 
 // UpdateArticle is a handler that updates an article.
@@ -26,16 +25,11 @@ func UpdateArticle(articleUpdater ArticleUpdater) http.HandlerFunc {
 			return
 		}
 
-		upd, err := articleUpdater.UpdateArticle(id, article)
-		if err != nil {
+		if err := articleUpdater.UpdateArticle(id, article); err != nil {
 			handleError(w, fmt.Errorf("error updating article: %v", err), http.StatusInternalServerError, true)
 			return
 		}
 
-		w.WriteHeader(http.StatusOK)
-		w.Header().Add("Content-Type", "application/json")
-		if err := json.NewEncoder(w).Encode(upd); err != nil {
-			log.Printf("%s: %v", logMsgWriteResponse, err)
-		}
+		w.WriteHeader(http.StatusNoContent)
 	}
 }

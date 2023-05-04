@@ -23,8 +23,8 @@ func GetAllArticles(articleFetcher AllArticlesFetcher) http.HandlerFunc {
 			return
 		}
 
-		w.WriteHeader(http.StatusOK)
 		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
 		if err := json.NewEncoder(w).Encode(articles); err != nil {
 			log.Printf("%s: %v", logMsgWriteResponse, err)
 		}

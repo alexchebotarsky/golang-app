@@ -12,7 +12,7 @@ import (
 
 // ArticleFetcher is an interface that fetches an article.
 type ArticleFetcher interface {
-	FetchArticle(id string) (database.Article, error)
+	FetchArticle(id string) (*database.Article, error)
 }
 
 // GetArticle is a handler that fetches an article.
@@ -26,8 +26,8 @@ func GetArticle(articleFetcher ArticleFetcher) http.HandlerFunc {
 			return
 		}
 
-		w.WriteHeader(http.StatusOK)
 		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
 		if err := json.NewEncoder(w).Encode(article); err != nil {
 			log.Printf("%s: %v", logMsgWriteResponse, err)
 		}

@@ -18,7 +18,7 @@ func RemoveArticle(articleRemover ArticleRemover) http.HandlerFunc {
 		id := chi.URLParam(r, "id")
 
 		if err := articleRemover.RemoveArticle(id); err != nil {
-			handleError(w, fmt.Errorf("error deleting article: %v", err), http.StatusInternalServerError, true)
+			handleError(w, fmt.Errorf("error removing article: %v", err), http.StatusInternalServerError, true)
 			return
 		}
 

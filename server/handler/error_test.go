@@ -21,12 +21,12 @@ func Test_handleError(t *testing.T) {
 		{
 			name: "should set passed status and write passed error",
 			args: args{
-				err:        errors.New("Test error"),
+				err:        errors.New("test error"),
 				statusCode: 500,
 				shouldLog:  false,
 			},
 			wantStatus: 500,
-			wantBody:   "Test error",
+			wantBody:   "test error",
 		},
 	}
 	for _, tt := range tests {

@@ -3,7 +3,6 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/goodleby/pure-go-server/client/database"
@@ -11,7 +10,7 @@ import (
 
 // ArticleCreator is an interface that creates an article.
 type ArticleCreator interface {
-	CreateArticle(article database.Article) (database.Article, error)
+	CreateArticle(article database.Article) error
 }
 
 // CreateArticle is a handler that creates an article.
@@ -23,16 +22,11 @@ func CreateArticle(articleCreator ArticleCreator) http.HandlerFunc {
 			return
 		}
 
-		article, err := articleCreator.CreateArticle(article)
-		if err != nil {
+		if err := articleCreator.CreateArticle(article); err != nil {
 			handleError(w, fmt.Errorf("error creating article: %v", err), http.StatusInternalServerError, true)
 			return
 		}
 
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusCreated)
-		if err := json.NewEncoder(w).Encode(article); err != nil {
-			log.Printf("%s: %v", logMsgWriteResponse, err)
-		}
+		w.WriteHeader(http.StatusNoContent)
 	}
 }
