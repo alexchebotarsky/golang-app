@@ -11,7 +11,7 @@ import (
 func main() {
 	ctx := context.Background()
 
-	config, err := config.Load(ctx)
+	config, err := config.Load(ctx, ".env")
 	if err != nil {
 		log.Printf("error loading config: %v", err)
 	}

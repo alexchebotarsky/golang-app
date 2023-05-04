@@ -11,17 +11,17 @@ import (
 
 // Config contains all environment configuration.
 type Config struct {
-	Port Port `env:"PORT,default=8000"`
+	Port Port `env:"PORT,required"`
 }
 
 // Port is a valid port.
 type Port = uint16
 
 // Load loads the environment configuration.
-func Load(ctx context.Context) (*Config, error) {
+func Load(ctx context.Context, envPath string) (*Config, error) {
 	var c Config
 
-	if err := godotenv.Load(".env"); err != nil {
+	if err := godotenv.Load(envPath); err != nil {
 		log.Printf("error loading environment variables: %v", err)
 	}
 
