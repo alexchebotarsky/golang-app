@@ -117,16 +117,16 @@ func TestRemoveArticle(t *testing.T) {
 			handler(w, tt.args.req)
 
 			if w.Code != tt.wantStatus {
-				t.Errorf("RemoveArticle() status = %v, want %v", w.Code, tt.wantStatus)
+				t.Fatalf("RemoveArticle() status = %v, want %v", w.Code, tt.wantStatus)
 			}
 
 			if !reflect.DeepEqual(tt.args.articleRemover.articles, tt.wantArticles) {
-				t.Errorf("RemoveArticle() articles = %v, want %v", tt.args.articleRemover.articles, tt.wantArticles)
+				t.Fatalf("RemoveArticle() articles = %v, want %v", tt.args.articleRemover.articles, tt.wantArticles)
 			}
 
 			// If we expect an error, we just need to check the response body is not empty.
 			if tt.wantErr && w.Body.Len() == 0 {
-				t.Errorf("RemoveArticle() response body is empty, want error")
+				t.Fatalf("RemoveArticle() response body is empty, want error")
 			}
 		})
 	}

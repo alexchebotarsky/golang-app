@@ -36,11 +36,11 @@ func Test_handleError(t *testing.T) {
 			handleError(w, tt.args.err, tt.args.statusCode, tt.args.shouldLog)
 
 			if w.Code != tt.wantStatus {
-				t.Errorf("handleError() status = %v, want %v", w.Code, tt.wantStatus)
+				t.Fatalf("handleError() status = %v, want %v", w.Code, tt.wantStatus)
 			}
 
 			if w.Body.String() != tt.wantBody {
-				t.Errorf("handleError() response body = %v, want %v", w.Body.String(), tt.wantBody)
+				t.Fatalf("handleError() response body = %v, want %v", w.Body.String(), tt.wantBody)
 			}
 		})
 	}

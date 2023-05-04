@@ -98,13 +98,13 @@ func TestGetArticle(t *testing.T) {
 			handler(w, tt.args.req)
 
 			if w.Code != tt.wantStatus {
-				t.Errorf("GetArticle() status = %v, want %v", w.Code, tt.wantStatus)
+				t.Fatalf("GetArticle() status = %v, want %v", w.Code, tt.wantStatus)
 			}
 
 			// If we expect an error, we just need to check the response body is not empty.
 			if tt.wantErr {
 				if w.Body.Len() == 0 {
-					t.Errorf("GetArticle() response body is empty, want error")
+					t.Fatalf("GetArticle() response body is empty, want error")
 				}
 				return
 			}
@@ -112,11 +112,11 @@ func TestGetArticle(t *testing.T) {
 			// Decode the response body into a database.Article struct for comparison.
 			var resBody database.Article
 			if err := json.NewDecoder(w.Body).Decode(&resBody); err != nil {
-				t.Errorf("GetArticle() error json decoding response body: %v", err)
+				t.Fatalf("GetArticle() error json decoding response body: %v", err)
 			}
 
 			if !reflect.DeepEqual(&resBody, tt.wantBody) {
-				t.Errorf("GetArticle() response body = %v, want %v", resBody, tt.wantBody)
+				t.Fatalf("GetArticle() response body = %v, want %v", resBody, tt.wantBody)
 			}
 		})
 	}

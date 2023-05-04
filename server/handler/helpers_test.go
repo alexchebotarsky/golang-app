@@ -26,7 +26,7 @@ func makeJSONBody(t *testing.T, bodyStruct any) io.Reader {
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(bodyStruct)
 	if err != nil {
-		t.Errorf("error encoding json body: %v", err)
+		t.Fatalf("error encoding json body: %v", err)
 	}
 
 	return &buf
