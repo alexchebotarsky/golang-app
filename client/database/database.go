@@ -24,7 +24,7 @@ type Client struct {
 	DB                *sqlx.DB
 	getArticlesStmt   *sqlx.Stmt
 	getArticleStmt    *sqlx.NamedStmt
-	createArticleStmt *sqlx.NamedStmt
+	addArticleStmt    *sqlx.NamedStmt
 	removeArticleStmt *sqlx.NamedStmt
 	updateArticleStmt *sqlx.NamedStmt
 	Articles          []Article
@@ -57,7 +57,7 @@ func New(ctx context.Context, config *config.Config) (*Client, error) {
 		return nil, err
 	}
 
-	if err := c.prepareCreateArticle(); err != nil {
+	if err := c.prepareAddArticle(); err != nil {
 		return nil, err
 	}
 

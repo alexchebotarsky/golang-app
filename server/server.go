@@ -60,7 +60,7 @@ func (s *Server) setupRoutes() {
 
 	s.Router.Route(v1API, func(r chi.Router) {
 		r.Get("/articles", handler.GetAllArticles(s.DB))
-		r.Post("/articles", handler.CreateArticle(s.DB))
+		r.Post("/articles", handler.AddArticle(s.DB))
 
 		r.Get("/articles/{id}", handler.GetArticle(s.DB))
 		r.Delete("/articles/{id}", handler.RemoveArticle(s.DB))

@@ -11,12 +11,12 @@ import (
 	"github.com/goodleby/pure-go-server/client/database"
 )
 
-type fakeArticleCreator struct {
+type fakeArticleAdder struct {
 	articles   []database.Article
 	shouldFail bool
 }
 
-func (m *fakeArticleCreator) CreateArticle(ctx context.Context, article database.Article) error {
+func (m *fakeArticleAdder) AddArticle(ctx context.Context, article database.Article) error {
 	if m.shouldFail {
 		return errors.New("test error")
 	}
@@ -26,10 +26,10 @@ func (m *fakeArticleCreator) CreateArticle(ctx context.Context, article database
 	return nil
 }
 
-func TestCreateArticle(t *testing.T) {
+func TestAddArticle(t *testing.T) {
 	type args struct {
-		articleCreator *fakeArticleCreator
-		req            *http.Request
+		articleAdder *fakeArticleAdder
+		req          *http.Request
 	}
 	tests := []struct {
 		name         string
@@ -39,9 +39,9 @@ func TestCreateArticle(t *testing.T) {
 		wantArticles []database.Article
 	}{
 		{
-			name: "should create the passed article in the database",
+			name: "should add the passed article to the database",
 			args: args{
-				articleCreator: &fakeArticleCreator{
+				articleAdder: &fakeArticleAdder{
 					articles: []database.Article{
 						{
 							ID:          "test_id",
@@ -79,9 +79,9 @@ func TestCreateArticle(t *testing.T) {
 			},
 		},
 		{
-			name: "should return an internal error if it fails to create the article in the database",
+			name: "should return an internal error if it fails to add the article in the database",
 			args: args{
-				articleCreator: &fakeArticleCreator{
+				articleAdder: &fakeArticleAdder{
 					articles: []database.Article{
 						{
 							ID:          "test_id",
@@ -115,7 +115,7 @@ func TestCreateArticle(t *testing.T) {
 		{
 			name: "should return a bad request error if wrong body is provided",
 			args: args{
-				articleCreator: &fakeArticleCreator{
+				articleAdder: &fakeArticleAdder{
 					articles: []database.Article{
 						{
 							ID:          "test_id",
@@ -145,15 +145,15 @@ func TestCreateArticle(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			w := httptest.NewRecorder()
-			handler := CreateArticle(tt.args.articleCreator)
+			handler := AddArticle(tt.args.articleAdder)
 			handler(w, tt.args.req)
 
 			if w.Code != tt.wantStatus {
 				t.Fatalf("GetArticle() status = %v, want %v", w.Code, tt.wantStatus)
 			}
 
-			if !reflect.DeepEqual(tt.args.articleCreator.articles, tt.wantArticles) {
-				t.Fatalf("GetArticle() articles = %v, want %v", tt.args.articleCreator.articles, tt.wantArticles)
+			if !reflect.DeepEqual(tt.args.articleAdder.articles, tt.wantArticles) {
+				t.Fatalf("GetArticle() articles = %v, want %v", tt.args.articleAdder.articles, tt.wantArticles)
 			}
 
 			// If we expect an error, we just need to check the response body is not empty.

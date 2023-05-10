@@ -85,20 +85,20 @@ func (c *Client) FetchArticle(ctx context.Context, id string) (*Article, error) 
 	return &article, nil
 }
 
-func (c *Client) prepareCreateArticle() error {
+func (c *Client) prepareAddArticle() error {
 	stmt, err := c.DB.PrepareNamed(`INSERT INTO articles (id, title, description, body) VALUES (:id, :title, :description, :body)`)
 
 	if err != nil {
-		return fmt.Errorf("error preparing create article statement: %v", err)
+		return fmt.Errorf("error preparing add article statement: %v", err)
 	}
 
-	c.createArticleStmt = stmt
+	c.addArticleStmt = stmt
 
 	return nil
 }
 
-// CreateArticle creates an article.
-func (c *Client) CreateArticle(ctx context.Context, article Article) error {
+// AddArticle adds an article.
+func (c *Client) AddArticle(ctx context.Context, article Article) error {
 	args := struct {
 		ID          string `db:"id"`
 		Title       string `db:"title"`
@@ -111,9 +111,9 @@ func (c *Client) CreateArticle(ctx context.Context, article Article) error {
 		Body:        article.Body,
 	}
 
-	_, err := c.createArticleStmt.ExecContext(ctx, args)
+	_, err := c.addArticleStmt.ExecContext(ctx, args)
 	if err != nil {
-		return fmt.Errorf("error creating article: %v", err)
+		return fmt.Errorf("error adding an article: %v", err)
 	}
 
 	return nil
