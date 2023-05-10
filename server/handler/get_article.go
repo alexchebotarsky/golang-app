@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -12,7 +13,7 @@ import (
 
 // ArticleFetcher is an interface that fetches an article.
 type ArticleFetcher interface {
-	FetchArticle(id string) (*database.Article, error)
+	FetchArticle(ctx context.Context, id string) (*database.Article, error)
 }
 
 // GetArticle is a handler that fetches an article.
@@ -20,9 +21,14 @@ func GetArticle(articleFetcher ArticleFetcher) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := chi.URLParam(r, "id")
 
-		article, err := articleFetcher.FetchArticle(id)
+		article, err := articleFetcher.FetchArticle(r.Context(), id)
 		if err != nil {
-			handleError(w, fmt.Errorf("error fetching article: %v", err), http.StatusInternalServerError, true)
+			switch err.(type) {
+			case *database.ErrNotFound:
+				handleError(w, fmt.Errorf("article with id %q not found: %v", id, err), http.StatusNotFound, false)
+			default:
+				handleError(w, fmt.Errorf("error fetching article: %v", err), http.StatusInternalServerError, true)
+			}
 			return
 		}
 

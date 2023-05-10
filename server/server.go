@@ -33,9 +33,9 @@ func New(ctx context.Context, config *config.Config) (*Server, error) {
 		Handler: s.Router,
 	}
 
-	dbClient, err := database.New()
+	dbClient, err := database.New(ctx, config)
 	if err != nil {
-		return &s, fmt.Errorf("error creating database client: %w", err)
+		return &s, fmt.Errorf("error creating database client: %v", err)
 	}
 	s.DB = dbClient
 
@@ -48,7 +48,7 @@ func New(ctx context.Context, config *config.Config) (*Server, error) {
 func (s *Server) Start() error {
 	log.Printf("Server is listening on port :%d", s.Config.Port)
 	if err := s.HTTP.ListenAndServe(); err != http.ErrServerClosed {
-		return fmt.Errorf("unexpected server error: %w", err)
+		return fmt.Errorf("unexpected server error: %v", err)
 	}
 
 	return nil

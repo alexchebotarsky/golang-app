@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -12,17 +14,22 @@ import (
 )
 
 type fakeArticleFetcher struct {
-	articles []database.Article
+	articles   []database.Article
+	shouldFail bool
 }
 
-func (m *fakeArticleFetcher) FetchArticle(id string) (*database.Article, error) {
+func (m *fakeArticleFetcher) FetchArticle(ctx context.Context, id string) (*database.Article, error) {
+	if m.shouldFail {
+		return nil, errors.New("test error")
+	}
+
 	for _, a := range m.articles {
 		if a.ID == id {
 			return &a, nil
 		}
 	}
 
-	return nil, fmt.Errorf("Article with id '%s' not found", id)
+	return nil, &database.ErrNotFound{Err: fmt.Errorf("article with id %q not found", id)}
 }
 
 func TestGetArticle(t *testing.T) {
@@ -55,6 +62,7 @@ func TestGetArticle(t *testing.T) {
 							Body:        "Test body",
 						},
 					},
+					shouldFail: false,
 				},
 				req: addChiURLParams(httptest.NewRequest(http.MethodGet, "/articles/test_id", nil), map[string]string{
 					"id": "test_id",
@@ -70,7 +78,7 @@ func TestGetArticle(t *testing.T) {
 			},
 		},
 		{
-			name: "should return an internal error if no article with the id found in the database",
+			name: "should return an err not found if no article with the id found in the database",
 			args: args{
 				articleFetcher: &fakeArticleFetcher{
 					articles: []database.Article{
@@ -81,6 +89,22 @@ func TestGetArticle(t *testing.T) {
 							Body:        "Test body",
 						},
 					},
+					shouldFail: false,
+				},
+				req: addChiURLParams(httptest.NewRequest(http.MethodGet, "/articles/some_id", nil), map[string]string{
+					"id": "some_id",
+				}),
+			},
+			wantErr:    true,
+			wantStatus: http.StatusNotFound,
+			wantBody:   nil,
+		},
+		{
+			name: "should return an internal error if failed to fetch article from the database",
+			args: args{
+				articleFetcher: &fakeArticleFetcher{
+					articles:   []database.Article{},
+					shouldFail: true,
 				},
 				req: addChiURLParams(httptest.NewRequest(http.MethodGet, "/articles/some_id", nil), map[string]string{
 					"id": "some_id",

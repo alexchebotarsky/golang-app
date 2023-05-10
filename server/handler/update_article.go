@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -11,7 +12,7 @@ import (
 
 // ArticleUpdater is an interface that updates an article.
 type ArticleUpdater interface {
-	UpdateArticle(id string, article database.Article) error
+	UpdateArticle(ctx context.Context, id string, article database.Article) error
 }
 
 // UpdateArticle is a handler that updates an article.
@@ -25,7 +26,7 @@ func UpdateArticle(articleUpdater ArticleUpdater) http.HandlerFunc {
 			return
 		}
 
-		if err := articleUpdater.UpdateArticle(id, article); err != nil {
+		if err := articleUpdater.UpdateArticle(r.Context(), id, article); err != nil {
 			handleError(w, fmt.Errorf("error updating article: %v", err), http.StatusInternalServerError, true)
 			return
 		}

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -14,7 +15,7 @@ type fakeArticleUpdater struct {
 	articles []database.Article
 }
 
-func (m *fakeArticleUpdater) UpdateArticle(id string, article database.Article) error {
+func (m *fakeArticleUpdater) UpdateArticle(ctx context.Context, id string, article database.Article) error {
 	for i, a := range m.articles {
 		if a.ID == id {
 			m.articles[i] = article
@@ -22,7 +23,7 @@ func (m *fakeArticleUpdater) UpdateArticle(id string, article database.Article) 
 		}
 	}
 
-	return fmt.Errorf("Article with id '%s' not found", id)
+	return fmt.Errorf("article with id %q not found", id)
 }
 
 func TestUpdateArticle(t *testing.T) {

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -16,7 +17,7 @@ type fakeAllArticlesFetcher struct {
 	shouldFail bool
 }
 
-func (m *fakeAllArticlesFetcher) FetchAllArticles() ([]database.Article, error) {
+func (m *fakeAllArticlesFetcher) FetchAllArticles(ctx context.Context) ([]database.Article, error) {
 	if m.shouldFail {
 		return nil, errors.New("test error")
 	}
@@ -74,6 +75,19 @@ func TestGetAllArticles(t *testing.T) {
 					Body:        "Other test body",
 				},
 			},
+		},
+		{
+			name: "should return a not found error if no articles has been fetched from the database",
+			args: args{
+				allArticlesFetcher: &fakeAllArticlesFetcher{
+					articles:   []database.Article{},
+					shouldFail: false,
+				},
+				req: httptest.NewRequest(http.MethodGet, "/articles", nil),
+			},
+			wantStatus: http.StatusNotFound,
+			wantErr:    true,
+			wantBody:   nil,
 		},
 		{
 			name: "should return an internal error if it fails to fetch articles from the database",

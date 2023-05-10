@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -10,7 +11,7 @@ import (
 
 // ArticleCreator is an interface that creates an article.
 type ArticleCreator interface {
-	CreateArticle(article database.Article) error
+	CreateArticle(ctx context.Context, article database.Article) error
 }
 
 // CreateArticle is a handler that creates an article.
@@ -22,7 +23,7 @@ func CreateArticle(articleCreator ArticleCreator) http.HandlerFunc {
 			return
 		}
 
-		if err := articleCreator.CreateArticle(article); err != nil {
+		if err := articleCreator.CreateArticle(r.Context(), article); err != nil {
 			handleError(w, fmt.Errorf("error creating article: %v", err), http.StatusInternalServerError, true)
 			return
 		}

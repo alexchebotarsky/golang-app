@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -15,7 +16,7 @@ type fakeArticleCreator struct {
 	shouldFail bool
 }
 
-func (m *fakeArticleCreator) CreateArticle(article database.Article) error {
+func (m *fakeArticleCreator) CreateArticle(ctx context.Context, article database.Article) error {
 	if m.shouldFail {
 		return errors.New("test error")
 	}

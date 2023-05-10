@@ -1,6 +1,15 @@
 package database
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+
+	"github.com/goodleby/pure-go-server/config"
+	"github.com/jmoiron/sqlx"
+
+	// Postgres driver
+	_ "github.com/lib/pq"
+)
 
 // Article is a database article.
 type Article struct {
@@ -12,64 +21,59 @@ type Article struct {
 
 // Client is a database client.
 type Client struct {
-	Articles []Article
+	DB                *sqlx.DB
+	getArticlesStmt   *sqlx.Stmt
+	getArticleStmt    *sqlx.NamedStmt
+	createArticleStmt *sqlx.NamedStmt
+	removeArticleStmt *sqlx.NamedStmt
+	updateArticleStmt *sqlx.NamedStmt
+	Articles          []Article
 }
 
 // New creates a new database client.
-func New() (*Client, error) {
+func New(ctx context.Context, config *config.Config) (*Client, error) {
 	var c Client
 
+	connString := fmt.Sprintf("postgres://%s:%s@%s:%d/%s%s",
+		config.DatabaseUser,
+		config.DatabasePassword,
+		config.DatabaseHost,
+		config.DatabasePort,
+		config.DatabaseName,
+		config.DatabaseOptions,
+	)
+
+	db, err := sqlx.ConnectContext(ctx, "postgres", connString)
+	if err != nil {
+		return nil, fmt.Errorf("error connecting to database, %+v", err)
+	}
+	c.DB = db
+
+	if err := c.prepareGetArticles(); err != nil {
+		return nil, err
+	}
+
+	if err := c.prepareGetArticle(); err != nil {
+		return nil, err
+	}
+
+	if err := c.prepareCreateArticle(); err != nil {
+		return nil, err
+	}
+
+	if err := c.prepareRemoveArticle(); err != nil {
+		return nil, err
+	}
+
+	if err := c.prepareUpdateArticle(); err != nil {
+		return nil, err
+	}
+
+	// TODO: remove me
 	c.Articles = []Article{
 		{Title: "Hello World", Description: "This is a description", Body: "This is the body", ID: "1"},
 		{Title: "Hello World 2", Description: "This is a description 2", Body: "This is the body 2", ID: "2"},
 	}
 
 	return &c, nil
-}
-
-// FetchAllArticles fetches all articles.
-func (c *Client) FetchAllArticles() ([]Article, error) {
-	return c.Articles, nil
-}
-
-// FetchArticle fetches an article by id.
-func (c *Client) FetchArticle(id string) (*Article, error) {
-	for _, article := range c.Articles {
-		if article.ID == id {
-			return &article, nil
-		}
-	}
-
-	return nil, fmt.Errorf("Article with id '%s' not found", id)
-}
-
-// CreateArticle creates an article.
-func (c *Client) CreateArticle(article Article) error {
-	c.Articles = append(c.Articles, article)
-
-	return nil
-}
-
-// UpdateArticle updates an article.
-func (c *Client) UpdateArticle(id string, article Article) error {
-	for i, a := range c.Articles {
-		if a.ID == id {
-			c.Articles[i] = article
-			return nil
-		}
-	}
-
-	return fmt.Errorf("Article with id '%s' not found", id)
-}
-
-// RemoveArticle removes an article.
-func (c *Client) RemoveArticle(id string) error {
-	for i, article := range c.Articles {
-		if article.ID == id {
-			c.Articles = append(c.Articles[:i], c.Articles[i+1:]...)
-			return nil
-		}
-	}
-
-	return fmt.Errorf("Article with id '%s' not found", id)
 }
