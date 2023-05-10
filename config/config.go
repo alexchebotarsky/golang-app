@@ -3,7 +3,6 @@ package config
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/joho/godotenv"
 	"github.com/sethvargo/go-envconfig"
@@ -29,11 +28,11 @@ func Load(ctx context.Context, envPath string) (*Config, error) {
 	var c Config
 
 	if err := godotenv.Load(envPath); err != nil {
-		log.Printf("error loading environment variables: %v", err)
+		return nil, fmt.Errorf("error loading environment variables: %v", err)
 	}
 
 	if err := envconfig.Process(ctx, &c); err != nil {
-		return &c, fmt.Errorf("error processing environment variables: %v", err)
+		return nil, fmt.Errorf("error processing environment variables: %v", err)
 	}
 
 	return &c, nil

@@ -24,11 +24,47 @@ func TestLoad(t *testing.T) {
 			args: args{
 				createTempEnvFile: true,
 				envVars: map[string]string{
-					"PORT": "1234",
+					"DATABASE_USER":     "test_user",
+					"DATABASE_PASSWORD": "test_pass",
+					"DATABASE_HOST":     "test_host",
+					"DATABASE_PORT":     "2000",
+					"DATABASE_NAME":     "test_db",
+					"DATABASE_OPTIONS":  "?database_option=test",
+
+					"PORT": "1000",
 				},
 			},
 			wantConfig: &Config{
-				Port: 1234,
+				DatabaseUser:     "test_user",
+				DatabasePassword: "test_pass",
+				DatabaseHost:     "test_host",
+				DatabasePort:     2000,
+				DatabaseName:     "test_db",
+				DatabaseOptions:  "?database_option=test",
+
+				Port: 1000,
+			},
+			wantErr: false,
+		},
+		{
+			name: "should use correct default values if no env variables is set",
+			args: args{
+				createTempEnvFile: true,
+				envVars: map[string]string{
+					"DATABASE_USER":     "test_user",
+					"DATABASE_PASSWORD": "test_pass",
+					"DATABASE_NAME":     "test_db",
+				},
+			},
+			wantConfig: &Config{
+				DatabaseUser:     "test_user",
+				DatabasePassword: "test_pass",
+				DatabaseHost:     "localhost",
+				DatabasePort:     5432,
+				DatabaseName:     "test_db",
+				DatabaseOptions:  "?sslmode=disable",
+
+				Port: 8000,
 			},
 			wantErr: false,
 		},
@@ -36,9 +72,15 @@ func TestLoad(t *testing.T) {
 			name: "should return an error if required variables are not set",
 			args: args{
 				createTempEnvFile: true,
-				envVars:           map[string]string{},
+				envVars: map[string]string{
+					"DATABASE_HOST":    "test_host",
+					"DATABASE_PORT":    "2000",
+					"DATABASE_OPTIONS": "?database_option=test",
+
+					"PORT": "1000",
+				},
 			},
-			wantConfig: &Config{},
+			wantConfig: nil,
 			wantErr:    true,
 		},
 		{
@@ -47,7 +89,7 @@ func TestLoad(t *testing.T) {
 				createTempEnvFile: false,
 				envVars:           map[string]string{},
 			},
-			wantConfig: &Config{},
+			wantConfig: nil,
 			wantErr:    true,
 		},
 	}
@@ -76,12 +118,14 @@ func TestLoad(t *testing.T) {
 					if _, err := envFile.WriteString(fmt.Sprintf("%s=%v\n", key, value)); err != nil {
 						t.Fatalf("error writing to temporary env file: %v", err)
 					}
-					t.Cleanup(func() {
+				}
+				t.Cleanup(func() {
+					for key := range tt.args.envVars {
 						if err := os.Unsetenv(key); err != nil {
 							t.Fatalf("error unsetting environment variable: %v", err)
 						}
-					})
-				}
+					}
+				})
 			}
 
 			config, err := Load(ctx, envPath)
