@@ -13,7 +13,7 @@ type errorResponse struct {
 
 func handleError(w http.ResponseWriter, err error, statusCode int, shouldLog bool) {
 	if shouldLog {
-		log.Print(err)
+		log.Printf("Handler error: %v", err)
 	}
 
 	w.Header().Add("Content-Type", "application/json")

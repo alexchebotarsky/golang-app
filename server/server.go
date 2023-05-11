@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/goodleby/pure-go-server/client/database"
@@ -45,11 +48,42 @@ func New(ctx context.Context, config *config.Config) (*Server, error) {
 }
 
 // Start starts the server.
-func (s *Server) Start() error {
-	log.Printf("Server is listening on port :%d", s.Config.Port)
-	if err := s.HTTP.ListenAndServe(); err != http.ErrServerClosed {
-		return fmt.Errorf("unexpected server error: %v", err)
+func (s *Server) Start(ctx context.Context) error {
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+
+	go func(stop chan<- os.Signal) {
+		log.Printf("Server is listening on port: %d", s.Config.Port)
+		if err := s.HTTP.ListenAndServe(); err != http.ErrServerClosed {
+			log.Printf("Unexpected server error: %v", err)
+
+			// Gracefully shutdown the server.
+			stop <- os.Interrupt
+		}
+	}(stop)
+
+	sig := <-stop
+
+	log.Printf("Shutdown signal received: %v", sig)
+
+	if err := s.Stop(ctx); err != nil {
+		return fmt.Errorf("error stopping server: %v", err)
 	}
+
+	return nil
+}
+
+// Stop stops the server.
+func (s *Server) Stop(ctx context.Context) error {
+	if err := s.DB.DB.Close(); err != nil {
+		return fmt.Errorf("error closing database connection: %v", err)
+	}
+
+	if err := s.HTTP.Shutdown(ctx); err != nil {
+		return fmt.Errorf("error shutting down http server: %v", err)
+	}
+
+	log.Print("Server has been gracefully shut down")
 
 	return nil
 }
