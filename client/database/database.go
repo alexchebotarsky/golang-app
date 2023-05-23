@@ -27,7 +27,6 @@ type Client struct {
 	addArticleStmt    *sqlx.NamedStmt
 	removeArticleStmt *sqlx.NamedStmt
 	updateArticleStmt *sqlx.NamedStmt
-	Articles          []Article
 }
 
 // New creates a new database client.
@@ -67,12 +66,6 @@ func New(ctx context.Context, config *config.Config) (*Client, error) {
 
 	if err := c.prepareUpdateArticle(); err != nil {
 		return nil, err
-	}
-
-	// TODO: remove me
-	c.Articles = []Article{
-		{Title: "Hello World", Description: "This is a description", Body: "This is the body", ID: "1"},
-		{Title: "Hello World 2", Description: "This is a description 2", Body: "This is the body 2", ID: "2"},
 	}
 
 	return &c, nil
