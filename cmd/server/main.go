@@ -25,7 +25,7 @@ func main() {
 	}
 
 	if err := s.Start(ctx); err != nil {
-		log.Printf("Error starting server: %v", err)
+		log.Printf("Server error: %v", err)
 		os.Exit(1)
 	}
 }

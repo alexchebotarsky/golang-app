@@ -77,3 +77,31 @@ func New(ctx context.Context, config *config.Config) (*Client, error) {
 
 	return &c, nil
 }
+
+func (c *Client) Close() error {
+	if err := c.getArticlesStmt.Close(); err != nil {
+		return err
+	}
+
+	if err := c.getArticleStmt.Close(); err != nil {
+		return err
+	}
+
+	if err := c.addArticleStmt.Close(); err != nil {
+		return err
+	}
+
+	if err := c.removeArticleStmt.Close(); err != nil {
+		return err
+	}
+
+	if err := c.updateArticleStmt.Close(); err != nil {
+		return err
+	}
+
+	if err := c.DB.Close(); err != nil {
+		return err
+	}
+
+	return nil
+}

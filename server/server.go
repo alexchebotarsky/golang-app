@@ -49,33 +49,32 @@ func New(ctx context.Context, config *config.Config) (*Server, error) {
 
 // Start starts the server.
 func (s *Server) Start(ctx context.Context) error {
+	errc := make(chan error, 1)
+
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 
-	go func(stop chan<- os.Signal) {
-		log.Printf("Server is listening on port: %d", s.Config.Port)
-		if err := s.HTTP.ListenAndServe(); err != http.ErrServerClosed {
-			log.Printf("Unexpected server error: %v", err)
+	go s.serveHTTP(errc)
 
-			// Gracefully shutdown the server.
-			stop <- os.Interrupt
-		}
-	}(stop)
+	select {
+	case sig := <-stop:
+		log.Printf("Shutdown signal received: %v", sig)
+	case err := <-errc:
+		log.Printf("Fatal server error: %v", err)
+	case <-ctx.Done():
+		log.Printf("Server context cancelled")
+	}
 
-	sig := <-stop
-
-	log.Printf("Shutdown signal received: %v", sig)
-
-	if err := s.Stop(ctx); err != nil {
+	if err := s.stop(ctx); err != nil {
 		return fmt.Errorf("error stopping server: %v", err)
 	}
 
 	return nil
 }
 
-// Stop stops the server.
-func (s *Server) Stop(ctx context.Context) error {
-	if err := s.DB.DB.Close(); err != nil {
+// stop stops the server.
+func (s *Server) stop(ctx context.Context) error {
+	if err := s.DB.Close(); err != nil {
 		return fmt.Errorf("error closing database connection: %v", err)
 	}
 
@@ -86,6 +85,14 @@ func (s *Server) Stop(ctx context.Context) error {
 	log.Print("Server has been gracefully shut down")
 
 	return nil
+}
+
+// serverHTTP starts HTTP server listening on its port.
+func (s *Server) serveHTTP(errc chan<- error) {
+	log.Printf("Server is listening on port: %d", s.Config.Port)
+	if err := s.HTTP.ListenAndServe(); err != http.ErrServerClosed {
+		errc <- fmt.Errorf("error listening and serving: %v", err)
+	}
 }
 
 // setupRoutes sets up the routes for the server.
