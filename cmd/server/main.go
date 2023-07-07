@@ -5,8 +5,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/goodleby/pure-go-server/config"
-	"github.com/goodleby/pure-go-server/server"
+	"github.com/goodleby/golang-server/config"
+	"github.com/goodleby/golang-server/server"
 )
 
 func main() {

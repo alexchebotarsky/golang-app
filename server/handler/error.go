@@ -11,7 +11,7 @@ type errorResponse struct {
 	StatusCode int    `json:"statusCode"`
 }
 
-func handleError(w http.ResponseWriter, err error, statusCode int, shouldLog bool) {
+func HandleError(w http.ResponseWriter, err error, statusCode int, shouldLog bool) {
 	if shouldLog {
 		log.Printf("Handler error: %v", err)
 	}

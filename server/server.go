@@ -10,9 +10,11 @@ import (
 	"syscall"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/goodleby/pure-go-server/client/database"
-	"github.com/goodleby/pure-go-server/config"
-	"github.com/goodleby/pure-go-server/server/handler"
+	"github.com/goodleby/golang-server/client/auth"
+	"github.com/goodleby/golang-server/client/database"
+	"github.com/goodleby/golang-server/config"
+	"github.com/goodleby/golang-server/server/handler"
+	"github.com/goodleby/golang-server/server/middleware"
 )
 
 const v1API string = "/api/v1"

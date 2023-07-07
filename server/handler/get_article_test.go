@@ -10,7 +10,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/goodleby/pure-go-server/client/database"
+	"github.com/goodleby/golang-server/client/database"
 )
 
 type fakeArticleFetcher struct {

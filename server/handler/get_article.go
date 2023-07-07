@@ -8,7 +8,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/goodleby/pure-go-server/client/database"
+	"github.com/goodleby/golang-server/client/database"
 )
 
 // ArticleFetcher is an interface that fetches an article.
@@ -25,9 +25,9 @@ func GetArticle(articleFetcher ArticleFetcher) http.HandlerFunc {
 		if err != nil {
 			switch err.(type) {
 			case *database.ErrNotFound:
-				handleError(w, fmt.Errorf("article with id %q not found: %v", id, err), http.StatusNotFound, false)
+				HandleError(w, fmt.Errorf("article with id %q not found: %v", id, err), http.StatusNotFound, false)
 			default:
-				handleError(w, fmt.Errorf("error fetching article: %v", err), http.StatusInternalServerError, true)
+				HandleError(w, fmt.Errorf("error fetching article: %v", err), http.StatusInternalServerError, true)
 			}
 			return
 		}

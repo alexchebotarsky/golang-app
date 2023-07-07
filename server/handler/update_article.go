@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/goodleby/pure-go-server/client/database"
+	"github.com/goodleby/golang-server/client/database"
 )
 
 // ArticleUpdater is an interface that updates an article.
@@ -22,12 +22,12 @@ func UpdateArticle(articleUpdater ArticleUpdater) http.HandlerFunc {
 
 		var article database.Article
 		if err := json.NewDecoder(r.Body).Decode(&article); err != nil {
-			handleError(w, fmt.Errorf("error decoding request body: %v", err), http.StatusBadRequest, true)
+			HandleError(w, fmt.Errorf("error decoding request body: %v", err), http.StatusBadRequest, true)
 			return
 		}
 
 		if err := articleUpdater.UpdateArticle(r.Context(), id, article); err != nil {
-			handleError(w, fmt.Errorf("error updating article: %v", err), http.StatusInternalServerError, true)
+			HandleError(w, fmt.Errorf("error updating article: %v", err), http.StatusInternalServerError, true)
 			return
 		}
 

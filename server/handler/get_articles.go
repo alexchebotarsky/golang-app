@@ -7,7 +7,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/goodleby/pure-go-server/client/database"
+	"github.com/goodleby/golang-server/client/database"
 )
 
 // ArticlesFetcher is an interface that fetches articles.
@@ -20,12 +20,12 @@ func GetAllArticles(articleFetcher AllArticlesFetcher) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		articles, err := articleFetcher.FetchAllArticles(r.Context())
 		if err != nil {
-			handleError(w, fmt.Errorf("error fetching articles: %v", err), http.StatusInternalServerError, true)
+			HandleError(w, fmt.Errorf("error fetching articles: %v", err), http.StatusInternalServerError, true)
 			return
 		}
 
 		if len(articles) == 0 {
-			handleError(w, fmt.Errorf("articles not found"), http.StatusNotFound, false)
+			HandleError(w, fmt.Errorf("articles not found"), http.StatusNotFound, false)
 			return
 		}
 

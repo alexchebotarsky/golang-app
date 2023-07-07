@@ -38,7 +38,7 @@ func Test_handleError(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			w := httptest.NewRecorder()
 
-			handleError(w, tt.args.err, tt.args.statusCode, tt.args.shouldLog)
+			HandleError(w, tt.args.err, tt.args.statusCode, tt.args.shouldLog)
 
 			if w.Code != tt.wantStatus {
 				t.Fatalf("handleError() status = %v, want %v", w.Code, tt.wantStatus)

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/goodleby/pure-go-server/config"
+	"github.com/goodleby/golang-server/config"
 	"github.com/jmoiron/sqlx"
 
 	// Postgres driver

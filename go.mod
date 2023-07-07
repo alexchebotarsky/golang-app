@@ -1,4 +1,4 @@
-module github.com/goodleby/pure-go-server
+module github.com/goodleby/golang-server
 
 go 1.20
 
