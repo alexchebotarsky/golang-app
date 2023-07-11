@@ -25,6 +25,7 @@ type Server struct {
 	Router *chi.Mux
 	HTTP   *http.Server
 	DB     *database.Client
+	Auth   *auth.Client
 }
 
 // New creates a new server.
@@ -43,6 +44,12 @@ func New(ctx context.Context, config *config.Config) (*Server, error) {
 		return &s, fmt.Errorf("error creating database client: %v", err)
 	}
 	s.DB = dbClient
+
+	authClient, err := auth.New(ctx, config)
+	if err != nil {
+		return &s, fmt.Errorf("error creating database client: %v", err)
+	}
+	s.Auth = authClient
 
 	s.setupRoutes()
 
@@ -102,11 +109,28 @@ func (s *Server) setupRoutes() {
 	s.Router.Get("/_healthz", handler.Healthz)
 
 	s.Router.Route(v1API, func(r chi.Router) {
-		r.Get("/articles", handler.GetAllArticles(s.DB))
-		r.Post("/articles", handler.AddArticle(s.DB))
+		// Auth routes
+		r.Group(func(r chi.Router) {
+			r.Post("/auth/login", handler.AuthLogin(s.Auth))
+			r.Post("/auth/refresh", handler.AuthRefresh(s.Auth))
+			r.Post("/auth/logout", handler.AuthRefresh(s.Auth))
+		})
 
-		r.Get("/articles/{id}", handler.GetArticle(s.DB))
-		r.Delete("/articles/{id}", handler.RemoveArticle(s.DB))
-		r.Patch("/articles/{id}", handler.UpdateArticle(s.DB))
+		// View articles
+		r.Group(func(r chi.Router) {
+			r.Use(middleware.Auth(s.Auth, auth.ViewerAccess))
+
+			r.Get("/articles", handler.GetAllArticles(s.DB))
+			r.Get("/articles/{id}", handler.GetArticle(s.DB))
+		})
+
+		// Edit articles
+		r.Group(func(r chi.Router) {
+			r.Use(middleware.Auth(s.Auth, auth.EditorAccess))
+
+			r.Post("/articles", handler.AddArticle(s.DB))
+			r.Delete("/articles/{id}", handler.RemoveArticle(s.DB))
+			r.Patch("/articles/{id}", handler.UpdateArticle(s.DB))
+		})
 	})
 }

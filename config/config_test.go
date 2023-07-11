@@ -31,6 +31,11 @@ func TestLoad(t *testing.T) {
 					"DATABASE_NAME":     "test_db",
 					"DATABASE_OPTIONS":  "?database_option=test",
 
+					"AUTH_SECRET":     "test_auth_secret",
+					"AUTH_ADMIN_KEY":  "test_auth_admin_key",
+					"AUTH_EDITOR_KEY": "test_auth_editor_key",
+					"AUTH_VIEWER_KEY": "test_auth_viewer_key",
+
 					"PORT": "1000",
 				},
 			},
@@ -41,6 +46,11 @@ func TestLoad(t *testing.T) {
 				DatabasePort:     2000,
 				DatabaseName:     "test_db",
 				DatabaseOptions:  "?database_option=test",
+
+				AuthSecret:    "test_auth_secret",
+				AuthAdminKey:  "test_auth_admin_key",
+				AuthEditorKey: "test_auth_editor_key",
+				AuthViewerKey: "test_auth_viewer_key",
 
 				Port: 1000,
 			},

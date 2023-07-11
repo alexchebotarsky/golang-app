@@ -17,6 +17,11 @@ type Config struct {
 	DatabaseName     string `env:"DATABASE_NAME,required"`
 	DatabaseOptions  string `env:"DATABASE_OPTIONS,default=?sslmode=disable"`
 
+	AuthSecret    string `env:"AUTH_SECRET,required"`
+	AuthAdminKey  string `env:"AUTH_ADMIN_KEY,required"`
+	AuthEditorKey string `env:"AUTH_EDITOR_KEY,required"`
+	AuthViewerKey string `env:"AUTH_VIEWER_KEY,required"`
+
 	Port Port `env:"PORT,default=8000"`
 }
 
