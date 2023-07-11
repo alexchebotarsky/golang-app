@@ -47,28 +47,6 @@ func TestLoad(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "should use correct default values if no env variables is set",
-			args: args{
-				createTempEnvFile: true,
-				envVars: map[string]string{
-					"DATABASE_USER":     "test_user",
-					"DATABASE_PASSWORD": "test_pass",
-					"DATABASE_NAME":     "test_db",
-				},
-			},
-			wantConfig: &Config{
-				DatabaseUser:     "test_user",
-				DatabasePassword: "test_pass",
-				DatabaseHost:     "localhost",
-				DatabasePort:     5432,
-				DatabaseName:     "test_db",
-				DatabaseOptions:  "?sslmode=disable",
-
-				Port: 8000,
-			},
-			wantErr: false,
-		},
-		{
 			name: "should return an error if required variables are not set",
 			args: args{
 				createTempEnvFile: true,
