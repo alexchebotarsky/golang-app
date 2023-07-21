@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http/httptest"
@@ -38,7 +39,7 @@ func Test_handleError(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			w := httptest.NewRecorder()
 
-			HandleError(w, tt.args.err, tt.args.statusCode, tt.args.shouldLog)
+			HandleError(context.TODO(), w, tt.args.err, tt.args.statusCode, tt.args.shouldLog)
 
 			if w.Code != tt.wantStatus {
 				t.Fatalf("handleError() status = %v, want %v", w.Code, tt.wantStatus)

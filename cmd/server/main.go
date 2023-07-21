@@ -7,6 +7,7 @@ import (
 
 	"github.com/goodleby/golang-server/config"
 	"github.com/goodleby/golang-server/server"
+	"github.com/goodleby/golang-server/tracing"
 )
 
 func main() {
@@ -15,6 +16,11 @@ func main() {
 	config, err := config.Load(ctx, ".env")
 	if err != nil {
 		log.Printf("Error loading config: %v", err)
+		os.Exit(1)
+	}
+
+	if err := tracing.Init(config); err != nil {
+		log.Printf("Error initializing tracing: %v", err)
 		os.Exit(1)
 	}
 

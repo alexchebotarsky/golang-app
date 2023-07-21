@@ -18,14 +18,16 @@ type AllArticlesFetcher interface {
 // GetArticles is a handler that fetches articles.
 func GetAllArticles(articleFetcher AllArticlesFetcher) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		articles, err := articleFetcher.FetchAllArticles(r.Context())
+		ctx := r.Context()
+
+		articles, err := articleFetcher.FetchAllArticles(ctx)
 		if err != nil {
-			HandleError(w, fmt.Errorf("error fetching articles: %v", err), http.StatusInternalServerError, true)
+			HandleError(ctx, w, fmt.Errorf("error fetching articles: %v", err), http.StatusInternalServerError, true)
 			return
 		}
 
 		if len(articles) == 0 {
-			HandleError(w, fmt.Errorf("articles not found"), http.StatusNotFound, false)
+			HandleError(ctx, w, fmt.Errorf("articles not found"), http.StatusNotFound, false)
 			return
 		}
 

@@ -109,6 +109,8 @@ func (s *Server) setupRoutes() {
 	s.Router.Get("/_healthz", handler.Healthz)
 
 	s.Router.Route(v1API, func(r chi.Router) {
+		r.Use(middleware.Trace)
+
 		// Auth routes
 		r.Group(func(r chi.Router) {
 			r.Post("/auth/login", handler.AuthLogin(s.Auth))

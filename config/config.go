@@ -22,7 +22,8 @@ type Config struct {
 	AuthEditorKey string `env:"AUTH_EDITOR_KEY,required"`
 	AuthViewerKey string `env:"AUTH_VIEWER_KEY,required"`
 
-	Port Port `env:"PORT,default=8000"`
+	Port        Port   `env:"PORT,default=8000"`
+	ServiceName string `env:"SERVICE_NAME,default=unknown"`
 }
 
 // Port is a valid port.

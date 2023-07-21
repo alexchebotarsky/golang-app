@@ -17,14 +17,16 @@ type ArticleAdder interface {
 // AddArticle is a handler that adds an article.
 func AddArticle(articleAdder ArticleAdder) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
 		var article database.Article
 		if err := json.NewDecoder(r.Body).Decode(&article); err != nil {
-			HandleError(w, fmt.Errorf("error decoding request body: %v", err), http.StatusBadRequest, true)
+			HandleError(ctx, w, fmt.Errorf("error decoding request body: %v", err), http.StatusBadRequest, true)
 			return
 		}
 
-		if err := articleAdder.AddArticle(r.Context(), article); err != nil {
-			HandleError(w, fmt.Errorf("error adding article: %v", err), http.StatusInternalServerError, true)
+		if err := articleAdder.AddArticle(ctx, article); err != nil {
+			HandleError(ctx, w, fmt.Errorf("error adding article: %v", err), http.StatusInternalServerError, true)
 			return
 		}
 

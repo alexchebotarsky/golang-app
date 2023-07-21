@@ -1,9 +1,13 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"net/http"
+
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type errorResponse struct {
@@ -11,7 +15,12 @@ type errorResponse struct {
 	StatusCode int    `json:"statusCode"`
 }
 
-func HandleError(w http.ResponseWriter, err error, statusCode int, shouldLog bool) {
+func HandleError(ctx context.Context, w http.ResponseWriter, err error, statusCode int, shouldLog bool) {
+	span := trace.SpanFromContext(ctx)
+
+	span.RecordError(err)
+	span.SetStatus(codes.Error, err.Error())
+
 	if shouldLog {
 		log.Printf("Handler error: %v", err)
 	}

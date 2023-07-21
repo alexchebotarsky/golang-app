@@ -15,15 +15,17 @@ type TokenRefresher interface {
 // future authorized requests.
 func AuthRefresh(tokenRefresher TokenRefresher) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
 		tokenCookie, err := r.Cookie("token")
 		if err != nil {
-			HandleError(w, fmt.Errorf("error reading auth token cookie: %v", err), http.StatusUnauthorized, true)
+			HandleError(ctx, w, fmt.Errorf("error reading auth token cookie: %v", err), http.StatusUnauthorized, true)
 			return
 		}
 
 		token, expires, err := tokenRefresher.RefreshToken(tokenCookie.Value)
 		if err != nil {
-			HandleError(w, fmt.Errorf("error refreshing token: %v", err), http.StatusUnauthorized, true)
+			HandleError(ctx, w, fmt.Errorf("error refreshing token: %v", err), http.StatusUnauthorized, true)
 			return
 		}
 

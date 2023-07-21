@@ -22,16 +22,18 @@ type TokenCreator interface {
 // future authorized requests.
 func AuthLogin(tokenCreator TokenCreator) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
 		var payload AuthLoginPayload
 		err := json.NewDecoder(r.Body).Decode(&payload)
 		if err != nil {
-			HandleError(w, fmt.Errorf("error decoding auth payload: %v", err), http.StatusBadRequest, true)
+			HandleError(ctx, w, fmt.Errorf("error decoding auth payload: %v", err), http.StatusBadRequest, true)
 			return
 		}
 
 		token, expires, err := tokenCreator.NewToken(payload.Role, payload.Key)
 		if err != nil {
-			HandleError(w, fmt.Errorf("error creating new auth token: %v", err), http.StatusUnauthorized, true)
+			HandleError(ctx, w, fmt.Errorf("error creating new auth token: %v", err), http.StatusUnauthorized, true)
 			return
 		}
 

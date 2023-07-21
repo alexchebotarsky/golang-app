@@ -36,7 +36,8 @@ func TestLoad(t *testing.T) {
 					"AUTH_EDITOR_KEY": "test_auth_editor_key",
 					"AUTH_VIEWER_KEY": "test_auth_viewer_key",
 
-					"PORT": "1000",
+					"PORT":         "1000",
+					"SERVICE_NAME": "test_service_name",
 				},
 			},
 			wantConfig: &Config{
@@ -52,7 +53,8 @@ func TestLoad(t *testing.T) {
 				AuthEditorKey: "test_auth_editor_key",
 				AuthViewerKey: "test_auth_viewer_key",
 
-				Port: 1000,
+				Port:        1000,
+				ServiceName: "test_service_name",
 			},
 			wantErr: false,
 		},
@@ -65,7 +67,8 @@ func TestLoad(t *testing.T) {
 					"DATABASE_PORT":    "2000",
 					"DATABASE_OPTIONS": "?database_option=test",
 
-					"PORT": "1000",
+					"PORT":         "1000",
+					"SERVICE_NAME": "test_service_name",
 				},
 			},
 			wantConfig: nil,

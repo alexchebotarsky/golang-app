@@ -18,20 +18,22 @@ type TokenParser interface {
 func Auth(tokenParser TokenParser, expectedAccessLevel int) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ctx := r.Context()
+
 			tokenCookie, err := r.Cookie("token")
 			if err != nil {
-				handler.HandleError(w, fmt.Errorf("error reading auth token cookie: %v", err), http.StatusUnauthorized, true)
+				handler.HandleError(ctx, w, fmt.Errorf("error reading auth token cookie: %v", err), http.StatusUnauthorized, true)
 				return
 			}
 
 			claims, err := tokenParser.ParseToken(tokenCookie.Value)
 			if err != nil {
-				handler.HandleError(w, fmt.Errorf("error validating auth token: %v", err), http.StatusUnauthorized, true)
+				handler.HandleError(ctx, w, fmt.Errorf("error validating auth token: %v", err), http.StatusUnauthorized, true)
 				return
 			}
 
 			if expectedAccessLevel < claims.AccessLevel {
-				handler.HandleError(w, errors.New("insufficient access level"), http.StatusForbidden, true)
+				handler.HandleError(ctx, w, errors.New("insufficient access level"), http.StatusForbidden, true)
 				return
 			}
 

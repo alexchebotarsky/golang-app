@@ -9,6 +9,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/goodleby/golang-server/client/database"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 )
 
 // ArticleFetcher is an interface that fetches an article.
@@ -19,15 +21,20 @@ type ArticleFetcher interface {
 // GetArticle is a handler that fetches an article.
 func GetArticle(articleFetcher ArticleFetcher) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		span := trace.SpanFromContext(ctx)
+
 		id := chi.URLParam(r, "id")
 
-		article, err := articleFetcher.FetchArticle(r.Context(), id)
+		span.SetAttributes(attribute.String("id", id))
+
+		article, err := articleFetcher.FetchArticle(ctx, id)
 		if err != nil {
 			switch err.(type) {
 			case *database.ErrNotFound:
-				HandleError(w, fmt.Errorf("article with id %q not found: %v", id, err), http.StatusNotFound, false)
+				HandleError(ctx, w, fmt.Errorf("article with id %q not found: %v", id, err), http.StatusNotFound, false)
 			default:
-				HandleError(w, fmt.Errorf("error fetching article: %v", err), http.StatusInternalServerError, true)
+				HandleError(ctx, w, fmt.Errorf("error fetching article: %v", err), http.StatusInternalServerError, true)
 			}
 			return
 		}
