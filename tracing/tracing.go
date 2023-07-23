@@ -17,6 +17,7 @@ import (
 // If empty, default name will be used
 const tracerName = ""
 
+// Init initializes global exporter and tracer provider
 func Init(config *config.Config) error {
 	exporter, err := newFileExporter("traces.txt")
 	if err != nil {
@@ -59,6 +60,7 @@ func newFileExporter(filePath string) (tracesdk.SpanExporter, error) {
 	return exporter, nil
 }
 
+// Span uses global tracer to start a new span
 func Span(ctx context.Context, name string, opts ...trace.SpanStartOption) (context.Context, trace.Span) {
 	return otel.Tracer(tracerName).Start(ctx, name, opts...)
 }

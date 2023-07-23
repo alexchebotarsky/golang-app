@@ -8,6 +8,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/goodleby/golang-server/config"
+	"github.com/goodleby/golang-server/tracing"
 )
 
 // Client is an auth client.
@@ -52,7 +53,10 @@ type Claims struct {
 }
 
 // NewToken creates a new signed JWT provided role credentials.
-func (c *Client) NewToken(roleName, roleKey string) (string, time.Time, error) {
+func (c *Client) NewToken(ctx context.Context, roleName, roleKey string) (string, time.Time, error) {
+	_, span := tracing.Span(ctx, "NewToken")
+	defer span.End()
+
 	role, err := c.ValidateRole(roleName, roleKey)
 	if err != nil {
 		return "", time.Time{}, fmt.Errorf("error validating role ket: %v", err)
@@ -79,7 +83,10 @@ func (c *Client) NewToken(roleName, roleKey string) (string, time.Time, error) {
 }
 
 // ParseToken parses and validates provided JWT string and checks its access level.
-func (c *Client) ParseToken(tokenString string) (*Claims, error) {
+func (c *Client) ParseToken(ctx context.Context, tokenString string) (*Claims, error) {
+	_, span := tracing.Span(ctx, "ParseToken")
+	defer span.End()
+
 	claims := Claims{}
 
 	token, err := jwt.ParseWithClaims(
@@ -102,7 +109,10 @@ func (c *Client) ParseToken(tokenString string) (*Claims, error) {
 }
 
 // RefreshToken creates a new signed JWT provided old JWT.
-func (c *Client) RefreshToken(tokenString string) (string, time.Time, error) {
+func (c *Client) RefreshToken(ctx context.Context, tokenString string) (string, time.Time, error) {
+	_, span := tracing.Span(ctx, "RefreshToken")
+	defer span.End()
+
 	claims := Claims{}
 
 	oldToken, err := jwt.ParseWithClaims(

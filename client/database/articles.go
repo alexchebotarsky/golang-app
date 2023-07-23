@@ -4,6 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
+
+	"github.com/goodleby/golang-server/tracing"
 )
 
 func (c *Client) prepareGetArticles() error {
@@ -20,6 +23,9 @@ func (c *Client) prepareGetArticles() error {
 
 // FetchAllArticles fetches all articles.
 func (c *Client) FetchAllArticles(ctx context.Context) ([]Article, error) {
+	ctx, span := tracing.Span(ctx, "FetchAllArticles")
+	defer span.End()
+
 	rows, err := c.getArticlesStmt.QueryContext(ctx)
 	if err != nil {
 		switch err {
@@ -29,7 +35,11 @@ func (c *Client) FetchAllArticles(ctx context.Context) ([]Article, error) {
 			return nil, fmt.Errorf("error querying articles: %v", err)
 		}
 	}
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			log.Printf("Error closing database rows: %v", err)
+		}
+	}()
 
 	var articles []Article
 	for rows.Next() {
@@ -64,6 +74,9 @@ func (c *Client) prepareGetArticle() error {
 
 // FetchArticle fetches an article by id.
 func (c *Client) FetchArticle(ctx context.Context, id string) (*Article, error) {
+	ctx, span := tracing.Span(ctx, "FetchArticle")
+	defer span.End()
+
 	var article Article
 
 	args := struct {
@@ -99,6 +112,9 @@ func (c *Client) prepareAddArticle() error {
 
 // AddArticle adds an article.
 func (c *Client) AddArticle(ctx context.Context, article Article) error {
+	ctx, span := tracing.Span(ctx, "AddArticle")
+	defer span.End()
+
 	args := struct {
 		ID          string `db:"id"`
 		Title       string `db:"title"`
@@ -132,6 +148,9 @@ func (c *Client) prepareRemoveArticle() error {
 
 // RemoveArticle removes an article.
 func (c *Client) RemoveArticle(ctx context.Context, id string) error {
+	ctx, span := tracing.Span(ctx, "RemoveArticle")
+	defer span.End()
+
 	args := struct {
 		ID string `db:"id"`
 	}{
@@ -159,6 +178,9 @@ func (c *Client) prepareUpdateArticle() error {
 
 // UpdateArticle updates an article.
 func (c *Client) UpdateArticle(ctx context.Context, id string, article Article) error {
+	ctx, span := tracing.Span(ctx, "UpdateArticle")
+	defer span.End()
+
 	args := struct {
 		ID             string `db:"id"`
 		NewID          string `db:"new_id"`

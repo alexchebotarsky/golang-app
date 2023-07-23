@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -11,7 +12,7 @@ import (
 
 // TokenParser is an interface for parsing and validating a JWT.
 type TokenParser interface {
-	ParseToken(token string) (*auth.Claims, error)
+	ParseToken(ctx context.Context, token string) (*auth.Claims, error)
 }
 
 // Auth is a middleware that checks authorization cookie and if access level is not sufficient blocks request.
@@ -26,7 +27,7 @@ func Auth(tokenParser TokenParser, expectedAccessLevel int) func(next http.Handl
 				return
 			}
 
-			claims, err := tokenParser.ParseToken(tokenCookie.Value)
+			claims, err := tokenParser.ParseToken(ctx, tokenCookie.Value)
 			if err != nil {
 				handler.HandleError(ctx, w, fmt.Errorf("error validating auth token: %v", err), http.StatusUnauthorized, true)
 				return

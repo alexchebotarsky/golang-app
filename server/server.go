@@ -115,7 +115,7 @@ func (s *Server) setupRoutes() {
 		r.Group(func(r chi.Router) {
 			r.Post("/auth/login", handler.AuthLogin(s.Auth))
 			r.Post("/auth/refresh", handler.AuthRefresh(s.Auth))
-			r.Post("/auth/logout", handler.AuthRefresh(s.Auth))
+			r.Post("/auth/logout", handler.AuthLogout)
 		})
 
 		// View articles

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -15,7 +16,7 @@ type AuthLoginPayload struct {
 
 // TokenCreator is an interface for creating new JWT provided role and key.
 type TokenCreator interface {
-	NewToken(role, key string) (token string, expires time.Time, err error)
+	NewToken(ctx context.Context, role, key string) (token string, expires time.Time, err error)
 }
 
 // AuthLogin is a handler that creates jwt auth token and stores it in cookie for
@@ -25,13 +26,12 @@ func AuthLogin(tokenCreator TokenCreator) http.HandlerFunc {
 		ctx := r.Context()
 
 		var payload AuthLoginPayload
-		err := json.NewDecoder(r.Body).Decode(&payload)
-		if err != nil {
+		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 			HandleError(ctx, w, fmt.Errorf("error decoding auth payload: %v", err), http.StatusBadRequest, true)
 			return
 		}
 
-		token, expires, err := tokenCreator.NewToken(payload.Role, payload.Key)
+		token, expires, err := tokenCreator.NewToken(ctx, payload.Role, payload.Key)
 		if err != nil {
 			HandleError(ctx, w, fmt.Errorf("error creating new auth token: %v", err), http.StatusUnauthorized, true)
 			return
