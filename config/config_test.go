@@ -36,6 +36,8 @@ func TestLoad(t *testing.T) {
 					"AUTH_EDITOR_KEY": "test_auth_editor_key",
 					"AUTH_VIEWER_KEY": "test_auth_viewer_key",
 
+					"EXAMPLE_ENDPOINT": "test_example_endpoint",
+
 					"PORT":         "1000",
 					"SERVICE_NAME": "test_service_name",
 				},
@@ -53,6 +55,8 @@ func TestLoad(t *testing.T) {
 				AuthEditorKey: "test_auth_editor_key",
 				AuthViewerKey: "test_auth_viewer_key",
 
+				ExampleEndpoint: "test_example_endpoint",
+
 				Port:        1000,
 				ServiceName: "test_service_name",
 			},
@@ -66,6 +70,8 @@ func TestLoad(t *testing.T) {
 					"DATABASE_HOST":    "test_host",
 					"DATABASE_PORT":    "2000",
 					"DATABASE_OPTIONS": "?database_option=test",
+
+					"EXAMPLE_ENDPOINT": "test_example_endpoint",
 
 					"PORT":         "1000",
 					"SERVICE_NAME": "test_service_name",

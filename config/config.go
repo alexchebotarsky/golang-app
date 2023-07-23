@@ -22,6 +22,8 @@ type Config struct {
 	AuthEditorKey string `env:"AUTH_EDITOR_KEY,required"`
 	AuthViewerKey string `env:"AUTH_VIEWER_KEY,required"`
 
+	ExampleEndpoint string `env:"EXAMPLE_ENDPOINT,default=https://swapi.dev/api/people"`
+
 	Port        Port   `env:"PORT,default=8000"`
 	ServiceName string `env:"SERVICE_NAME,default=unknown"`
 }
