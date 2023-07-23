@@ -33,7 +33,7 @@ func Auth(tokenParser TokenParser, expectedAccessLevel int) func(next http.Handl
 				return
 			}
 
-			if expectedAccessLevel < claims.AccessLevel {
+			if expectedAccessLevel > claims.AccessLevel {
 				handler.HandleError(ctx, w, errors.New("insufficient access level"), http.StatusForbidden, true)
 				return
 			}
