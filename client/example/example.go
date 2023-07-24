@@ -33,14 +33,11 @@ func New(config *config.Config) (*Client, error) {
 
 // ExampleData is the data we expect to receive from example endpoint.
 type ExampleData struct {
-	Count   int `json:"count"`
-	Results []struct {
-		Name      string `json:"name"`
-		Height    string `json:"height"`
-		Mass      string `json:"mass"`
-		BirthYear string `json:"birth_year"`
-		Gender    string `json:"gender"`
-	} `json:"results"`
+	Name      string `json:"name"`
+	Height    string `json:"height"`
+	Mass      string `json:"mass"`
+	BirthYear string `json:"birth_year"`
+	Gender    string `json:"gender"`
 }
 
 // FetchExampleData sends get request to the example endpoint.
