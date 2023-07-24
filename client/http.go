@@ -13,7 +13,7 @@ import (
 
 // TracedTransport implement the http.RoundTripper interface and adds tracing.
 type TracedTransport struct {
-	RoundTripper http.RoundTripper
+	http.RoundTripper
 }
 
 // RoundTrip executes a single HTTP transaction and is part of the

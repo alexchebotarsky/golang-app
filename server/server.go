@@ -14,6 +14,7 @@ import (
 	"github.com/goodleby/golang-server/client/database"
 	"github.com/goodleby/golang-server/client/example"
 	"github.com/goodleby/golang-server/config"
+	"github.com/goodleby/golang-server/metrics"
 	"github.com/goodleby/golang-server/server/handler"
 	"github.com/goodleby/golang-server/server/middleware"
 )
@@ -43,21 +44,25 @@ func New(ctx context.Context, config *config.Config) (*Server, error) {
 
 	dbClient, err := database.New(ctx, config)
 	if err != nil {
-		return &s, fmt.Errorf("error creating database client: %v", err)
+		return nil, fmt.Errorf("error creating database client: %v", err)
 	}
 	s.DB = dbClient
 
 	authClient, err := auth.New(ctx, config)
 	if err != nil {
-		return &s, fmt.Errorf("error creating database client: %v", err)
+		return nil, fmt.Errorf("error creating database client: %v", err)
 	}
 	s.Auth = authClient
 
 	exampleClient, err := example.New(config)
 	if err != nil {
-		return &s, fmt.Errorf("error creating database client: %v", err)
+		return nil, fmt.Errorf("error creating database client: %v", err)
 	}
 	s.Example = exampleClient
+
+	if err := metrics.Init(); err != nil {
+		return nil, fmt.Errorf("error initializing metrics: %v", err)
+	}
 
 	s.setupRoutes()
 
@@ -118,6 +123,7 @@ func (s *Server) setupRoutes() {
 
 	s.Router.Route(v1API, func(r chi.Router) {
 		r.Use(middleware.Trace)
+		r.Use(middleware.Metrics)
 
 		r.Get("/example", handler.GetExampleData(s.Example))
 
