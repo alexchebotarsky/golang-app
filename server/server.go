@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"syscall"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/goodleby/golang-server/client/auth"
@@ -38,8 +38,10 @@ func New(ctx context.Context, config *config.Config) (*Server, error) {
 	s.Config = config
 	s.Router = chi.NewRouter()
 	s.HTTP = &http.Server{
-		Addr:    fmt.Sprintf(":%d", s.Config.Port),
-		Handler: s.Router,
+		Addr:         fmt.Sprintf(":%d", s.Config.Port),
+		Handler:      s.Router,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
 	}
 
 	dbClient, err := database.New(ctx, config)
@@ -73,21 +75,19 @@ func New(ctx context.Context, config *config.Config) (*Server, error) {
 func (s *Server) Start(ctx context.Context) error {
 	errc := make(chan error, 1)
 
-	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt, os.Kill)
+	defer cancel()
 
 	go s.serveHTTP(errc)
 
 	select {
-	case sig := <-stop:
-		log.Printf("Shutdown signal received: %v", sig)
 	case err := <-errc:
 		log.Printf("Fatal server error: %v", err)
 	case <-ctx.Done():
-		log.Printf("Server context cancelled")
+		log.Print("Server context cancelled")
 	}
 
-	if err := s.stop(ctx); err != nil {
+	if err := s.Stop(ctx); err != nil {
 		return fmt.Errorf("error stopping server: %v", err)
 	}
 
@@ -95,7 +95,7 @@ func (s *Server) Start(ctx context.Context) error {
 }
 
 // stop stops the server.
-func (s *Server) stop(ctx context.Context) error {
+func (s *Server) Stop(ctx context.Context) error {
 	if err := s.DB.Close(); err != nil {
 		return fmt.Errorf("error closing database connection: %v", err)
 	}
