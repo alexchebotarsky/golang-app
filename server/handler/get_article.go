@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -41,8 +40,8 @@ func GetArticle(articleFetcher ArticleFetcher) http.HandlerFunc {
 
 		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(article); err != nil {
-			log.Printf("%s: %v", logMsgWriteResponse, err)
-		}
+
+		err = json.NewEncoder(w).Encode(article)
+		handleWritingErr(err)
 	}
 }

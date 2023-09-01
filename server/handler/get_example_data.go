@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/goodleby/golang-server/client/example"
@@ -28,8 +27,8 @@ func GetExampleData(exampleFetcher ExampleDataFetcher) http.HandlerFunc {
 
 		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(exampleData); err != nil {
-			log.Printf("%s: %v", logMsgWriteResponse, err)
-		}
+
+		err = json.NewEncoder(w).Encode(exampleData)
+		handleWritingErr(err)
 	}
 }

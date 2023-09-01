@@ -27,10 +27,10 @@ func HandleError(ctx context.Context, w http.ResponseWriter, err error, statusCo
 
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
-	if err := json.NewEncoder(w).Encode(errorResponse{
+
+	err = json.NewEncoder(w).Encode(errorResponse{
 		Error:      err.Error(),
 		StatusCode: statusCode,
-	}); err != nil {
-		log.Printf("%s: %v", logMsgWriteResponse, err)
-	}
+	})
+	handleWritingErr(err)
 }
