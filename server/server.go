@@ -40,8 +40,8 @@ func New(ctx context.Context, config *config.Config) (*Server, error) {
 	s.HTTP = &http.Server{
 		Addr:         fmt.Sprintf(":%d", s.Config.Port),
 		Handler:      s.Router,
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 10 * time.Second,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 5 * time.Second,
 	}
 
 	dbClient, err := database.New(ctx, config)
@@ -72,48 +72,38 @@ func New(ctx context.Context, config *config.Config) (*Server, error) {
 }
 
 // Start starts the server.
-func (s *Server) Start(ctx context.Context) error {
-	errc := make(chan error, 1)
-
+func (s *Server) Start(ctx context.Context) {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt, os.Kill)
 	defer cancel()
 
-	go s.serveHTTP(errc)
+	go s.serveHTTP()
 
-	select {
-	case err := <-errc:
-		log.Printf("Fatal server error: %v", err)
-	case <-ctx.Done():
-		log.Print("Server context cancelled")
-	}
+	<-ctx.Done()
 
-	if err := s.Stop(ctx); err != nil {
-		return fmt.Errorf("error stopping server: %v", err)
-	}
+	ctx, cancelTimeout := context.WithTimeout(ctx, 10*time.Second)
+	defer cancelTimeout()
 
-	return nil
+	s.Stop(ctx)
 }
 
-// stop stops the server.
-func (s *Server) Stop(ctx context.Context) error {
-	if err := s.DB.Close(); err != nil {
-		return fmt.Errorf("error closing database connection: %v", err)
-	}
-
+// Stop stops the server.
+func (s *Server) Stop(ctx context.Context) {
 	if err := s.HTTP.Shutdown(ctx); err != nil {
-		return fmt.Errorf("error shutting down http server: %v", err)
+		log.Printf("error shutting down http server: %v", err)
 	}
 
-	log.Print("Server has been gracefully shut down")
+	if err := s.DB.Close(); err != nil {
+		log.Printf("error closing database connection: %v", err)
+	}
 
-	return nil
+	log.Print("Server has been gracefully stopped")
 }
 
 // serverHTTP starts HTTP server listening on its port.
-func (s *Server) serveHTTP(errc chan<- error) {
+func (s *Server) serveHTTP() {
 	log.Printf("Server is listening on port: %d", s.Config.Port)
 	if err := s.HTTP.ListenAndServe(); err != http.ErrServerClosed {
-		errc <- fmt.Errorf("error listening and serving: %v", err)
+		log.Printf("Error listening and serving: %v", err)
 	}
 }
 

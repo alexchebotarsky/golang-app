@@ -30,8 +30,5 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := s.Start(ctx); err != nil {
-		log.Printf("Server error: %v", err)
-		os.Exit(1)
-	}
+	s.Start(ctx)
 }
