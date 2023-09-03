@@ -24,7 +24,7 @@ const v1API string = "/api/v1"
 // Server is a server.
 type Server struct {
 	Config  *config.Config
-	Router  *chi.Mux
+	Router  chi.Router
 	HTTP    *http.Server
 	DB      *database.Client
 	Auth    *auth.Client
