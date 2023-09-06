@@ -4,72 +4,23 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"log"
 
 	"github.com/goodleby/golang-server/tracing"
 )
-
-func (c *Client) prepareGetArticles() error {
-	stmt, err := c.DB.Preparex(`SELECT id, title, description, body FROM articles`)
-
-	if err != nil {
-		return fmt.Errorf("error preparing get articles statement: %v", err)
-	}
-
-	c.getArticlesStmt = stmt
-
-	return nil
-}
 
 // FetchAllArticles fetches all articles.
 func (c *Client) FetchAllArticles(ctx context.Context) ([]Article, error) {
 	ctx, span := tracing.Span(ctx, "FetchAllArticles")
 	defer span.End()
 
-	rows, err := c.getArticlesStmt.QueryContext(ctx)
-	if err != nil {
-		switch err {
-		case sql.ErrNoRows:
-			return nil, &ErrNotFound{Err: err}
-		default:
-			return nil, fmt.Errorf("error querying articles: %v", err)
-		}
-	}
-	defer func() {
-		if err := rows.Close(); err != nil {
-			log.Printf("Error closing database rows: %v", err)
-		}
-	}()
+	query := `SELECT id, title, description, body FROM articles`
 
 	var articles []Article
-	for rows.Next() {
-		var article Article
-		err := rows.Scan(
-			&article.ID,
-			&article.Title,
-			&article.Description,
-			&article.Body,
-		)
-		if err != nil {
-			return nil, fmt.Errorf("error scanning rows: %v", err)
-		}
-
-		articles = append(articles, article)
+	if err := c.DB.SelectContext(ctx, &articles, query); err != nil {
+		return nil, fmt.Errorf("error selecting articles: %v", err)
 	}
 
 	return articles, nil
-}
-
-func (c *Client) prepareGetArticle() error {
-	stmt, err := c.DB.PrepareNamed(`SELECT id, title, description, body FROM articles WHERE id = :id`)
-
-	if err != nil {
-		return fmt.Errorf("error preparing get articles statement: %v", err)
-	}
-
-	c.getArticleStmt = stmt
-
-	return nil
 }
 
 // FetchArticle fetches an article by id.
@@ -77,7 +28,7 @@ func (c *Client) FetchArticle(ctx context.Context, id string) (*Article, error) 
 	ctx, span := tracing.Span(ctx, "FetchArticle")
 	defer span.End()
 
-	var article Article
+	query := `SELECT id, title, description, body FROM articles WHERE id = :id`
 
 	args := struct {
 		ID string `db:"id"`
@@ -85,35 +36,25 @@ func (c *Client) FetchArticle(ctx context.Context, id string) (*Article, error) 
 		ID: id,
 	}
 
-	err := c.getArticleStmt.QueryRowContext(ctx, args).Scan(&article.ID, &article.Title, &article.Description, &article.Body)
-	if err != nil {
+	var article Article
+	if err := c.DB.GetContext(ctx, &article, query, args); err != nil {
 		switch err {
 		case sql.ErrNoRows:
 			return nil, &ErrNotFound{Err: err}
 		default:
-			return nil, fmt.Errorf("error querying article with id %q: %v", id, err)
+			return nil, fmt.Errorf("error getting article with id %q: %v", id, err)
 		}
 	}
 
 	return &article, nil
 }
 
-func (c *Client) prepareAddArticle() error {
-	stmt, err := c.DB.PrepareNamed(`INSERT INTO articles (id, title, description, body) VALUES (:id, :title, :description, :body)`)
-
-	if err != nil {
-		return fmt.Errorf("error preparing add article statement: %v", err)
-	}
-
-	c.addArticleStmt = stmt
-
-	return nil
-}
-
 // AddArticle adds an article.
 func (c *Client) AddArticle(ctx context.Context, article Article) error {
 	ctx, span := tracing.Span(ctx, "AddArticle")
 	defer span.End()
+
+	query := `INSERT INTO articles (id, title, description, body) VALUES (:id, :title, :description, :body)`
 
 	args := struct {
 		ID          string `db:"id"`
@@ -127,21 +68,9 @@ func (c *Client) AddArticle(ctx context.Context, article Article) error {
 		Body:        article.Body,
 	}
 
-	_, err := c.addArticleStmt.ExecContext(ctx, args)
-	if err != nil {
+	if _, err := c.DB.ExecContext(ctx, query, args); err != nil {
 		return fmt.Errorf("error adding an article: %v", err)
 	}
-
-	return nil
-}
-
-func (c *Client) prepareRemoveArticle() error {
-	stmt, err := c.DB.PrepareNamed(`DELETE FROM articles WHERE id = :id`)
-	if err != nil {
-		return fmt.Errorf("error preparing remove article statement: %v", err)
-	}
-
-	c.removeArticleStmt = stmt
 
 	return nil
 }
@@ -151,27 +80,18 @@ func (c *Client) RemoveArticle(ctx context.Context, id string) error {
 	ctx, span := tracing.Span(ctx, "RemoveArticle")
 	defer span.End()
 
+	query := `DELETE FROM articles WHERE id = :id`
+
 	args := struct {
 		ID string `db:"id"`
 	}{
 		ID: id,
 	}
 
-	_, err := c.removeArticleStmt.ExecContext(ctx, args)
+	_, err := c.DB.ExecContext(ctx, query, args)
 	if err != nil {
 		return fmt.Errorf("error removing article: %v", err)
 	}
-
-	return nil
-}
-
-func (c *Client) prepareUpdateArticle() error {
-	stmt, err := c.DB.PrepareNamed(`UPDATE articles SET id = :new_id, title = :new_title, description = :new_description, body = :new_body WHERE id = :id`)
-	if err != nil {
-		return fmt.Errorf("error preparing update article statement: %v", err)
-	}
-
-	c.updateArticleStmt = stmt
 
 	return nil
 }
@@ -180,6 +100,8 @@ func (c *Client) prepareUpdateArticle() error {
 func (c *Client) UpdateArticle(ctx context.Context, id string, article Article) error {
 	ctx, span := tracing.Span(ctx, "UpdateArticle")
 	defer span.End()
+
+	query := `UPDATE articles SET id = :new_id, title = :new_title, description = :new_description, body = :new_body WHERE id = :id`
 
 	args := struct {
 		ID             string `db:"id"`
@@ -195,8 +117,7 @@ func (c *Client) UpdateArticle(ctx context.Context, id string, article Article) 
 		NewBody:        article.Body,
 	}
 
-	_, err := c.updateArticleStmt.ExecContext(ctx, args)
-	if err != nil {
+	if _, err := c.DB.ExecContext(ctx, query, args); err != nil {
 		return fmt.Errorf("error updating article: %v", err)
 	}
 
