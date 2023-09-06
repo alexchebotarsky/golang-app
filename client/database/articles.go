@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
 
 	"github.com/goodleby/golang-server/tracing"
 )
@@ -28,7 +29,15 @@ func (c *Client) FetchArticle(ctx context.Context, id string) (*Article, error) 
 	ctx, span := tracing.Span(ctx, "FetchArticle")
 	defer span.End()
 
-	query := `SELECT id, title, description, body FROM articles WHERE id = :id`
+	stmt, err := c.DB.PrepareNamedContext(ctx, `SELECT id, title, description, body FROM articles WHERE id = :id`)
+	if err != nil {
+		return nil, fmt.Errorf("error preparing named statement: %v", err)
+	}
+	defer func() {
+		if err := stmt.Close(); err != nil {
+			log.Printf("Error closing prepared named statement: %v", err)
+		}
+	}()
 
 	args := struct {
 		ID string `db:"id"`
@@ -37,7 +46,7 @@ func (c *Client) FetchArticle(ctx context.Context, id string) (*Article, error) 
 	}
 
 	var article Article
-	if err := c.DB.GetContext(ctx, &article, query, args); err != nil {
+	if err := stmt.GetContext(ctx, &article, args); err != nil {
 		switch err {
 		case sql.ErrNoRows:
 			return nil, &ErrNotFound{Err: err}
@@ -117,7 +126,7 @@ func (c *Client) UpdateArticle(ctx context.Context, id string, article Article) 
 		NewBody:        article.Body,
 	}
 
-	if _, err := c.DB.ExecContext(ctx, query, args); err != nil {
+	if _, err := c.DB.NamedExecContext(ctx, query, args); err != nil {
 		return fmt.Errorf("error updating article: %v", err)
 	}
 
