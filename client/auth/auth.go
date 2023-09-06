@@ -171,5 +171,3 @@ const EditorAccess = 20
 
 const ViewerRole = "viewer"
 const ViewerAccess = 10
-
-const AnyAccess = 0
