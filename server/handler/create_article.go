@@ -9,11 +9,11 @@ import (
 	"github.com/goodleby/golang-server/client/database"
 )
 
-type ArticleAdder interface {
-	AddArticle(ctx context.Context, article database.Article) error
+type ArticleInserter interface {
+	InsertArticle(ctx context.Context, article database.Article) error
 }
 
-func AddArticle(articleAdder ArticleAdder) http.HandlerFunc {
+func AddArticle(articleInserter ArticleInserter) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
@@ -23,8 +23,8 @@ func AddArticle(articleAdder ArticleAdder) http.HandlerFunc {
 			return
 		}
 
-		if err := articleAdder.AddArticle(ctx, article); err != nil {
-			HandleError(ctx, w, fmt.Errorf("error adding article: %v", err), http.StatusInternalServerError, true)
+		if err := articleInserter.InsertArticle(ctx, article); err != nil {
+			HandleError(ctx, w, fmt.Errorf("error inserting article: %v", err), http.StatusInternalServerError, true)
 			return
 		}
 

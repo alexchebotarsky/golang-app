@@ -56,8 +56,8 @@ func (c *Client) SelectArticle(ctx context.Context, id string) (*Article, error)
 	return &article, nil
 }
 
-func (c *Client) AddArticle(ctx context.Context, article Article) error {
-	ctx, span := tracing.Span(ctx, "AddArticle")
+func (c *Client) InsertArticle(ctx context.Context, article Article) error {
+	ctx, span := tracing.Span(ctx, "InsertArticle")
 	defer span.End()
 
 	query := `INSERT INTO articles (id, title, description, body) VALUES (:id, :title, :description, :body)`
@@ -75,7 +75,7 @@ func (c *Client) AddArticle(ctx context.Context, article Article) error {
 	}
 
 	if _, err := c.DB.NamedExecContext(ctx, query, args); err != nil {
-		return fmt.Errorf("error adding an article: %v", err)
+		return fmt.Errorf("error inserting an article: %v", err)
 	}
 
 	return nil
