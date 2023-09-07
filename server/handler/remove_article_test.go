@@ -11,11 +11,11 @@ import (
 	"github.com/goodleby/golang-server/client/database"
 )
 
-type fakeArticleRemover struct {
+type fakeArticleDeleter struct {
 	articles []database.Article
 }
 
-func (m *fakeArticleRemover) RemoveArticle(ctx context.Context, id string) error {
+func (m *fakeArticleDeleter) DeleteArticle(ctx context.Context, id string) error {
 	for i, article := range m.articles {
 		if article.ID == id {
 			m.articles = append(m.articles[:i], m.articles[i+1:]...)
@@ -28,7 +28,7 @@ func (m *fakeArticleRemover) RemoveArticle(ctx context.Context, id string) error
 
 func TestRemoveArticle(t *testing.T) {
 	type args struct {
-		articleRemover *fakeArticleRemover
+		articleDeleter *fakeArticleDeleter
 		req            *http.Request
 	}
 	tests := []struct {
@@ -41,7 +41,7 @@ func TestRemoveArticle(t *testing.T) {
 		{
 			name: "should remove the article from the database and return nil",
 			args: args{
-				articleRemover: &fakeArticleRemover{
+				articleDeleter: &fakeArticleDeleter{
 					articles: []database.Article{
 						{
 							ID:          "test_id",
@@ -75,7 +75,7 @@ func TestRemoveArticle(t *testing.T) {
 		{
 			name: "should return an internal error if no article with the id found in the database",
 			args: args{
-				articleRemover: &fakeArticleRemover{
+				articleDeleter: &fakeArticleDeleter{
 					articles: []database.Article{
 						{
 							ID:          "test_id",
@@ -114,15 +114,15 @@ func TestRemoveArticle(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			w := httptest.NewRecorder()
-			handler := RemoveArticle(tt.args.articleRemover)
+			handler := RemoveArticle(tt.args.articleDeleter)
 			handler(w, tt.args.req)
 
 			if w.Code != tt.wantStatus {
 				t.Fatalf("RemoveArticle() status = %v, want %v", w.Code, tt.wantStatus)
 			}
 
-			if !reflect.DeepEqual(tt.args.articleRemover.articles, tt.wantArticles) {
-				t.Fatalf("RemoveArticle() articles = %v, want %v", tt.args.articleRemover.articles, tt.wantArticles)
+			if !reflect.DeepEqual(tt.args.articleDeleter.articles, tt.wantArticles) {
+				t.Fatalf("RemoveArticle() articles = %v, want %v", tt.args.articleDeleter.articles, tt.wantArticles)
 			}
 
 			// If we expect an error, we just need to check the response body is not empty.

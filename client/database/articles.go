@@ -81,8 +81,8 @@ func (c *Client) InsertArticle(ctx context.Context, article Article) error {
 	return nil
 }
 
-func (c *Client) RemoveArticle(ctx context.Context, id string) error {
-	ctx, span := tracing.Span(ctx, "RemoveArticle")
+func (c *Client) DeleteArticle(ctx context.Context, id string) error {
+	ctx, span := tracing.Span(ctx, "DeleteArticle")
 	defer span.End()
 
 	query := `DELETE FROM articles WHERE id = :id`
@@ -95,7 +95,7 @@ func (c *Client) RemoveArticle(ctx context.Context, id string) error {
 
 	_, err := c.DB.NamedExecContext(ctx, query, args)
 	if err != nil {
-		return fmt.Errorf("error removing article: %v", err)
+		return fmt.Errorf("error deleting article: %v", err)
 	}
 
 	return nil
