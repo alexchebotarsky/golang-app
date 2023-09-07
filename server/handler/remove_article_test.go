@@ -73,7 +73,7 @@ func TestRemoveArticle(t *testing.T) {
 			},
 		},
 		{
-			name: "should return an internal error if it fails no article with the id found in the database",
+			name: "should return an internal error if no article with the id found in the database",
 			args: args{
 				articleRemover: &fakeArticleRemover{
 					articles: []database.Article{
