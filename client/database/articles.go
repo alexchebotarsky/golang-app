@@ -49,7 +49,7 @@ func (c *Client) SelectArticle(ctx context.Context, id string) (*Article, error)
 		case sql.ErrNoRows:
 			return nil, &ErrNotFound{Err: err}
 		default:
-			return nil, fmt.Errorf("error getting article with id %q: %v", id, err)
+			return nil, fmt.Errorf("error selecting article with id %q: %v", id, err)
 		}
 	}
 
