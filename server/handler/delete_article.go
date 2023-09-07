@@ -14,7 +14,7 @@ type ArticleDeleter interface {
 	DeleteArticle(ctx context.Context, id string) error
 }
 
-func RemoveArticle(articleDeleter ArticleDeleter) http.HandlerFunc {
+func DeleteArticle(articleDeleter ArticleDeleter) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		span := trace.SpanFromContext(ctx)

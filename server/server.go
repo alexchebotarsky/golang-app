@@ -131,7 +131,7 @@ func (s *Server) setupRoutes() {
 			r.Use(middleware.Auth(s.Auth, auth.EditorAccess))
 
 			r.Post("/articles", handler.AddArticle(s.DB))
-			r.Delete("/articles/{id}", handler.RemoveArticle(s.DB))
+			r.Delete("/articles/{id}", handler.DeleteArticle(s.DB))
 			r.Patch("/articles/{id}", handler.UpdateArticle(s.DB))
 		})
 	})

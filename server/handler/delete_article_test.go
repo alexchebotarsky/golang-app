@@ -26,7 +26,7 @@ func (m *fakeArticleDeleter) DeleteArticle(ctx context.Context, id string) error
 	return fmt.Errorf("article with id %q not found", id)
 }
 
-func TestRemoveArticle(t *testing.T) {
+func TestDeleteArticle(t *testing.T) {
 	type args struct {
 		articleDeleter *fakeArticleDeleter
 		req            *http.Request
@@ -114,20 +114,20 @@ func TestRemoveArticle(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			w := httptest.NewRecorder()
-			handler := RemoveArticle(tt.args.articleDeleter)
+			handler := DeleteArticle(tt.args.articleDeleter)
 			handler(w, tt.args.req)
 
 			if w.Code != tt.wantStatus {
-				t.Fatalf("RemoveArticle() status = %v, want %v", w.Code, tt.wantStatus)
+				t.Fatalf("DeleteArticle() status = %v, want %v", w.Code, tt.wantStatus)
 			}
 
 			if !reflect.DeepEqual(tt.args.articleDeleter.articles, tt.wantArticles) {
-				t.Fatalf("RemoveArticle() articles = %v, want %v", tt.args.articleDeleter.articles, tt.wantArticles)
+				t.Fatalf("DeleteArticle() articles = %v, want %v", tt.args.articleDeleter.articles, tt.wantArticles)
 			}
 
 			// If we expect an error, we just need to check the response body is not empty.
 			if tt.wantErr && w.Body.Len() == 0 {
-				t.Fatalf("RemoveArticle() response body is empty, want error")
+				t.Fatalf("DeleteArticle() response body is empty, want error")
 			}
 		})
 	}
