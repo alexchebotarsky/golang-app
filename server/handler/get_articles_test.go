@@ -12,12 +12,12 @@ import (
 	"github.com/goodleby/golang-server/client/database"
 )
 
-type fakeAllArticlesFetcher struct {
+type fakeAllArticlesSelector struct {
 	articles   []database.Article
 	shouldFail bool
 }
 
-func (m *fakeAllArticlesFetcher) FetchAllArticles(ctx context.Context) ([]database.Article, error) {
+func (m *fakeAllArticlesSelector) SelectAllArticles(ctx context.Context) ([]database.Article, error) {
 	if m.shouldFail {
 		return nil, errors.New("test error")
 	}
@@ -27,8 +27,8 @@ func (m *fakeAllArticlesFetcher) FetchAllArticles(ctx context.Context) ([]databa
 
 func TestGetAllArticles(t *testing.T) {
 	type args struct {
-		allArticlesFetcher AllArticlesFetcher
-		req                *http.Request
+		allArticlesSelector AllArticlesSelector
+		req                 *http.Request
 	}
 	tests := []struct {
 		name       string
@@ -40,7 +40,7 @@ func TestGetAllArticles(t *testing.T) {
 		{
 			name: "should return all articles from the database",
 			args: args{
-				allArticlesFetcher: &fakeAllArticlesFetcher{
+				allArticlesSelector: &fakeAllArticlesSelector{
 					articles: []database.Article{
 						{
 							ID:          "test_id",
@@ -77,9 +77,9 @@ func TestGetAllArticles(t *testing.T) {
 			},
 		},
 		{
-			name: "should return a not found error if no articles has been fetched from the database",
+			name: "should return a not found error if no articles has been selected from the database",
 			args: args{
-				allArticlesFetcher: &fakeAllArticlesFetcher{
+				allArticlesSelector: &fakeAllArticlesSelector{
 					articles:   []database.Article{},
 					shouldFail: false,
 				},
@@ -90,9 +90,9 @@ func TestGetAllArticles(t *testing.T) {
 			wantBody:   nil,
 		},
 		{
-			name: "should return an internal error if it fails to fetch articles from the database",
+			name: "should return an internal error if it fails to select articles from the database",
 			args: args{
-				allArticlesFetcher: &fakeAllArticlesFetcher{
+				allArticlesSelector: &fakeAllArticlesSelector{
 					articles:   []database.Article{},
 					shouldFail: true,
 				},
@@ -106,7 +106,7 @@ func TestGetAllArticles(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			w := httptest.NewRecorder()
-			handler := GetAllArticles(tt.args.allArticlesFetcher)
+			handler := GetAllArticles(tt.args.allArticlesSelector)
 			handler(w, tt.args.req)
 
 			if w.Code != tt.wantStatus {

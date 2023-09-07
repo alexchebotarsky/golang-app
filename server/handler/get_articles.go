@@ -9,17 +9,17 @@ import (
 	"github.com/goodleby/golang-server/client/database"
 )
 
-type AllArticlesFetcher interface {
-	FetchAllArticles(ctx context.Context) ([]database.Article, error)
+type AllArticlesSelector interface {
+	SelectAllArticles(ctx context.Context) ([]database.Article, error)
 }
 
-func GetAllArticles(articleFetcher AllArticlesFetcher) http.HandlerFunc {
+func GetAllArticles(articleSelector AllArticlesSelector) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		articles, err := articleFetcher.FetchAllArticles(ctx)
+		articles, err := articleSelector.SelectAllArticles(ctx)
 		if err != nil {
-			HandleError(ctx, w, fmt.Errorf("error fetching articles: %v", err), http.StatusInternalServerError, true)
+			HandleError(ctx, w, fmt.Errorf("error selecting articles: %v", err), http.StatusInternalServerError, true)
 			return
 		}
 

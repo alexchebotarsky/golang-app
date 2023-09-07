@@ -9,8 +9,8 @@ import (
 	"github.com/goodleby/golang-server/tracing"
 )
 
-func (c *Client) FetchAllArticles(ctx context.Context) ([]Article, error) {
-	ctx, span := tracing.Span(ctx, "FetchAllArticles")
+func (c *Client) SelectAllArticles(ctx context.Context) ([]Article, error) {
+	ctx, span := tracing.Span(ctx, "SelectAllArticles")
 	defer span.End()
 
 	query := `SELECT id, title, description, body FROM articles`
@@ -23,8 +23,8 @@ func (c *Client) FetchAllArticles(ctx context.Context) ([]Article, error) {
 	return articles, nil
 }
 
-func (c *Client) FetchArticle(ctx context.Context, id string) (*Article, error) {
-	ctx, span := tracing.Span(ctx, "FetchArticle")
+func (c *Client) SelectArticle(ctx context.Context, id string) (*Article, error) {
+	ctx, span := tracing.Span(ctx, "SelectArticle")
 	defer span.End()
 
 	stmt, err := c.DB.PrepareNamedContext(ctx, `SELECT id, title, description, body FROM articles WHERE id = :id`)

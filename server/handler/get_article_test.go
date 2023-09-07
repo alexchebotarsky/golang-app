@@ -13,12 +13,12 @@ import (
 	"github.com/goodleby/golang-server/client/database"
 )
 
-type fakeArticleFetcher struct {
+type fakeArticleSelector struct {
 	articles   []database.Article
 	shouldFail bool
 }
 
-func (m *fakeArticleFetcher) FetchArticle(ctx context.Context, id string) (*database.Article, error) {
+func (m *fakeArticleSelector) SelectArticle(ctx context.Context, id string) (*database.Article, error) {
 	if m.shouldFail {
 		return nil, errors.New("test error")
 	}
@@ -34,8 +34,8 @@ func (m *fakeArticleFetcher) FetchArticle(ctx context.Context, id string) (*data
 
 func TestGetArticle(t *testing.T) {
 	type args struct {
-		articleFetcher ArticleFetcher
-		req            *http.Request
+		articleSelector ArticleSelector
+		req             *http.Request
 	}
 	tests := []struct {
 		name       string
@@ -47,7 +47,7 @@ func TestGetArticle(t *testing.T) {
 		{
 			name: "should return an article from the database",
 			args: args{
-				articleFetcher: &fakeArticleFetcher{
+				articleSelector: &fakeArticleSelector{
 					articles: []database.Article{
 						{
 							ID:          "other_id",
@@ -80,7 +80,7 @@ func TestGetArticle(t *testing.T) {
 		{
 			name: "should return an err not found if no article with the id found in the database",
 			args: args{
-				articleFetcher: &fakeArticleFetcher{
+				articleSelector: &fakeArticleSelector{
 					articles: []database.Article{
 						{
 							ID:          "test_id",
@@ -100,9 +100,9 @@ func TestGetArticle(t *testing.T) {
 			wantBody:   nil,
 		},
 		{
-			name: "should return an internal error if failed to fetch article from the database",
+			name: "should return an internal error if failed to select article from the database",
 			args: args{
-				articleFetcher: &fakeArticleFetcher{
+				articleSelector: &fakeArticleSelector{
 					articles:   []database.Article{},
 					shouldFail: true,
 				},
@@ -118,7 +118,7 @@ func TestGetArticle(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			w := httptest.NewRecorder()
-			handler := GetArticle(tt.args.articleFetcher)
+			handler := GetArticle(tt.args.articleSelector)
 			handler(w, tt.args.req)
 
 			if w.Code != tt.wantStatus {

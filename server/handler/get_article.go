@@ -12,11 +12,11 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-type ArticleFetcher interface {
-	FetchArticle(ctx context.Context, id string) (*database.Article, error)
+type ArticleSelector interface {
+	SelectArticle(ctx context.Context, id string) (*database.Article, error)
 }
 
-func GetArticle(articleFetcher ArticleFetcher) http.HandlerFunc {
+func GetArticle(articleSelector ArticleSelector) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		span := trace.SpanFromContext(ctx)
@@ -25,13 +25,13 @@ func GetArticle(articleFetcher ArticleFetcher) http.HandlerFunc {
 
 		span.SetAttributes(attribute.String("id", id))
 
-		article, err := articleFetcher.FetchArticle(ctx, id)
+		article, err := articleSelector.SelectArticle(ctx, id)
 		if err != nil {
 			switch err.(type) {
 			case *database.ErrNotFound:
 				HandleError(ctx, w, fmt.Errorf("article with id %q not found: %v", id, err), http.StatusNotFound, false)
 			default:
-				HandleError(ctx, w, fmt.Errorf("error fetching article: %v", err), http.StatusInternalServerError, true)
+				HandleError(ctx, w, fmt.Errorf("error selecting article: %v", err), http.StatusInternalServerError, true)
 			}
 			return
 		}
