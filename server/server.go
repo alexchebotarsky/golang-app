@@ -21,7 +21,6 @@ import (
 
 const v1API string = "/api/v1"
 
-// Server is a server.
 type Server struct {
 	Config  *config.Config
 	Router  chi.Router
@@ -31,7 +30,6 @@ type Server struct {
 	Example *example.Client
 }
 
-// New creates a new server.
 func New(ctx context.Context, config *config.Config) (*Server, error) {
 	var s Server
 
@@ -71,7 +69,6 @@ func New(ctx context.Context, config *config.Config) (*Server, error) {
 	return &s, nil
 }
 
-// Start starts the server.
 func (s *Server) Start(ctx context.Context) {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt, os.Kill)
 	defer cancel()
@@ -86,7 +83,6 @@ func (s *Server) Start(ctx context.Context) {
 	s.Stop(ctx)
 }
 
-// Stop stops the server.
 func (s *Server) Stop(ctx context.Context) {
 	if err := s.HTTP.Shutdown(ctx); err != nil {
 		log.Printf("error shutting down http server: %v", err)
@@ -99,7 +95,6 @@ func (s *Server) Stop(ctx context.Context) {
 	log.Print("Server has been gracefully stopped")
 }
 
-// serverHTTP starts HTTP server listening on its port.
 func (s *Server) serveHTTP() {
 	log.Printf("Server is listening on port: %d", s.Config.Port)
 	if err := s.HTTP.ListenAndServe(); err != http.ErrServerClosed {
@@ -107,7 +102,6 @@ func (s *Server) serveHTTP() {
 	}
 }
 
-// setupRoutes sets up the routes for the server.
 func (s *Server) setupRoutes() {
 	s.Router.Get("/_healthz", handler.Healthz)
 

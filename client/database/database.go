@@ -11,7 +11,6 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// Article is a database article.
 type Article struct {
 	Title       string `json:"title" db:"title"`
 	Description string `json:"description" db:"description"`
@@ -19,12 +18,10 @@ type Article struct {
 	ID          string `json:"id" db:"id"`
 }
 
-// Client is a database client.
 type Client struct {
 	DB *sqlx.DB
 }
 
-// New creates a new database client.
 func New(ctx context.Context, config *config.Config) (*Client, error) {
 	var c Client
 

@@ -12,12 +12,10 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-// ArticleFetcher is an interface that fetches an article.
 type ArticleFetcher interface {
 	FetchArticle(ctx context.Context, id string) (*database.Article, error)
 }
 
-// GetArticle is a handler that fetches an article.
 func GetArticle(articleFetcher ArticleFetcher) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()

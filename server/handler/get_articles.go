@@ -9,12 +9,10 @@ import (
 	"github.com/goodleby/golang-server/client/database"
 )
 
-// ArticlesFetcher is an interface that fetches articles.
 type AllArticlesFetcher interface {
 	FetchAllArticles(ctx context.Context) ([]database.Article, error)
 }
 
-// GetArticles is a handler that fetches articles.
 func GetAllArticles(articleFetcher AllArticlesFetcher) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()

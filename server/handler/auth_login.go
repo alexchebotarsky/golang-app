@@ -8,19 +8,15 @@ import (
 	"time"
 )
 
-// AuthPayload is expected payload.
 type AuthLoginPayload struct {
 	Role string `json:"role"`
 	Key  string `json:"key"`
 }
 
-// TokenCreator is an interface for creating new JWT provided role and key.
 type TokenCreator interface {
 	NewToken(ctx context.Context, role, key string) (token string, expires time.Time, err error)
 }
 
-// AuthLogin is a handler that creates jwt auth token and stores it in cookie for
-// future authorized requests.
 func AuthLogin(tokenCreator TokenCreator) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()

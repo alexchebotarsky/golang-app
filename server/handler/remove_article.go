@@ -10,12 +10,10 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-// ArticleRemover is an interface that removes an article.
 type ArticleRemover interface {
 	RemoveArticle(ctx context.Context, id string) error
 }
 
-// RemoveArticle is a handler that removes an article.
 func RemoveArticle(articleRemover ArticleRemover) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()

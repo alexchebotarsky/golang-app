@@ -9,12 +9,10 @@ import (
 	"github.com/goodleby/golang-server/client/example"
 )
 
-// ExampleDataFetcher is an interface that fetches example data.
 type ExampleDataFetcher interface {
 	FetchExampleData(ctx context.Context) (*example.ExampleData, error)
 }
 
-// GetExampleData is a handler that fetches example data from example client.
 func GetExampleData(exampleFetcher ExampleDataFetcher) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()

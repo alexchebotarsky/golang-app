@@ -9,12 +9,10 @@ import (
 	"github.com/goodleby/golang-server/client/database"
 )
 
-// ArticleAdder is an interface that adds an article.
 type ArticleAdder interface {
 	AddArticle(ctx context.Context, article database.Article) error
 }
 
-// AddArticle is a handler that adds an article.
 func AddArticle(articleAdder ArticleAdder) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()

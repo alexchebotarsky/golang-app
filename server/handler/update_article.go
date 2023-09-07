@@ -12,12 +12,10 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-// ArticleUpdater is an interface that updates an article.
 type ArticleUpdater interface {
 	UpdateArticle(ctx context.Context, id string, article database.Article) error
 }
 
-// UpdateArticle is a handler that updates an article.
 func UpdateArticle(articleUpdater ArticleUpdater) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()

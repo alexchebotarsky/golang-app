@@ -12,13 +12,11 @@ import (
 	"github.com/goodleby/golang-server/tracing"
 )
 
-// Client is an example client.
 type Client struct {
 	ExampleEndpoint string
 	HTTPClient      *http.Client
 }
 
-// New creates a new example client.
 func New(config *config.Config) (*Client, error) {
 	var c Client
 
@@ -31,7 +29,6 @@ func New(config *config.Config) (*Client, error) {
 	return &c, nil
 }
 
-// ExampleData is the data we expect to receive from example endpoint.
 type ExampleData struct {
 	Name      string `json:"name"`
 	Height    string `json:"height"`
@@ -40,7 +37,6 @@ type ExampleData struct {
 	Gender    string `json:"gender"`
 }
 
-// FetchExampleData sends get request to the example endpoint.
 func (c *Client) FetchExampleData(ctx context.Context) (*ExampleData, error) {
 	ctx, span := tracing.Span(ctx, "FetchExampleData")
 	defer span.End()

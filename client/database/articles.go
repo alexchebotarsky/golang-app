@@ -9,7 +9,6 @@ import (
 	"github.com/goodleby/golang-server/tracing"
 )
 
-// FetchAllArticles fetches all articles.
 func (c *Client) FetchAllArticles(ctx context.Context) ([]Article, error) {
 	ctx, span := tracing.Span(ctx, "FetchAllArticles")
 	defer span.End()
@@ -24,7 +23,6 @@ func (c *Client) FetchAllArticles(ctx context.Context) ([]Article, error) {
 	return articles, nil
 }
 
-// FetchArticle fetches an article by id.
 func (c *Client) FetchArticle(ctx context.Context, id string) (*Article, error) {
 	ctx, span := tracing.Span(ctx, "FetchArticle")
 	defer span.End()
@@ -58,7 +56,6 @@ func (c *Client) FetchArticle(ctx context.Context, id string) (*Article, error) 
 	return &article, nil
 }
 
-// AddArticle adds an article.
 func (c *Client) AddArticle(ctx context.Context, article Article) error {
 	ctx, span := tracing.Span(ctx, "AddArticle")
 	defer span.End()
@@ -84,7 +81,6 @@ func (c *Client) AddArticle(ctx context.Context, article Article) error {
 	return nil
 }
 
-// RemoveArticle removes an article.
 func (c *Client) RemoveArticle(ctx context.Context, id string) error {
 	ctx, span := tracing.Span(ctx, "RemoveArticle")
 	defer span.End()
@@ -105,7 +101,6 @@ func (c *Client) RemoveArticle(ctx context.Context, id string) error {
 	return nil
 }
 
-// UpdateArticle updates an article.
 func (c *Client) UpdateArticle(ctx context.Context, id string, article Article) error {
 	ctx, span := tracing.Span(ctx, "UpdateArticle")
 	defer span.End()

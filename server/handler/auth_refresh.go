@@ -7,13 +7,10 @@ import (
 	"time"
 )
 
-// TokenRefresher is an interface for refreshing JWT.
 type TokenRefresher interface {
 	RefreshToken(ctx context.Context, tokenString string) (token string, expires time.Time, err error)
 }
 
-// AuthRefresh is a handler that creates jwt auth token and stores it in cookie for
-// future authorized requests.
 func AuthRefresh(tokenRefresher TokenRefresher) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()

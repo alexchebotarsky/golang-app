@@ -11,14 +11,12 @@ import (
 	"github.com/goodleby/golang-server/tracing"
 )
 
-// Client is an auth client.
 type Client struct {
 	roles         []Role
 	authSecret    []byte
 	SigningMethod jwt.SigningMethod
 }
 
-// New creates a new auth client.
 func New(ctx context.Context, config *config.Config) (*Client, error) {
 	var c Client
 
@@ -45,14 +43,12 @@ func New(ctx context.Context, config *config.Config) (*Client, error) {
 	return &c, nil
 }
 
-// Claims contains all standard and custom fields of auth JWT.
 type Claims struct {
 	RoleName    string `json:"roleName"`
 	AccessLevel int    `json:"accessLevel"`
 	jwt.RegisteredClaims
 }
 
-// NewToken creates a new signed JWT provided role credentials.
 func (c *Client) NewToken(ctx context.Context, roleName, roleKey string) (string, time.Time, error) {
 	_, span := tracing.Span(ctx, "NewToken")
 	defer span.End()
@@ -82,7 +78,6 @@ func (c *Client) NewToken(ctx context.Context, roleName, roleKey string) (string
 	return signedToken, expires, nil
 }
 
-// ParseToken parses and validates provided JWT string and checks its access level.
 func (c *Client) ParseToken(ctx context.Context, tokenString string) (*Claims, error) {
 	_, span := tracing.Span(ctx, "ParseToken")
 	defer span.End()
@@ -108,7 +103,6 @@ func (c *Client) ParseToken(ctx context.Context, tokenString string) (*Claims, e
 	return &claims, nil
 }
 
-// RefreshToken creates a new signed JWT provided old JWT.
 func (c *Client) RefreshToken(ctx context.Context, tokenString string) (string, time.Time, error) {
 	_, span := tracing.Span(ctx, "RefreshToken")
 	defer span.End()
@@ -145,14 +139,12 @@ func (c *Client) RefreshToken(ctx context.Context, tokenString string) (string, 
 	return signedToken, expires, nil
 }
 
-// Role is an authorized role.
 type Role struct {
 	Name        string
 	AccessLevel int
 	Key         string
 }
 
-// ValidateRole checks role credentials and if valid returns matched role.
 func (c *Client) ValidateRole(roleName, roleKey string) (*Role, error) {
 	for _, role := range c.roles {
 		if role.Name == roleName && role.Key == roleKey {

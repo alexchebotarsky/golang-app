@@ -10,12 +10,10 @@ import (
 	"github.com/goodleby/golang-server/server/handler"
 )
 
-// TokenParser is an interface for parsing and validating a JWT.
 type TokenParser interface {
 	ParseToken(ctx context.Context, token string) (*auth.Claims, error)
 }
 
-// Auth is a middleware that checks authorization cookie and if access level is not sufficient blocks request.
 func Auth(tokenParser TokenParser, expectedAccessLevel int) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

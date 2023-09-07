@@ -22,7 +22,6 @@ var (
 	})
 )
 
-// Init initializes prometheus collectors.
 func Init() error {
 	if err := prometheus.Register(requestStatusCodes); err != nil {
 		return fmt.Errorf("error registering requestStatusCodes metrics collector: %v", err)
@@ -35,12 +34,10 @@ func Init() error {
 	return nil
 }
 
-// ObserveTimeToProcess records the time spent processing an operation.
 func ObserveTimeToProcess(operation string, t float64) {
 	timeToProcessRequest.Observe(t)
 }
 
-// RecordRequestStatusCode records the status code returned for each request.
 func RecordRequestStatusCode(statusCode int, operationName string) {
 	requestStatusCodes.WithLabelValues(strconv.Itoa(statusCode), operationName).Inc()
 }

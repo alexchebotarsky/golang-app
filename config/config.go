@@ -8,7 +8,6 @@ import (
 	"github.com/sethvargo/go-envconfig"
 )
 
-// Config contains all environment configuration.
 type Config struct {
 	DatabaseUser     string `env:"DATABASE_USER,required"`
 	DatabasePassword string `env:"DATABASE_PASSWORD,required"`
@@ -28,10 +27,8 @@ type Config struct {
 	ServiceName string `env:"SERVICE_NAME,default=unknown"`
 }
 
-// Port is a valid port.
 type Port = uint16
 
-// Load loads the environment configuration.
 func Load(ctx context.Context, envPath string) (*Config, error) {
 	var c Config
 
