@@ -74,7 +74,7 @@ func (c *Client) AddArticle(ctx context.Context, article Article) error {
 		Body:        article.Body,
 	}
 
-	if _, err := c.DB.ExecContext(ctx, query, args); err != nil {
+	if _, err := c.DB.NamedExecContext(ctx, query, args); err != nil {
 		return fmt.Errorf("error adding an article: %v", err)
 	}
 
@@ -93,7 +93,7 @@ func (c *Client) RemoveArticle(ctx context.Context, id string) error {
 		ID: id,
 	}
 
-	_, err := c.DB.ExecContext(ctx, query, args)
+	_, err := c.DB.NamedExecContext(ctx, query, args)
 	if err != nil {
 		return fmt.Errorf("error removing article: %v", err)
 	}
