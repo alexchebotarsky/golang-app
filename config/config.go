@@ -12,7 +12,7 @@ type Config struct {
 	DatabaseUser     string `env:"DATABASE_USER,required"`
 	DatabasePassword string `env:"DATABASE_PASSWORD,required"`
 	DatabaseHost     string `env:"DATABASE_HOST,default=localhost"`
-	DatabasePort     Port   `env:"DATABASE_PORT,default=5432"`
+	DatabasePort     uint16 `env:"DATABASE_PORT,default=5432"`
 	DatabaseName     string `env:"DATABASE_NAME,required"`
 	DatabaseOptions  string `env:"DATABASE_OPTIONS,default=?sslmode=disable"`
 
@@ -23,11 +23,9 @@ type Config struct {
 
 	ExampleEndpoint string `env:"EXAMPLE_ENDPOINT,default=https://swapi.dev/api/people/1"`
 
-	Port        Port   `env:"PORT,default=8000"`
+	Port        uint16 `env:"PORT,default=8000"`
 	ServiceName string `env:"SERVICE_NAME,default=unknown"`
 }
-
-type Port = uint16
 
 func Load(ctx context.Context, envPath string) (*Config, error) {
 	var c Config
