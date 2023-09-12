@@ -77,19 +77,6 @@ func TestGetAllArticles(t *testing.T) {
 			},
 		},
 		{
-			name: "should return a not found error if no articles has been selected from the database",
-			args: args{
-				allArticlesSelector: &fakeAllArticlesSelector{
-					articles:   []database.Article{},
-					shouldFail: false,
-				},
-				req: httptest.NewRequest(http.MethodGet, "/articles", nil),
-			},
-			wantStatus: http.StatusNotFound,
-			wantErr:    true,
-			wantBody:   nil,
-		},
-		{
 			name: "should return an internal error if it fails to select articles from the database",
 			args: args{
 				allArticlesSelector: &fakeAllArticlesSelector{

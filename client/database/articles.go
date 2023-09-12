@@ -15,7 +15,7 @@ func (c *Client) SelectAllArticles(ctx context.Context) ([]Article, error) {
 
 	query := `SELECT id, title, description, body FROM articles`
 
-	var articles []Article
+	articles := []Article{}
 	if err := c.DB.SelectContext(ctx, &articles, query); err != nil {
 		return nil, fmt.Errorf("error selecting articles: %v", err)
 	}

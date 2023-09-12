@@ -23,11 +23,6 @@ func GetAllArticles(articleSelector AllArticlesSelector) http.HandlerFunc {
 			return
 		}
 
-		if len(articles) == 0 {
-			HandleError(ctx, w, fmt.Errorf("articles not found"), http.StatusNotFound, false)
-			return
-		}
-
 		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 
