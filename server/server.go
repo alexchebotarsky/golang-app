@@ -106,8 +106,7 @@ func (s *Server) setupRoutes() {
 	s.Router.Get("/_healthz", handler.Healthz)
 
 	s.Router.Route(v1API, func(r chi.Router) {
-		r.Use(middleware.Trace)
-		r.Use(middleware.Metrics)
+		r.Use(middleware.Trace, middleware.Metrics)
 
 		r.Get("/example", handler.GetExampleData(s.Example))
 
