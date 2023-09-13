@@ -93,8 +93,7 @@ func (c *Client) DeleteArticle(ctx context.Context, id string) error {
 		ID: id,
 	}
 
-	_, err := c.DB.NamedExecContext(ctx, query, args)
-	if err != nil {
+	if _, err := c.DB.NamedExecContext(ctx, query, args); err != nil {
 		return fmt.Errorf("error deleting article: %v", err)
 	}
 
