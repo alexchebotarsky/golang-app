@@ -9,6 +9,13 @@ import (
 	"github.com/goodleby/golang-server/tracing"
 )
 
+type Article struct {
+	Title       string `json:"title" db:"title"`
+	Description string `json:"description" db:"description"`
+	Body        string `json:"body" db:"body"`
+	ID          string `json:"id" db:"id"`
+}
+
 func (c *Client) SelectAllArticles(ctx context.Context) ([]Article, error) {
 	ctx, span := tracing.StartSpan(ctx, "SelectAllArticles")
 	defer span.End()

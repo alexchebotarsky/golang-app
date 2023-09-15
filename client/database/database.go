@@ -11,13 +11,6 @@ import (
 	_ "github.com/lib/pq"
 )
 
-type Article struct {
-	Title       string `json:"title" db:"title"`
-	Description string `json:"description" db:"description"`
-	Body        string `json:"body" db:"body"`
-	ID          string `json:"id" db:"id"`
-}
-
 type Client struct {
 	DB *sqlx.DB
 }
