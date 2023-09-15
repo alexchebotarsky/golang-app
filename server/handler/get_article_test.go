@@ -18,12 +18,12 @@ type fakeArticleSelector struct {
 	shouldFail bool
 }
 
-func (m *fakeArticleSelector) SelectArticle(ctx context.Context, id string) (*database.Article, error) {
-	if m.shouldFail {
+func (f *fakeArticleSelector) SelectArticle(ctx context.Context, id string) (*database.Article, error) {
+	if f.shouldFail {
 		return nil, errors.New("test error")
 	}
 
-	for _, a := range m.articles {
+	for _, a := range f.articles {
 		if a.ID == id {
 			return &a, nil
 		}

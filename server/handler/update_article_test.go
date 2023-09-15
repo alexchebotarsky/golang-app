@@ -15,10 +15,10 @@ type fakeArticleUpdater struct {
 	articles []database.Article
 }
 
-func (m *fakeArticleUpdater) UpdateArticle(ctx context.Context, id string, article database.Article) error {
-	for i, a := range m.articles {
+func (f *fakeArticleUpdater) UpdateArticle(ctx context.Context, id string, article database.Article) error {
+	for i, a := range f.articles {
 		if a.ID == id {
-			m.articles[i] = article
+			f.articles[i] = article
 			return nil
 		}
 	}

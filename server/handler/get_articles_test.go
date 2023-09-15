@@ -17,12 +17,12 @@ type fakeAllArticlesSelector struct {
 	shouldFail bool
 }
 
-func (m *fakeAllArticlesSelector) SelectAllArticles(ctx context.Context) ([]database.Article, error) {
-	if m.shouldFail {
+func (f *fakeAllArticlesSelector) SelectAllArticles(ctx context.Context) ([]database.Article, error) {
+	if f.shouldFail {
 		return nil, errors.New("test error")
 	}
 
-	return m.articles, nil
+	return f.articles, nil
 }
 
 func TestGetAllArticles(t *testing.T) {
@@ -75,6 +75,19 @@ func TestGetAllArticles(t *testing.T) {
 					Body:        "Other test body",
 				},
 			},
+		},
+		{
+			name: "should return empty array if no articles in the database",
+			args: args{
+				allArticlesSelector: &fakeAllArticlesSelector{
+					articles:   []database.Article{},
+					shouldFail: false,
+				},
+				req: httptest.NewRequest(http.MethodGet, "/articles", nil),
+			},
+			wantStatus: http.StatusOK,
+			wantErr:    false,
+			wantBody:   []database.Article{},
 		},
 		{
 			name: "should return an internal error if it fails to select articles from the database",

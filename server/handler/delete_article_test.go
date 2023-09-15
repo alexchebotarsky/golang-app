@@ -15,10 +15,10 @@ type fakeArticleDeleter struct {
 	articles []database.Article
 }
 
-func (m *fakeArticleDeleter) DeleteArticle(ctx context.Context, id string) error {
-	for i, article := range m.articles {
+func (f *fakeArticleDeleter) DeleteArticle(ctx context.Context, id string) error {
+	for i, article := range f.articles {
 		if article.ID == id {
-			m.articles = append(m.articles[:i], m.articles[i+1:]...)
+			f.articles = append(f.articles[:i], f.articles[i+1:]...)
 			return nil
 		}
 	}

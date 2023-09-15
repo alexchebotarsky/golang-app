@@ -16,12 +16,12 @@ type fakeArticleInserter struct {
 	shouldFail bool
 }
 
-func (m *fakeArticleInserter) InsertArticle(ctx context.Context, article database.Article) error {
-	if m.shouldFail {
+func (f *fakeArticleInserter) InsertArticle(ctx context.Context, article database.Article) error {
+	if f.shouldFail {
 		return errors.New("test error")
 	}
 
-	m.articles = append(m.articles, article)
+	f.articles = append(f.articles, article)
 
 	return nil
 }
