@@ -14,7 +14,6 @@ import (
 	"github.com/goodleby/golang-server/client/database"
 	"github.com/goodleby/golang-server/client/example"
 	"github.com/goodleby/golang-server/config"
-	"github.com/goodleby/golang-server/metrics"
 	"github.com/goodleby/golang-server/server/handler"
 	"github.com/goodleby/golang-server/server/middleware"
 )
@@ -59,10 +58,6 @@ func New(ctx context.Context, config *config.Config) (*Server, error) {
 		return nil, fmt.Errorf("error creating database client: %v", err)
 	}
 	s.Example = exampleClient
-
-	if err := metrics.Init(); err != nil {
-		return nil, fmt.Errorf("error initializing metrics: %v", err)
-	}
 
 	s.setupRoutes()
 
