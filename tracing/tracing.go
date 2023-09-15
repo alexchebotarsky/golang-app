@@ -59,6 +59,6 @@ func newFileExporter(filePath string) (tracesdk.SpanExporter, error) {
 	return exporter, nil
 }
 
-func Span(ctx context.Context, name string, opts ...trace.SpanStartOption) (context.Context, trace.Span) {
+func StartSpan(ctx context.Context, name string, opts ...trace.SpanStartOption) (context.Context, trace.Span) {
 	return otel.Tracer(tracerName).Start(ctx, name, opts...)
 }

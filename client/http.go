@@ -16,7 +16,7 @@ type TracedTransport struct {
 }
 
 func (tt TracedTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	_, span := tracing.Span(req.Context(), "RoundTrip")
+	_, span := tracing.StartSpan(req.Context(), "RoundTrip")
 	defer span.End()
 
 	span.SetAttributes(attribute.String("URL", req.URL.String()))

@@ -11,7 +11,7 @@ import (
 
 func Trace(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx, span := tracing.Span(r.Context(), "Root")
+		ctx, span := tracing.StartSpan(r.Context(), "Root")
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 

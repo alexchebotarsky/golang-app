@@ -10,7 +10,7 @@ import (
 )
 
 func (c *Client) SelectAllArticles(ctx context.Context) ([]Article, error) {
-	ctx, span := tracing.Span(ctx, "SelectAllArticles")
+	ctx, span := tracing.StartSpan(ctx, "SelectAllArticles")
 	defer span.End()
 
 	query := `SELECT id, title, description, body FROM articles`
@@ -24,7 +24,7 @@ func (c *Client) SelectAllArticles(ctx context.Context) ([]Article, error) {
 }
 
 func (c *Client) SelectArticle(ctx context.Context, id string) (*Article, error) {
-	ctx, span := tracing.Span(ctx, "SelectArticle")
+	ctx, span := tracing.StartSpan(ctx, "SelectArticle")
 	defer span.End()
 
 	stmt, err := c.DB.PrepareNamedContext(ctx, `SELECT id, title, description, body FROM articles WHERE id = :id`)
@@ -57,7 +57,7 @@ func (c *Client) SelectArticle(ctx context.Context, id string) (*Article, error)
 }
 
 func (c *Client) InsertArticle(ctx context.Context, article Article) error {
-	ctx, span := tracing.Span(ctx, "InsertArticle")
+	ctx, span := tracing.StartSpan(ctx, "InsertArticle")
 	defer span.End()
 
 	query := `INSERT INTO articles (id, title, description, body) VALUES (:id, :title, :description, :body)`
@@ -82,7 +82,7 @@ func (c *Client) InsertArticle(ctx context.Context, article Article) error {
 }
 
 func (c *Client) DeleteArticle(ctx context.Context, id string) error {
-	ctx, span := tracing.Span(ctx, "DeleteArticle")
+	ctx, span := tracing.StartSpan(ctx, "DeleteArticle")
 	defer span.End()
 
 	query := `DELETE FROM articles WHERE id = :id`
@@ -101,7 +101,7 @@ func (c *Client) DeleteArticle(ctx context.Context, id string) error {
 }
 
 func (c *Client) UpdateArticle(ctx context.Context, id string, article Article) error {
-	ctx, span := tracing.Span(ctx, "UpdateArticle")
+	ctx, span := tracing.StartSpan(ctx, "UpdateArticle")
 	defer span.End()
 
 	query := `UPDATE articles SET id = :new_id, title = :new_title, description = :new_description, body = :new_body WHERE id = :id`

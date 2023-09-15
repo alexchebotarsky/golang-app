@@ -50,7 +50,7 @@ type Claims struct {
 }
 
 func (c *Client) NewToken(ctx context.Context, roleName, roleKey string) (string, time.Time, error) {
-	_, span := tracing.Span(ctx, "NewToken")
+	_, span := tracing.StartSpan(ctx, "NewToken")
 	defer span.End()
 
 	role, err := c.ValidateRole(roleName, roleKey)
@@ -79,7 +79,7 @@ func (c *Client) NewToken(ctx context.Context, roleName, roleKey string) (string
 }
 
 func (c *Client) ParseToken(ctx context.Context, tokenString string) (*Claims, error) {
-	_, span := tracing.Span(ctx, "ParseToken")
+	_, span := tracing.StartSpan(ctx, "ParseToken")
 	defer span.End()
 
 	claims := Claims{}
@@ -104,7 +104,7 @@ func (c *Client) ParseToken(ctx context.Context, tokenString string) (*Claims, e
 }
 
 func (c *Client) RefreshToken(ctx context.Context, tokenString string) (string, time.Time, error) {
-	_, span := tracing.Span(ctx, "RefreshToken")
+	_, span := tracing.StartSpan(ctx, "RefreshToken")
 	defer span.End()
 
 	claims := Claims{}

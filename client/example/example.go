@@ -38,7 +38,7 @@ type ExampleData struct {
 }
 
 func (c *Client) FetchExampleData(ctx context.Context) (*ExampleData, error) {
-	ctx, span := tracing.Span(ctx, "FetchExampleData")
+	ctx, span := tracing.StartSpan(ctx, "FetchExampleData")
 	defer span.End()
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.ExampleEndpoint, nil)
