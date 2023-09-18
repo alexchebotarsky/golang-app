@@ -20,8 +20,8 @@ func Metrics(next http.Handler) http.Handler {
 
 		routeID := fmt.Sprintf("%s %s", r.Method, chi.RouteContext(r.Context()).RoutePattern())
 
-		metrics.ObserveTimeToProcess(routeID, duration.Seconds())
 		metrics.RecordRequestStatusCode(crw.status, routeID)
+		metrics.ObserveRequestDuration(duration.Seconds())
 	})
 }
 
