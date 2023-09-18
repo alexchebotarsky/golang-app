@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestHealthz(t *testing.T) {
+func TestHealth(t *testing.T) {
 	type args struct {
 		req *http.Request
 	}
@@ -33,7 +33,7 @@ func TestHealthz(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			w := httptest.NewRecorder()
 
-			Healthz(w, tt.args.req)
+			Health(w, tt.args.req)
 
 			if w.Code != tt.wantStatus {
 				t.Fatalf("Healthz() status = %v, want %v", w.Code, tt.wantStatus)

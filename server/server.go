@@ -98,7 +98,7 @@ func (s *Server) serveHTTP() {
 }
 
 func (s *Server) setupRoutes() {
-	s.Router.Get("/_healthz", handler.Healthz)
+	s.Router.Get("/_healthz", handler.Health)
 
 	s.Router.Route(v1API, func(r chi.Router) {
 		r.Use(middleware.Trace, middleware.Metrics)
