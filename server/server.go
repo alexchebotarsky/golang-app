@@ -11,14 +11,14 @@ import (
 	"github.com/goodleby/golang-server/client/auth"
 	"github.com/goodleby/golang-server/client/database"
 	"github.com/goodleby/golang-server/client/example"
-	"github.com/goodleby/golang-server/config"
+	"github.com/goodleby/golang-server/env"
 	"github.com/goodleby/golang-server/server/handler"
 	"github.com/goodleby/golang-server/server/middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type Server struct {
-	Config  *config.Config
+	Env     *env.Config
 	Router  chi.Router
 	HTTP    *http.Server
 	DB      *database.Client
@@ -26,30 +26,30 @@ type Server struct {
 	Example *example.Client
 }
 
-func New(ctx context.Context, config *config.Config) (*Server, error) {
+func New(ctx context.Context, env *env.Config) (*Server, error) {
 	var s Server
 	var err error
 
-	s.Config = config
+	s.Env = env
 	s.Router = chi.NewRouter()
 	s.HTTP = &http.Server{
-		Addr:         fmt.Sprintf(":%d", s.Config.Port),
+		Addr:         fmt.Sprintf(":%d", s.Env.Port),
 		Handler:      s.Router,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 5 * time.Second,
 	}
 
-	s.DB, err = database.New(ctx, config)
+	s.DB, err = database.New(ctx, s.Env)
 	if err != nil {
 		return nil, fmt.Errorf("error creating database client: %v", err)
 	}
 
-	s.Auth, err = auth.New(ctx, config)
+	s.Auth, err = auth.New(ctx, s.Env)
 	if err != nil {
 		return nil, fmt.Errorf("error creating auth client: %v", err)
 	}
 
-	s.Example, err = example.New(config)
+	s.Example, err = example.New(s.Env)
 	if err != nil {
 		return nil, fmt.Errorf("error creating example client: %v", err)
 	}
@@ -60,7 +60,7 @@ func New(ctx context.Context, config *config.Config) (*Server, error) {
 }
 
 func (s *Server) Start(ctx context.Context) {
-	log.Printf("Server is listening on port: %d", s.Config.Port)
+	log.Printf("Server is listening on port: %d", s.Env.Port)
 	if err := s.HTTP.ListenAndServe(); err != http.ErrServerClosed {
 		log.Printf("Error listening and serving: %v", err)
 	}

@@ -1,4 +1,4 @@
-package config
+package env
 
 import (
 	"context"
@@ -27,7 +27,7 @@ type Config struct {
 	ServiceName string `env:"SERVICE_NAME,default=unknown"`
 }
 
-func Load(ctx context.Context, envPath string) (*Config, error) {
+func LoadConfig(ctx context.Context, envPath string) (*Config, error) {
 	var c Config
 
 	if err := godotenv.Load(envPath); err != nil {

@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/goodleby/golang-server/app"
-	"github.com/goodleby/golang-server/config"
+	"github.com/goodleby/golang-server/env"
 	"github.com/goodleby/golang-server/metrics"
 	"github.com/goodleby/golang-server/tracing"
 )
@@ -13,12 +13,12 @@ import (
 func main() {
 	ctx := context.Background()
 
-	config, err := config.Load(ctx, ".env")
+	env, err := env.LoadConfig(ctx, ".env")
 	if err != nil {
 		log.Fatalf("Error loading env config: %v", err)
 	}
 
-	if err := tracing.Init(config); err != nil {
+	if err := tracing.Init(env); err != nil {
 		log.Fatalf("Error initializing tracing: %v", err)
 	}
 
@@ -26,7 +26,7 @@ func main() {
 		log.Fatalf("Error initializing metrics: %v", err)
 	}
 
-	s, err := app.New(ctx, config)
+	s, err := app.New(ctx, env)
 	if err != nil {
 		log.Fatalf("Error creating server: %v", err)
 	}

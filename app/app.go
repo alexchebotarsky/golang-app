@@ -8,7 +8,7 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/goodleby/golang-server/config"
+	"github.com/goodleby/golang-server/env"
 	"github.com/goodleby/golang-server/server"
 )
 
@@ -19,12 +19,15 @@ type Service interface {
 
 type App struct {
 	Services []Service
+	Env      *env.Config
 }
 
-func New(ctx context.Context, config *config.Config) (*App, error) {
+func New(ctx context.Context, env *env.Config) (*App, error) {
 	var app App
 
-	server, err := server.New(ctx, config)
+	app.Env = env
+
+	server, err := server.New(ctx, app.Env)
 	if err != nil {
 		return nil, fmt.Errorf("error creating new server: %v", err)
 	}

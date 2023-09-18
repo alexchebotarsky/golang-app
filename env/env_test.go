@@ -1,4 +1,4 @@
-package config
+package env
 
 import (
 	"context"
@@ -125,7 +125,7 @@ func TestLoad(t *testing.T) {
 				})
 			}
 
-			config, err := Load(ctx, envPath)
+			config, err := LoadConfig(ctx, envPath)
 
 			if tt.wantErr != (err != nil) {
 				t.Fatalf("Load() error = %v, wantErr %v", err, tt.wantErr)

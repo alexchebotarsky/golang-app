@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/goodleby/golang-server/client"
-	"github.com/goodleby/golang-server/config"
+	"github.com/goodleby/golang-server/env"
 	"github.com/goodleby/golang-server/tracing"
 )
 
@@ -17,10 +17,10 @@ type Client struct {
 	HTTPClient      *http.Client
 }
 
-func New(config *config.Config) (*Client, error) {
+func New(env *env.Config) (*Client, error) {
 	var c Client
 
-	c.ExampleEndpoint = config.ExampleEndpoint
+	c.ExampleEndpoint = env.ExampleEndpoint
 
 	c.HTTPClient = client.NewHTTPClient(client.Parameters{
 		Timeout: 3 * time.Second,

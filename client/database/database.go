@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/goodleby/golang-server/config"
+	"github.com/goodleby/golang-server/env"
 	"github.com/jmoiron/sqlx"
 
 	// Postgres driver
@@ -15,16 +15,16 @@ type Client struct {
 	DB *sqlx.DB
 }
 
-func New(ctx context.Context, config *config.Config) (*Client, error) {
+func New(ctx context.Context, env *env.Config) (*Client, error) {
 	var c Client
 
 	dataSourceName := fmt.Sprintf("postgres://%s:%s@%s:%d/%s%s",
-		config.DatabaseUser,
-		config.DatabasePassword,
-		config.DatabaseHost,
-		config.DatabasePort,
-		config.DatabaseName,
-		config.DatabaseOptions,
+		env.DatabaseUser,
+		env.DatabasePassword,
+		env.DatabaseHost,
+		env.DatabasePort,
+		env.DatabaseName,
+		env.DatabaseOptions,
 	)
 
 	db, err := sqlx.ConnectContext(ctx, "postgres", dataSourceName)
