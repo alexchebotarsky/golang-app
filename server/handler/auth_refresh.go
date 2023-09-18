@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -18,6 +19,11 @@ func AuthRefresh(tokenRefresher TokenRefresher) http.HandlerFunc {
 		tokenCookie, err := r.Cookie("token")
 		if err != nil {
 			HandleError(ctx, w, fmt.Errorf("error reading auth token cookie: %v", err), http.StatusUnauthorized, true)
+			return
+		}
+
+		if time.Now().After(tokenCookie.Expires) {
+			HandleError(ctx, w, errors.New("cookie has expired"), http.StatusUnauthorized, true)
 			return
 		}
 
