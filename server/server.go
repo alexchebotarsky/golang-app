@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/go-chi/chi/v5"
+	chi "github.com/go-chi/chi/v5"
 	"github.com/goodleby/golang-server/client/auth"
 	"github.com/goodleby/golang-server/client/database"
 	"github.com/goodleby/golang-server/client/example"
