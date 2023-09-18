@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
-	"os/signal"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -16,9 +14,8 @@ import (
 	"github.com/goodleby/golang-server/config"
 	"github.com/goodleby/golang-server/server/handler"
 	"github.com/goodleby/golang-server/server/middleware"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
-
-const v1API string = "/api/v1"
 
 type Server struct {
 	Config  *config.Config
@@ -31,6 +28,7 @@ type Server struct {
 
 func New(ctx context.Context, config *config.Config) (*Server, error) {
 	var s Server
+	var err error
 
 	s.Config = config
 	s.Router = chi.NewRouter()
@@ -41,23 +39,20 @@ func New(ctx context.Context, config *config.Config) (*Server, error) {
 		WriteTimeout: 5 * time.Second,
 	}
 
-	dbClient, err := database.New(ctx, config)
+	s.DB, err = database.New(ctx, config)
 	if err != nil {
 		return nil, fmt.Errorf("error creating database client: %v", err)
 	}
-	s.DB = dbClient
 
-	authClient, err := auth.New(ctx, config)
+	s.Auth, err = auth.New(ctx, config)
 	if err != nil {
-		return nil, fmt.Errorf("error creating database client: %v", err)
+		return nil, fmt.Errorf("error creating auth client: %v", err)
 	}
-	s.Auth = authClient
 
-	exampleClient, err := example.New(config)
+	s.Example, err = example.New(config)
 	if err != nil {
-		return nil, fmt.Errorf("error creating database client: %v", err)
+		return nil, fmt.Errorf("error creating example client: %v", err)
 	}
-	s.Example = exampleClient
 
 	s.setupRoutes()
 
@@ -65,35 +60,15 @@ func New(ctx context.Context, config *config.Config) (*Server, error) {
 }
 
 func (s *Server) Start(ctx context.Context) {
-	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt, os.Kill)
-	defer cancel()
-
-	go s.serveHTTP()
-
-	<-ctx.Done()
-
-	ctx, cancelTimeout := context.WithTimeout(ctx, 10*time.Second)
-	defer cancelTimeout()
-
-	s.Stop(ctx)
+	log.Printf("Server is listening on port: %d", s.Config.Port)
+	if err := s.HTTP.ListenAndServe(); err != http.ErrServerClosed {
+		log.Printf("Error listening and serving: %v", err)
+	}
 }
 
 func (s *Server) Stop(ctx context.Context) {
 	if err := s.HTTP.Shutdown(ctx); err != nil {
 		log.Printf("error shutting down http server: %v", err)
-	}
-
-	if err := s.DB.Close(); err != nil {
-		log.Printf("error closing database connection: %v", err)
-	}
-
-	log.Print("Server has been gracefully stopped")
-}
-
-func (s *Server) serveHTTP() {
-	log.Printf("Server is listening on port: %d", s.Config.Port)
-	if err := s.HTTP.ListenAndServe(); err != http.ErrServerClosed {
-		log.Printf("Error listening and serving: %v", err)
 	}
 }
 
@@ -131,3 +106,5 @@ func (s *Server) setupRoutes() {
 		})
 	})
 }
+
+const v1API string = "/api/v1"
