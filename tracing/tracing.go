@@ -20,12 +20,12 @@ const tracerName = ""
 func Init(config *config.Config) error {
 	exporter, err := newFileExporter("traces.txt")
 	if err != nil {
-		return fmt.Errorf("Error creating new file exporter: %v", err)
+		return fmt.Errorf("error creating new file exporter: %v", err)
 	}
 
 	tp, err := newTracerProvider(config.ServiceName, exporter)
 	if err != nil {
-		return fmt.Errorf("Error creating new tracer provider: %v", err)
+		return fmt.Errorf("error creating new tracer provider: %v", err)
 	}
 
 	otel.SetTracerProvider(tp)
