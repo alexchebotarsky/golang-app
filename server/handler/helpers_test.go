@@ -21,11 +21,11 @@ func addChiURLParams(req *http.Request, params map[string]string) *http.Request 
 }
 
 func makeJSONBody(t *testing.T, bodyStruct any) io.Reader {
-	var buf bytes.Buffer
-	err := json.NewEncoder(&buf).Encode(bodyStruct)
+	buf := &bytes.Buffer{}
+	err := json.NewEncoder(buf).Encode(bodyStruct)
 	if err != nil {
 		t.Fatalf("error encoding json body: %v", err)
 	}
 
-	return &buf
+	return buf
 }

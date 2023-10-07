@@ -27,7 +27,7 @@ type Server struct {
 }
 
 func New(ctx context.Context, env *env.Config) (*Server, error) {
-	var s Server
+	s := &Server{}
 	var err error
 
 	s.Env = env
@@ -56,7 +56,7 @@ func New(ctx context.Context, env *env.Config) (*Server, error) {
 
 	s.setupRoutes()
 
-	return &s, nil
+	return s, nil
 }
 
 func (s *Server) Start(ctx context.Context) {

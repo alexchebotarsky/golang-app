@@ -26,10 +26,10 @@ func main() {
 		log.Fatalf("Error initializing metrics: %v", err)
 	}
 
-	s, err := app.New(ctx, env)
+	app, err := app.New(ctx, env)
 	if err != nil {
-		log.Fatalf("Error creating server: %v", err)
+		log.Fatalf("Error creating app: %v", err)
 	}
 
-	s.Start(ctx)
+	app.Start(ctx)
 }

@@ -25,13 +25,13 @@ func UpdateArticle(articleUpdater ArticleUpdater) http.HandlerFunc {
 
 		span.SetAttributes(attribute.String("id", id))
 
-		var article database.Article
+		article := &database.Article{}
 		if err := json.NewDecoder(r.Body).Decode(&article); err != nil {
 			HandleError(ctx, w, fmt.Errorf("error decoding request body: %v", err), http.StatusBadRequest, true)
 			return
 		}
 
-		if err := articleUpdater.UpdateArticle(ctx, id, article); err != nil {
+		if err := articleUpdater.UpdateArticle(ctx, id, *article); err != nil {
 			HandleError(ctx, w, fmt.Errorf("error updating article: %v", err), http.StatusInternalServerError, true)
 			return
 		}

@@ -18,7 +18,7 @@ type Client struct {
 }
 
 func New(env *env.Config) (*Client, error) {
-	var c Client
+	c := &Client{}
 
 	c.ExampleEndpoint = env.ExampleEndpoint
 
@@ -26,7 +26,7 @@ func New(env *env.Config) (*Client, error) {
 		Timeout: 3 * time.Second,
 	})
 
-	return &c, nil
+	return c, nil
 }
 
 type ExampleData struct {
@@ -51,10 +51,10 @@ func (c *Client) FetchExampleData(ctx context.Context) (*ExampleData, error) {
 		return nil, fmt.Errorf("error doing http request: %v", err)
 	}
 
-	var exampleData ExampleData
-	if err := json.NewDecoder(res.Body).Decode(&exampleData); err != nil {
+	exampleData := &ExampleData{}
+	if err := json.NewDecoder(res.Body).Decode(exampleData); err != nil {
 		return nil, fmt.Errorf("error decoding request body as json: %v", err)
 	}
 
-	return &exampleData, nil
+	return exampleData, nil
 }

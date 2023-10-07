@@ -16,7 +16,7 @@ type Client struct {
 }
 
 func New(ctx context.Context, env *env.Config) (*Client, error) {
-	var c Client
+	c := &Client{}
 
 	dataSourceName := fmt.Sprintf("postgres://%s:%s@%s:%d/%s%s",
 		env.DatabaseUser,
@@ -33,7 +33,7 @@ func New(ctx context.Context, env *env.Config) (*Client, error) {
 	}
 	c.DB = db
 
-	return &c, nil
+	return c, nil
 }
 
 func (c *Client) Close() error {

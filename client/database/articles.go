@@ -50,8 +50,8 @@ func (c *Client) SelectArticle(ctx context.Context, id string) (*Article, error)
 		ID: id,
 	}
 
-	var article Article
-	if err := stmt.GetContext(ctx, &article, args); err != nil {
+	article := &Article{}
+	if err := stmt.GetContext(ctx, article, args); err != nil {
 		switch err {
 		case sql.ErrNoRows:
 			return nil, &ErrNotFound{Err: err}
@@ -60,7 +60,7 @@ func (c *Client) SelectArticle(ctx context.Context, id string) (*Article, error)
 		}
 	}
 
-	return &article, nil
+	return article, nil
 }
 
 func (c *Client) InsertArticle(ctx context.Context, article Article) error {

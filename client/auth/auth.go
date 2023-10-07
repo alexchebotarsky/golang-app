@@ -18,7 +18,7 @@ type Client struct {
 }
 
 func New(ctx context.Context, env *env.Config) (*Client, error) {
-	var c Client
+	c := &Client{}
 
 	c.authSecret = []byte(env.AuthSecret)
 	c.roles = []Role{
@@ -40,7 +40,7 @@ func New(ctx context.Context, env *env.Config) (*Client, error) {
 	}
 	c.SigningMethod = jwt.SigningMethodHS256
 
-	return &c, nil
+	return c, nil
 }
 
 type Claims struct {

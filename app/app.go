@@ -23,7 +23,7 @@ type App struct {
 }
 
 func New(ctx context.Context, env *env.Config) (*App, error) {
-	var app App
+	app := &App{}
 
 	app.Env = env
 
@@ -33,7 +33,7 @@ func New(ctx context.Context, env *env.Config) (*App, error) {
 	}
 	app.Services = append(app.Services, server)
 
-	return &app, nil
+	return app, nil
 }
 
 func (app *App) Start(ctx context.Context) {
