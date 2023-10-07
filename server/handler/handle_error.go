@@ -6,8 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"go.opentelemetry.io/otel/codes"
-	"go.opentelemetry.io/otel/trace"
+	"github.com/goodleby/golang-server/tracing"
 )
 
 type errorResponse struct {
@@ -16,10 +15,9 @@ type errorResponse struct {
 }
 
 func HandleError(ctx context.Context, w http.ResponseWriter, err error, statusCode int, shouldLog bool) {
-	span := trace.SpanFromContext(ctx)
+	span := tracing.SpanFromContext(ctx)
 
 	span.RecordError(err)
-	span.SetStatus(codes.Error, err.Error())
 
 	if shouldLog {
 		log.Printf("Handler error: %v", err)

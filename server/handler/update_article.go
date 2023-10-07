@@ -8,8 +8,7 @@ import (
 
 	chi "github.com/go-chi/chi/v5"
 	"github.com/goodleby/golang-server/client/database"
-	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/trace"
+	"github.com/goodleby/golang-server/tracing"
 )
 
 type ArticleUpdater interface {
@@ -19,11 +18,11 @@ type ArticleUpdater interface {
 func UpdateArticle(articleUpdater ArticleUpdater) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		span := trace.SpanFromContext(ctx)
+		span := tracing.SpanFromContext(ctx)
 
 		id := chi.URLParam(r, "id")
 
-		span.SetAttributes(attribute.String("id", id))
+		span.SetTag("id", id)
 
 		article := &database.Article{}
 		if err := json.NewDecoder(r.Body).Decode(&article); err != nil {

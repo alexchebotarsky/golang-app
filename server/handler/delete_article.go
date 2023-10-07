@@ -6,8 +6,7 @@ import (
 	"net/http"
 
 	chi "github.com/go-chi/chi/v5"
-	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/trace"
+	"github.com/goodleby/golang-server/tracing"
 )
 
 type ArticleDeleter interface {
@@ -17,11 +16,11 @@ type ArticleDeleter interface {
 func DeleteArticle(articleDeleter ArticleDeleter) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		span := trace.SpanFromContext(ctx)
+		span := tracing.SpanFromContext(ctx)
 
 		id := chi.URLParam(r, "id")
 
-		span.SetAttributes(attribute.String("id", id))
+		span.SetTag("id", id)
 
 		if err := articleDeleter.DeleteArticle(ctx, id); err != nil {
 			HandleError(ctx, w, fmt.Errorf("error deleting article: %v", err), http.StatusInternalServerError, true)

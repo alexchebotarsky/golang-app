@@ -1,7 +1,6 @@
 package tracing
 
 import (
-	"context"
 	"fmt"
 	"os"
 
@@ -11,7 +10,6 @@ import (
 	"go.opentelemetry.io/otel/sdk/resource"
 	tracesdk "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
-	"go.opentelemetry.io/otel/trace"
 )
 
 // If empty, default name will be used
@@ -57,8 +55,4 @@ func newFileExporter(filePath string) (tracesdk.SpanExporter, error) {
 	}
 
 	return exporter, nil
-}
-
-func StartSpan(ctx context.Context, name string, opts ...trace.SpanStartOption) (context.Context, trace.Span) {
-	return otel.Tracer(tracerName).Start(ctx, name, opts...)
 }
