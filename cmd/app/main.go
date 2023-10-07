@@ -31,5 +31,5 @@ func main() {
 		log.Fatalf("Error creating app: %v", err)
 	}
 
-	app.Start(ctx)
+	app.Launch(ctx)
 }

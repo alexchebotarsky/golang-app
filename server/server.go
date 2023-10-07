@@ -59,14 +59,24 @@ func New(ctx context.Context, env *env.Config) (*Server, error) {
 	return s, nil
 }
 
-func (s *Server) Start(ctx context.Context) {
+func (s *Server) Run(ctx context.Context) {
+	go s.listenAndServe()
+
+	<-ctx.Done()
+
+	s.shutdown(ctx)
+
+	log.Print("Server has been gracefully shut down")
+}
+
+func (s *Server) listenAndServe() {
 	log.Printf("Server is listening on port: %d", s.Env.Port)
 	if err := s.HTTP.ListenAndServe(); err != http.ErrServerClosed {
 		log.Printf("Error listening and serving: %v", err)
 	}
 }
 
-func (s *Server) Stop(ctx context.Context) {
+func (s *Server) shutdown(ctx context.Context) {
 	if err := s.HTTP.Shutdown(ctx); err != nil {
 		log.Printf("error shutting down http server: %v", err)
 	}
