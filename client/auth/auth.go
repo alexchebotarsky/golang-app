@@ -53,7 +53,7 @@ func (c *Client) NewToken(ctx context.Context, roleName, roleKey string) (string
 	_, span := tracing.StartSpan(ctx, "NewToken")
 	defer span.End()
 
-	role, err := c.ValidateRole(roleName, roleKey)
+	role, err := c.validateRole(roleName, roleKey)
 	if err != nil {
 		return "", time.Time{}, fmt.Errorf("error validating role ket: %v", err)
 	}
@@ -145,7 +145,7 @@ type Role struct {
 	Key         string
 }
 
-func (c *Client) ValidateRole(roleName, roleKey string) (*Role, error) {
+func (c *Client) validateRole(roleName, roleKey string) (*Role, error) {
 	for _, role := range c.roles {
 		if role.Name == roleName && role.Key == roleKey {
 			return &role, nil
