@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -27,7 +28,7 @@ func HandleError(ctx context.Context, w http.ResponseWriter, err error, statusCo
 	w.WriteHeader(statusCode)
 
 	err = json.NewEncoder(w).Encode(errorResponse{
-		Error:      err.Error(),
+		Error:      fmt.Sprintf("%v", err),
 		StatusCode: statusCode,
 	})
 	handleWritingErr(err)

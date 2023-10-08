@@ -2,6 +2,7 @@ package tracing
 
 import (
 	"context"
+	"fmt"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -27,7 +28,7 @@ func (s *Span) SetTag(key, value string) {
 
 func (s *Span) RecordError(err error) {
 	s.span.RecordError(err)
-	s.span.SetStatus(codes.Error, err.Error())
+	s.span.SetStatus(codes.Error, fmt.Sprintf("%v", err))
 }
 
 func StartSpan(ctx context.Context, name string) (context.Context, Span) {
