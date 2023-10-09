@@ -65,7 +65,7 @@ func (c *Client) NewToken(ctx context.Context, roleName, roleKey string) (string
 
 	expires := time.Now().Add(5 * time.Minute)
 
-	claims := Claims{
+	claims := &Claims{
 		RoleName:    role.Name,
 		AccessLevel: role.AccessLevel,
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -73,7 +73,7 @@ func (c *Client) NewToken(ctx context.Context, roleName, roleKey string) (string
 		},
 	}
 
-	token := jwt.NewWithClaims(c.SigningMethod, &claims)
+	token := jwt.NewWithClaims(c.SigningMethod, claims)
 
 	signedToken, err := token.SignedString(c.authSecret)
 	if err != nil {
@@ -87,11 +87,11 @@ func (c *Client) ParseToken(ctx context.Context, tokenString string) (*Claims, e
 	_, span := tracing.StartSpan(ctx, "ParseToken")
 	defer span.End()
 
-	claims := Claims{}
+	claims := &Claims{}
 
 	token, err := jwt.ParseWithClaims(
 		tokenString,
-		&claims,
+		claims,
 		func(t *jwt.Token) (interface{}, error) {
 			return c.authSecret, nil
 		},
@@ -105,18 +105,18 @@ func (c *Client) ParseToken(ctx context.Context, tokenString string) (*Claims, e
 		return nil, errors.New("invalid auth token")
 	}
 
-	return &claims, nil
+	return claims, nil
 }
 
 func (c *Client) RefreshToken(ctx context.Context, tokenString string) (string, time.Time, error) {
 	_, span := tracing.StartSpan(ctx, "RefreshToken")
 	defer span.End()
 
-	claims := Claims{}
+	claims := &Claims{}
 
 	oldToken, err := jwt.ParseWithClaims(
 		tokenString,
-		&claims,
+		claims,
 		func(t *jwt.Token) (interface{}, error) {
 			return c.authSecret, nil
 		},
@@ -134,7 +134,7 @@ func (c *Client) RefreshToken(ctx context.Context, tokenString string) (string, 
 
 	claims.ExpiresAt = jwt.NewNumericDate(expires)
 
-	token := jwt.NewWithClaims(c.SigningMethod, &claims)
+	token := jwt.NewWithClaims(c.SigningMethod, claims)
 
 	signedToken, err := token.SignedString(c.authSecret)
 	if err != nil {
