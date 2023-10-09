@@ -7,8 +7,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/goodleby/golang-server/client"
-	"github.com/goodleby/golang-server/env"
 	"github.com/goodleby/golang-server/tracing"
 )
 
@@ -17,14 +15,15 @@ type Client struct {
 	HTTPClient      *http.Client
 }
 
-func New(env *env.Config) (*Client, error) {
+func New(endpoint string) (*Client, error) {
 	c := &Client{}
 
-	c.ExampleEndpoint = env.ExampleEndpoint
+	c.ExampleEndpoint = endpoint
 
-	c.HTTPClient = client.NewHTTPClient(client.Parameters{
-		Timeout: 3 * time.Second,
-	})
+	c.HTTPClient = &http.Client{
+		Timeout:   3 * time.Second,
+		Transport: tracing.NewTracedTransport(http.DefaultTransport),
+	}
 
 	return c, nil
 }

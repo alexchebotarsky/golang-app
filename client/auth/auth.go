@@ -7,7 +7,6 @@ import (
 	"time"
 
 	jwt "github.com/golang-jwt/jwt/v5"
-	"github.com/goodleby/golang-server/env"
 	"github.com/goodleby/golang-server/tracing"
 )
 
@@ -17,25 +16,31 @@ type Client struct {
 	SigningMethod jwt.SigningMethod
 }
 
-func New(ctx context.Context, env *env.Config) (*Client, error) {
+type Keys struct {
+	Admin  string
+	Editor string
+	Viewer string
+}
+
+func New(ctx context.Context, secret string, keys Keys) (*Client, error) {
 	c := &Client{}
 
-	c.authSecret = []byte(env.AuthSecret)
+	c.authSecret = []byte(secret)
 	c.roles = []Role{
 		{
 			Name:        AdminRole,
 			AccessLevel: AdminAccess,
-			Key:         env.AuthAdminKey,
+			Key:         keys.Admin,
 		},
 		{
 			Name:        EditorRole,
 			AccessLevel: EditorAccess,
-			Key:         env.AuthEditorKey,
+			Key:         keys.Editor,
 		},
 		{
 			Name:        ViewerRole,
 			AccessLevel: ViewerAccess,
-			Key:         env.AuthViewerKey,
+			Key:         keys.Viewer,
 		},
 	}
 	c.SigningMethod = jwt.SigningMethodHS256

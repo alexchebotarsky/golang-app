@@ -9,50 +9,52 @@ import (
 
 	chi "github.com/go-chi/chi/v5"
 	"github.com/goodleby/golang-server/client/auth"
-	"github.com/goodleby/golang-server/client/database"
-	"github.com/goodleby/golang-server/client/example"
-	"github.com/goodleby/golang-server/env"
 	"github.com/goodleby/golang-server/server/handler"
 	"github.com/goodleby/golang-server/server/middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-type Server struct {
-	Env     *env.Config
-	Router  chi.Router
-	HTTP    *http.Server
-	DB      *database.Client
-	Auth    *auth.Client
-	Example *example.Client
+type DBClient interface {
+	handler.AllArticlesSelector
+	handler.ArticleSelector
+	handler.ArticleInserter
+	handler.ArticleUpdater
+	handler.ArticleDeleter
 }
 
-func New(ctx context.Context, env *env.Config) (*Server, error) {
-	s := &Server{}
-	var err error
+type AuthClient interface {
+	handler.TokenCreator
+	handler.TokenRefresher
+	middleware.TokenParser
+}
 
-	s.Env = env
+type ExampleClient interface {
+	handler.ExampleDataFetcher
+}
+
+type Server struct {
+	Port    uint16
+	Router  chi.Router
+	HTTP    *http.Server
+	DB      DBClient
+	Auth    AuthClient
+	Example ExampleClient
+}
+
+func New(ctx context.Context, port uint16, DB DBClient, Auth AuthClient, Example ExampleClient) (*Server, error) {
+	s := &Server{}
+
+	s.Port = port
 	s.Router = chi.NewRouter()
 	s.HTTP = &http.Server{
-		Addr:         fmt.Sprintf(":%d", s.Env.Port),
+		Addr:         fmt.Sprintf(":%d", s.Port),
 		Handler:      s.Router,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 5 * time.Second,
 	}
-
-	s.DB, err = database.New(ctx, s.Env)
-	if err != nil {
-		return nil, fmt.Errorf("error creating database client: %v", err)
-	}
-
-	s.Auth, err = auth.New(ctx, s.Env)
-	if err != nil {
-		return nil, fmt.Errorf("error creating auth client: %v", err)
-	}
-
-	s.Example, err = example.New(s.Env)
-	if err != nil {
-		return nil, fmt.Errorf("error creating example client: %v", err)
-	}
+	s.DB = DB
+	s.Auth = Auth
+	s.Example = Example
 
 	s.setupRoutes()
 
@@ -70,7 +72,7 @@ func (s *Server) Run(ctx context.Context) {
 }
 
 func (s *Server) listenAndServe() {
-	log.Printf("Server is listening on port: %d", s.Env.Port)
+	log.Printf("Server is listening on port: %d", s.Port)
 	if err := s.HTTP.ListenAndServe(); err != http.ErrServerClosed {
 		log.Printf("Error listening and serving: %v", err)
 	}
