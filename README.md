@@ -1,4 +1,4 @@
-# Basic golang server
+# Basic golang application
 
 Includes features:
 
@@ -6,3 +6,4 @@ Includes features:
 - Prometheus Metrics Collection
 - PostgreSQL database
 - JWT-based authorization
+- PubSub events publishing and subscribing
