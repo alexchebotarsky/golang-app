@@ -28,6 +28,10 @@ type AuthClient interface {
 	middleware.TokenParser
 }
 
+type PubSubClient interface {
+	handler.AddArticlePublisher
+}
+
 type ExampleClient interface {
 	handler.ExampleDataFetcher
 }
@@ -38,10 +42,11 @@ type Server struct {
 	HTTP    *http.Server
 	DB      DBClient
 	Auth    AuthClient
+	PubSub  PubSubClient
 	Example ExampleClient
 }
 
-func New(ctx context.Context, port uint16, db DBClient, auth AuthClient, example ExampleClient) (*Server, error) {
+func New(ctx context.Context, port uint16, db DBClient, auth AuthClient, pubsub PubSubClient, example ExampleClient) (*Server, error) {
 	s := &Server{}
 
 	s.Port = port
@@ -54,6 +59,7 @@ func New(ctx context.Context, port uint16, db DBClient, auth AuthClient, example
 	}
 	s.DB = db
 	s.Auth = auth
+	s.PubSub = pubsub
 	s.Example = example
 
 	s.setupRoutes()

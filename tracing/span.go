@@ -7,6 +7,7 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -45,4 +46,18 @@ func SpanFromContext(ctx context.Context) Span {
 	s.span = trace.SpanFromContext(ctx)
 
 	return s
+}
+
+func NewCarrier(ctx context.Context) propagation.MapCarrier {
+	carrier := propagation.MapCarrier{}
+
+	otel.GetTextMapPropagator().Inject(ctx, &carrier)
+
+	return carrier
+}
+
+func StartSpanFromCarrier(ctx context.Context, carrier propagation.MapCarrier, name string) (context.Context, Span) {
+	ctx = otel.GetTextMapPropagator().Extract(ctx, carrier)
+
+	return StartSpan(ctx, name)
 }

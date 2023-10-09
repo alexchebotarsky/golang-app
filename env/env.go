@@ -23,6 +23,8 @@ type Config struct {
 
 	ExampleEndpoint string `env:"EXAMPLE_ENDPOINT,default=https://swapi.dev/api/people/1"`
 
+	PubSubProjectID string `env:"PUBSUB_PROJECT_ID,required"`
+
 	Port        uint16 `env:"PORT,default=8000"`
 	ServiceName string `env:"SERVICE_NAME,default=unknown"`
 }
