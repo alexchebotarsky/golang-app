@@ -41,7 +41,7 @@ type Server struct {
 	Example ExampleClient
 }
 
-func New(ctx context.Context, port uint16, DB DBClient, Auth AuthClient, Example ExampleClient) (*Server, error) {
+func New(ctx context.Context, port uint16, db DBClient, auth AuthClient, example ExampleClient) (*Server, error) {
 	s := &Server{}
 
 	s.Port = port
@@ -52,9 +52,9 @@ func New(ctx context.Context, port uint16, DB DBClient, Auth AuthClient, Example
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 5 * time.Second,
 	}
-	s.DB = DB
-	s.Auth = Auth
-	s.Example = Example
+	s.DB = db
+	s.Auth = auth
+	s.Example = example
 
 	s.setupRoutes()
 
