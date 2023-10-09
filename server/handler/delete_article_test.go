@@ -8,11 +8,11 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/goodleby/golang-server/client/database"
+	"github.com/goodleby/golang-server/article"
 )
 
 type fakeArticleDeleter struct {
-	articles []database.Article
+	articles []article.Article
 }
 
 func (f *fakeArticleDeleter) DeleteArticle(ctx context.Context, id string) error {
@@ -36,13 +36,13 @@ func TestDeleteArticle(t *testing.T) {
 		args         args
 		wantStatus   int
 		wantErr      bool
-		wantArticles []database.Article
+		wantArticles []article.Article
 	}{
 		{
 			name: "should remove the article from the database and return nil",
 			args: args{
 				articleDeleter: &fakeArticleDeleter{
-					articles: []database.Article{
+					articles: []article.Article{
 						{
 							ID:          "test_id",
 							Title:       "Test title",
@@ -63,7 +63,7 @@ func TestDeleteArticle(t *testing.T) {
 			},
 			wantStatus: http.StatusNoContent,
 			wantErr:    false,
-			wantArticles: []database.Article{
+			wantArticles: []article.Article{
 				{
 					ID:          "other_id",
 					Title:       "Other test title",
@@ -76,7 +76,7 @@ func TestDeleteArticle(t *testing.T) {
 			name: "should return an internal error if no article with the id found in the database",
 			args: args{
 				articleDeleter: &fakeArticleDeleter{
-					articles: []database.Article{
+					articles: []article.Article{
 						{
 							ID:          "test_id",
 							Title:       "Test title",
@@ -95,7 +95,7 @@ func TestDeleteArticle(t *testing.T) {
 			},
 			wantStatus: http.StatusInternalServerError,
 			wantErr:    true,
-			wantArticles: []database.Article{
+			wantArticles: []article.Article{
 				{
 					ID:          "test_id",
 					Title:       "Test title",

@@ -9,15 +9,15 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/goodleby/golang-server/client/database"
+	"github.com/goodleby/golang-server/article"
 )
 
 type fakeAllArticlesSelector struct {
-	articles   []database.Article
+	articles   []article.Article
 	shouldFail bool
 }
 
-func (f *fakeAllArticlesSelector) SelectAllArticles(ctx context.Context) ([]database.Article, error) {
+func (f *fakeAllArticlesSelector) SelectAllArticles(ctx context.Context) ([]article.Article, error) {
 	if f.shouldFail {
 		return nil, errors.New("test error")
 	}
@@ -35,13 +35,13 @@ func TestGetAllArticles(t *testing.T) {
 		args       args
 		wantStatus int
 		wantErr    bool
-		wantBody   []database.Article
+		wantBody   []article.Article
 	}{
 		{
 			name: "should return all articles from the database",
 			args: args{
 				allArticlesSelector: &fakeAllArticlesSelector{
-					articles: []database.Article{
+					articles: []article.Article{
 						{
 							ID:          "test_id",
 							Title:       "Test title",
@@ -61,7 +61,7 @@ func TestGetAllArticles(t *testing.T) {
 			},
 			wantStatus: http.StatusOK,
 			wantErr:    false,
-			wantBody: []database.Article{
+			wantBody: []article.Article{
 				{
 					ID:          "test_id",
 					Title:       "Test title",
@@ -80,20 +80,20 @@ func TestGetAllArticles(t *testing.T) {
 			name: "should return empty array if no articles in the database",
 			args: args{
 				allArticlesSelector: &fakeAllArticlesSelector{
-					articles:   []database.Article{},
+					articles:   []article.Article{},
 					shouldFail: false,
 				},
 				req: httptest.NewRequest(http.MethodGet, "/articles", nil),
 			},
 			wantStatus: http.StatusOK,
 			wantErr:    false,
-			wantBody:   []database.Article{},
+			wantBody:   []article.Article{},
 		},
 		{
 			name: "should return an internal error if it fails to select articles from the database",
 			args: args{
 				allArticlesSelector: &fakeAllArticlesSelector{
-					articles:   []database.Article{},
+					articles:   []article.Article{},
 					shouldFail: true,
 				},
 				req: httptest.NewRequest(http.MethodGet, "/articles", nil),
@@ -121,8 +121,8 @@ func TestGetAllArticles(t *testing.T) {
 				return
 			}
 
-			// Decode the response body into a database.Article struct for comparison.
-			resBody := []database.Article{}
+			// Decode the response body into a article.Article struct for comparison.
+			resBody := []article.Article{}
 			if err := json.NewDecoder(w.Body).Decode(&resBody); err != nil {
 				t.Fatalf("GetAllArticles() error json decoding response body: %v", err)
 			}

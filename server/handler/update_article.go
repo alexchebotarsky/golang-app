@@ -7,12 +7,12 @@ import (
 	"net/http"
 
 	chi "github.com/go-chi/chi/v5"
-	"github.com/goodleby/golang-server/client/database"
+	"github.com/goodleby/golang-server/article"
 	"github.com/goodleby/golang-server/tracing"
 )
 
 type ArticleUpdater interface {
-	UpdateArticle(ctx context.Context, id string, article database.Article) error
+	UpdateArticle(ctx context.Context, id string, article article.Article) error
 }
 
 func UpdateArticle(articleUpdater ArticleUpdater) http.HandlerFunc {
@@ -24,9 +24,14 @@ func UpdateArticle(articleUpdater ArticleUpdater) http.HandlerFunc {
 
 		span.SetTag("id", id)
 
-		article := &database.Article{}
+		article := &article.Article{}
 		if err := json.NewDecoder(r.Body).Decode(&article); err != nil {
 			HandleError(ctx, w, fmt.Errorf("error decoding request body: %v", err), http.StatusBadRequest, true)
+			return
+		}
+
+		if err := article.Validate(); err != nil {
+			HandleError(ctx, w, fmt.Errorf("error invalid article: %v", err), http.StatusBadRequest, true)
 			return
 		}
 

@@ -8,14 +8,14 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/goodleby/golang-server/client/database"
+	"github.com/goodleby/golang-server/article"
 )
 
 type fakeArticleUpdater struct {
-	articles []database.Article
+	articles []article.Article
 }
 
-func (f *fakeArticleUpdater) UpdateArticle(ctx context.Context, id string, article database.Article) error {
+func (f *fakeArticleUpdater) UpdateArticle(ctx context.Context, id string, article article.Article) error {
 	for i, a := range f.articles {
 		if a.ID == id {
 			f.articles[i] = article
@@ -36,13 +36,13 @@ func TestUpdateArticle(t *testing.T) {
 		args         args
 		wantStatus   int
 		wantErr      bool
-		wantArticles []database.Article
+		wantArticles []article.Article
 	}{
 		{
 			name: "should return the updated article when successful",
 			args: args{
 				articleUpdater: &fakeArticleUpdater{
-					articles: []database.Article{
+					articles: []article.Article{
 						{
 							ID:          "test_id",
 							Title:       "Test title",
@@ -57,7 +57,7 @@ func TestUpdateArticle(t *testing.T) {
 						},
 					},
 				},
-				req: addChiURLParams(httptest.NewRequest(http.MethodPatch, "/articles/test_id", makeJSONBody(t, &database.Article{
+				req: addChiURLParams(httptest.NewRequest(http.MethodPatch, "/articles/test_id", makeJSONBody(t, &article.Article{
 					ID:          "test_id",
 					Title:       "Updated title",
 					Description: "Updated description",
@@ -68,7 +68,7 @@ func TestUpdateArticle(t *testing.T) {
 			},
 			wantStatus: http.StatusNoContent,
 			wantErr:    false,
-			wantArticles: []database.Article{
+			wantArticles: []article.Article{
 				{
 					ID:          "test_id",
 					Title:       "Updated title",
@@ -87,7 +87,7 @@ func TestUpdateArticle(t *testing.T) {
 			name: "should return an internal error if no article with the id found in the database",
 			args: args{
 				articleUpdater: &fakeArticleUpdater{
-					articles: []database.Article{
+					articles: []article.Article{
 						{
 							ID:          "test_id",
 							Title:       "Test title",
@@ -102,7 +102,7 @@ func TestUpdateArticle(t *testing.T) {
 						},
 					},
 				},
-				req: addChiURLParams(httptest.NewRequest(http.MethodPatch, "/articles/some_id", makeJSONBody(t, &database.Article{
+				req: addChiURLParams(httptest.NewRequest(http.MethodPatch, "/articles/some_id", makeJSONBody(t, &article.Article{
 					ID:          "some_id",
 					Title:       "Updated title",
 					Description: "Updated description",
@@ -113,7 +113,7 @@ func TestUpdateArticle(t *testing.T) {
 			},
 			wantStatus: http.StatusInternalServerError,
 			wantErr:    true,
-			wantArticles: []database.Article{
+			wantArticles: []article.Article{
 				{
 					ID:          "test_id",
 					Title:       "Test title",
@@ -132,7 +132,7 @@ func TestUpdateArticle(t *testing.T) {
 			name: "should return a bad request error if wrong body is provided",
 			args: args{
 				articleUpdater: &fakeArticleUpdater{
-					articles: []database.Article{
+					articles: []article.Article{
 						{
 							ID:          "test_id",
 							Title:       "Test title",
@@ -153,7 +153,7 @@ func TestUpdateArticle(t *testing.T) {
 			},
 			wantStatus: http.StatusBadRequest,
 			wantErr:    true,
-			wantArticles: []database.Article{
+			wantArticles: []article.Article{
 				{
 					ID:          "test_id",
 					Title:       "Test title",

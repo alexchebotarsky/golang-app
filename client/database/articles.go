@@ -6,23 +6,17 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/goodleby/golang-server/article"
 	"github.com/goodleby/golang-server/tracing"
 )
 
-type Article struct {
-	Title       string `json:"title" db:"title"`
-	Description string `json:"description" db:"description"`
-	Body        string `json:"body" db:"body"`
-	ID          string `json:"id" db:"id"`
-}
-
-func (c *Client) SelectAllArticles(ctx context.Context) ([]Article, error) {
+func (c *Client) SelectAllArticles(ctx context.Context) ([]article.Article, error) {
 	ctx, span := tracing.StartSpan(ctx, "SelectAllArticles")
 	defer span.End()
 
 	query := `SELECT id, title, description, body FROM articles`
 
-	articles := []Article{}
+	articles := []article.Article{}
 	if err := c.DB.SelectContext(ctx, &articles, query); err != nil {
 		return nil, fmt.Errorf("error selecting articles: %v", err)
 	}
@@ -30,7 +24,7 @@ func (c *Client) SelectAllArticles(ctx context.Context) ([]Article, error) {
 	return articles, nil
 }
 
-func (c *Client) SelectArticle(ctx context.Context, id string) (*Article, error) {
+func (c *Client) SelectArticle(ctx context.Context, id string) (*article.Article, error) {
 	ctx, span := tracing.StartSpan(ctx, "SelectArticle")
 	defer span.End()
 
@@ -50,7 +44,7 @@ func (c *Client) SelectArticle(ctx context.Context, id string) (*Article, error)
 		ID: id,
 	}
 
-	article := &Article{}
+	article := &article.Article{}
 	if err := stmt.GetContext(ctx, article, args); err != nil {
 		switch err {
 		case sql.ErrNoRows:
@@ -63,7 +57,7 @@ func (c *Client) SelectArticle(ctx context.Context, id string) (*Article, error)
 	return article, nil
 }
 
-func (c *Client) InsertArticle(ctx context.Context, article Article) error {
+func (c *Client) InsertArticle(ctx context.Context, article article.Article) error {
 	ctx, span := tracing.StartSpan(ctx, "InsertArticle")
 	defer span.End()
 
@@ -107,7 +101,7 @@ func (c *Client) DeleteArticle(ctx context.Context, id string) error {
 	return nil
 }
 
-func (c *Client) UpdateArticle(ctx context.Context, id string, article Article) error {
+func (c *Client) UpdateArticle(ctx context.Context, id string, article article.Article) error {
 	ctx, span := tracing.StartSpan(ctx, "UpdateArticle")
 	defer span.End()
 

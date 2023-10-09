@@ -10,15 +10,16 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/goodleby/golang-server/article"
 	"github.com/goodleby/golang-server/client/database"
 )
 
 type fakeArticleSelector struct {
-	articles   []database.Article
+	articles   []article.Article
 	shouldFail bool
 }
 
-func (f *fakeArticleSelector) SelectArticle(ctx context.Context, id string) (*database.Article, error) {
+func (f *fakeArticleSelector) SelectArticle(ctx context.Context, id string) (*article.Article, error) {
 	if f.shouldFail {
 		return nil, errors.New("test error")
 	}
@@ -42,13 +43,13 @@ func TestGetArticle(t *testing.T) {
 		args       args
 		wantStatus int
 		wantErr    bool
-		wantBody   *database.Article
+		wantBody   *article.Article
 	}{
 		{
 			name: "should return an article from the database",
 			args: args{
 				articleSelector: &fakeArticleSelector{
-					articles: []database.Article{
+					articles: []article.Article{
 						{
 							ID:          "other_id",
 							Title:       "Other test title",
@@ -70,7 +71,7 @@ func TestGetArticle(t *testing.T) {
 			},
 			wantErr:    false,
 			wantStatus: http.StatusOK,
-			wantBody: &database.Article{
+			wantBody: &article.Article{
 				ID:          "test_id",
 				Title:       "Test title",
 				Description: "Test description",
@@ -81,7 +82,7 @@ func TestGetArticle(t *testing.T) {
 			name: "should return an err not found if no article with the id found in the database",
 			args: args{
 				articleSelector: &fakeArticleSelector{
-					articles: []database.Article{
+					articles: []article.Article{
 						{
 							ID:          "test_id",
 							Title:       "Test title",
@@ -103,7 +104,7 @@ func TestGetArticle(t *testing.T) {
 			name: "should return an internal error if failed to select article from the database",
 			args: args{
 				articleSelector: &fakeArticleSelector{
-					articles:   []database.Article{},
+					articles:   []article.Article{},
 					shouldFail: true,
 				},
 				req: addChiURLParams(httptest.NewRequest(http.MethodGet, "/articles/some_id", nil), map[string]string{
@@ -133,8 +134,8 @@ func TestGetArticle(t *testing.T) {
 				return
 			}
 
-			// Decode the response body into a database.Article struct for comparison.
-			resBody := &database.Article{}
+			// Decode the response body into a article.Article struct for comparison.
+			resBody := &article.Article{}
 			if err := json.NewDecoder(w.Body).Decode(&resBody); err != nil {
 				t.Fatalf("GetArticle() error json decoding response body: %v", err)
 			}

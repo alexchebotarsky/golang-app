@@ -8,15 +8,15 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/goodleby/golang-server/client/database"
+	"github.com/goodleby/golang-server/article"
 )
 
 type fakeArticleInserter struct {
-	articles   []database.Article
+	articles   []article.Article
 	shouldFail bool
 }
 
-func (f *fakeArticleInserter) InsertArticle(ctx context.Context, article database.Article) error {
+func (f *fakeArticleInserter) InsertArticle(ctx context.Context, article article.Article) error {
 	if f.shouldFail {
 		return errors.New("test error")
 	}
@@ -36,13 +36,13 @@ func TestAddArticle(t *testing.T) {
 		args         args
 		wantStatus   int
 		wantErr      bool
-		wantArticles []database.Article
+		wantArticles []article.Article
 	}{
 		{
 			name: "should add the passed article to the database",
 			args: args{
 				articleInserter: &fakeArticleInserter{
-					articles: []database.Article{
+					articles: []article.Article{
 						{
 							ID:          "test_id",
 							Title:       "Test title",
@@ -52,7 +52,7 @@ func TestAddArticle(t *testing.T) {
 					},
 					shouldFail: false,
 				},
-				req: addChiURLParams(httptest.NewRequest(http.MethodPatch, "/articles/test_id", makeJSONBody(t, &database.Article{
+				req: addChiURLParams(httptest.NewRequest(http.MethodPatch, "/articles/test_id", makeJSONBody(t, &article.Article{
 					ID:          "new_id",
 					Title:       "New title",
 					Description: "New description",
@@ -63,7 +63,7 @@ func TestAddArticle(t *testing.T) {
 			},
 			wantStatus: http.StatusNoContent,
 			wantErr:    false,
-			wantArticles: []database.Article{
+			wantArticles: []article.Article{
 				{
 					ID:          "test_id",
 					Title:       "Test title",
@@ -82,7 +82,7 @@ func TestAddArticle(t *testing.T) {
 			name: "should return an internal error if it fails to insert the article to the database",
 			args: args{
 				articleInserter: &fakeArticleInserter{
-					articles: []database.Article{
+					articles: []article.Article{
 						{
 							ID:          "test_id",
 							Title:       "Test title",
@@ -92,7 +92,7 @@ func TestAddArticle(t *testing.T) {
 					},
 					shouldFail: true,
 				},
-				req: addChiURLParams(httptest.NewRequest(http.MethodPatch, "/articles/test_id", makeJSONBody(t, &database.Article{
+				req: addChiURLParams(httptest.NewRequest(http.MethodPatch, "/articles/test_id", makeJSONBody(t, &article.Article{
 					ID:          "new_id",
 					Title:       "New title",
 					Description: "New description",
@@ -103,7 +103,7 @@ func TestAddArticle(t *testing.T) {
 			},
 			wantStatus: http.StatusInternalServerError,
 			wantErr:    true,
-			wantArticles: []database.Article{
+			wantArticles: []article.Article{
 				{
 					ID:          "test_id",
 					Title:       "Test title",
@@ -116,7 +116,7 @@ func TestAddArticle(t *testing.T) {
 			name: "should return a bad request error if wrong body is provided",
 			args: args{
 				articleInserter: &fakeArticleInserter{
-					articles: []database.Article{
+					articles: []article.Article{
 						{
 							ID:          "test_id",
 							Title:       "Test title",
@@ -132,7 +132,7 @@ func TestAddArticle(t *testing.T) {
 			},
 			wantStatus: http.StatusBadRequest,
 			wantErr:    true,
-			wantArticles: []database.Article{
+			wantArticles: []article.Article{
 				{
 					ID:          "test_id",
 					Title:       "Test title",

@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/goodleby/golang-server/client/database"
+	"github.com/goodleby/golang-server/article"
 )
 
 type AllArticlesSelector interface {
-	SelectAllArticles(ctx context.Context) ([]database.Article, error)
+	SelectAllArticles(ctx context.Context) ([]article.Article, error)
 }
 
 func GetAllArticles(articleSelector AllArticlesSelector) http.HandlerFunc {

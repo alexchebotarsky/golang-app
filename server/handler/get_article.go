@@ -7,12 +7,13 @@ import (
 	"net/http"
 
 	chi "github.com/go-chi/chi/v5"
+	"github.com/goodleby/golang-server/article"
 	"github.com/goodleby/golang-server/client/database"
 	"github.com/goodleby/golang-server/tracing"
 )
 
 type ArticleSelector interface {
-	SelectArticle(ctx context.Context, id string) (*database.Article, error)
+	SelectArticle(ctx context.Context, id string) (*article.Article, error)
 }
 
 func GetArticle(articleSelector ArticleSelector) http.HandlerFunc {
