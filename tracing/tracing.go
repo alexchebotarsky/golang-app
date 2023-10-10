@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/goodleby/golang-server/env"
+	"github.com/goodleby/golang-app/env"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"go.opentelemetry.io/otel/sdk/resource"

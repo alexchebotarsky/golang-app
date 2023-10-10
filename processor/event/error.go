@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/goodleby/golang-server/tracing"
+	"github.com/goodleby/golang-app/tracing"
 )
 
 func HandleError(ctx context.Context, err error, shouldLog bool) {

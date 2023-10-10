@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/goodleby/golang-server/tracing"
+	"github.com/goodleby/golang-app/tracing"
 )
 
 type Client struct {

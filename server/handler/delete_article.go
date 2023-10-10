@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	chi "github.com/go-chi/chi/v5"
-	"github.com/goodleby/golang-server/tracing"
+	"github.com/goodleby/golang-app/tracing"
 )
 
 type ArticleDeleter interface {

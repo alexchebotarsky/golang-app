@@ -6,7 +6,7 @@ import (
 	"time"
 
 	chi "github.com/go-chi/chi/v5"
-	"github.com/goodleby/golang-server/metrics"
+	"github.com/goodleby/golang-app/metrics"
 )
 
 func Metrics(next http.Handler) http.Handler {

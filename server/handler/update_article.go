@@ -7,8 +7,8 @@ import (
 	"net/http"
 
 	chi "github.com/go-chi/chi/v5"
-	"github.com/goodleby/golang-server/article"
-	"github.com/goodleby/golang-server/tracing"
+	"github.com/goodleby/golang-app/article"
+	"github.com/goodleby/golang-app/tracing"
 )
 
 type ArticleUpdater interface {

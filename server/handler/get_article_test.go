@@ -10,8 +10,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/goodleby/golang-server/article"
-	"github.com/goodleby/golang-server/client/database"
+	"github.com/goodleby/golang-app/article"
+	"github.com/goodleby/golang-app/client/database"
 )
 
 type fakeArticleSelector struct {

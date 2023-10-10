@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"cloud.google.com/go/pubsub"
-	"github.com/goodleby/golang-server/article"
+	"github.com/goodleby/golang-app/article"
 )
 
 type ArticleInserter interface {

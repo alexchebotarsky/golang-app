@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/goodleby/golang-server/client/auth"
-	"github.com/goodleby/golang-server/server/handler"
+	"github.com/goodleby/golang-app/client/auth"
+	"github.com/goodleby/golang-app/server/handler"
 )
 
 type TokenParser interface {

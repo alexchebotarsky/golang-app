@@ -4,10 +4,10 @@ import (
 	"context"
 	"log"
 
-	"github.com/goodleby/golang-server/app"
-	"github.com/goodleby/golang-server/env"
-	"github.com/goodleby/golang-server/metrics"
-	"github.com/goodleby/golang-server/tracing"
+	"github.com/goodleby/golang-app/app"
+	"github.com/goodleby/golang-app/env"
+	"github.com/goodleby/golang-app/metrics"
+	"github.com/goodleby/golang-app/tracing"
 )
 
 func main() {

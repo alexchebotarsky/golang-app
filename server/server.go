@@ -8,9 +8,9 @@ import (
 	"time"
 
 	chi "github.com/go-chi/chi/v5"
-	"github.com/goodleby/golang-server/client/auth"
-	"github.com/goodleby/golang-server/server/handler"
-	"github.com/goodleby/golang-server/server/middleware"
+	"github.com/goodleby/golang-app/client/auth"
+	"github.com/goodleby/golang-app/server/handler"
+	"github.com/goodleby/golang-app/server/middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 

@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/goodleby/golang-server/article"
-	"github.com/goodleby/golang-server/tracing"
+	"github.com/goodleby/golang-app/article"
+	"github.com/goodleby/golang-app/tracing"
 )
 
 func (c *Client) SelectAllArticles(ctx context.Context) ([]article.Article, error) {

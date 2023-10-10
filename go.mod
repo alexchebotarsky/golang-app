@@ -1,4 +1,4 @@
-module github.com/goodleby/golang-server
+module github.com/goodleby/golang-app
 
 go 1.21
 

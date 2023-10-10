@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/goodleby/golang-server/client/example"
+	"github.com/goodleby/golang-app/client/example"
 )
 
 type ExampleDataFetcher interface {

@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"cloud.google.com/go/pubsub"
-	"github.com/goodleby/golang-server/processor/event"
-	"github.com/goodleby/golang-server/processor/middleware"
+	"github.com/goodleby/golang-app/processor/event"
+	"github.com/goodleby/golang-app/processor/middleware"
 )
 
 type PubSubClient interface {

@@ -8,7 +8,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/goodleby/golang-server/article"
+	"github.com/goodleby/golang-app/article"
 )
 
 type fakeArticleUpdater struct {

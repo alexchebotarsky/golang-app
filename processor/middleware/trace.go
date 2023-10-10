@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"cloud.google.com/go/pubsub"
-	"github.com/goodleby/golang-server/processor/event"
-	"github.com/goodleby/golang-server/tracing"
+	"github.com/goodleby/golang-app/processor/event"
+	"github.com/goodleby/golang-app/tracing"
 )
 
 func Trace(id string, next event.Handler) event.Handler {

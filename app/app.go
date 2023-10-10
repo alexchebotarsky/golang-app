@@ -7,13 +7,13 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/goodleby/golang-server/client/auth"
-	"github.com/goodleby/golang-server/client/database"
-	"github.com/goodleby/golang-server/client/example"
-	"github.com/goodleby/golang-server/client/pubsub"
-	"github.com/goodleby/golang-server/env"
-	"github.com/goodleby/golang-server/processor"
-	"github.com/goodleby/golang-server/server"
+	"github.com/goodleby/golang-app/client/auth"
+	"github.com/goodleby/golang-app/client/database"
+	"github.com/goodleby/golang-app/client/example"
+	"github.com/goodleby/golang-app/client/pubsub"
+	"github.com/goodleby/golang-app/env"
+	"github.com/goodleby/golang-app/processor"
+	"github.com/goodleby/golang-app/server"
 )
 
 type Service interface {

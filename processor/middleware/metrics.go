@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"cloud.google.com/go/pubsub"
-	"github.com/goodleby/golang-server/metrics"
-	"github.com/goodleby/golang-server/processor/event"
+	"github.com/goodleby/golang-app/metrics"
+	"github.com/goodleby/golang-app/processor/event"
 )
 
 func Metrics(id string, next event.Handler) event.Handler {
