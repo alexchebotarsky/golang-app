@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 
@@ -28,17 +29,19 @@ type Clients struct {
 
 type App struct {
 	Services []Service
+	Clients  *Clients
 }
 
 func New(ctx context.Context, env *env.Config) (*App, error) {
 	app := &App{}
+	var err error
 
-	clients, err := setupClients(ctx, env)
+	app.Clients, err = setupClients(ctx, env)
 	if err != nil {
 		return nil, fmt.Errorf("error setting up clients: %v", err)
 	}
 
-	app.Services, err = setupServices(ctx, env, clients)
+	app.Services, err = setupServices(ctx, env, app.Clients)
 	if err != nil {
 		return nil, fmt.Errorf("error setting up services: %v", err)
 	}
@@ -53,6 +56,14 @@ func (app *App) Launch(ctx context.Context) {
 	for _, service := range app.Services {
 		go service.Run(ctx)
 	}
+
+	<-ctx.Done()
+
+	if err := app.Clients.DB.Close(); err != nil {
+		log.Printf("Error closing database client: %v", err)
+	}
+
+	log.Printf("App has gracefully stopped")
 }
 
 func setupClients(ctx context.Context, env *env.Config) (*Clients, error) {
