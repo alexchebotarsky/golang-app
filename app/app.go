@@ -91,7 +91,7 @@ func setupClients(ctx context.Context, env *env.Config) (*Clients, error) {
 		return nil, fmt.Errorf("error creating auth client: %v", err)
 	}
 
-	c.PubSub, err = pubsub.New(ctx, env.ExampleEndpoint)
+	c.PubSub, err = pubsub.New(ctx, env.PubSubProjectID)
 	if err != nil {
 		return nil, fmt.Errorf("error creating example client: %v", err)
 	}
