@@ -69,5 +69,5 @@ func (p *Processor) setupMiddlewares() {
 func (p *Processor) setupEvents() {
 	p.use(middleware.Trace, middleware.Metrics)
 
-	p.handle("golang-server-add-article", event.AddArticle(p.DB))
+	p.handle("golang-app-add-article", event.AddArticle(p.DB))
 }

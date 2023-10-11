@@ -14,7 +14,7 @@ func (c *Client) PublishAddArticle(ctx context.Context, article *article.Article
 		return fmt.Errorf("error marshalling article: %v", err)
 	}
 
-	c.send(ctx, "golang-server-add-article", data)
+	c.send(ctx, "golang-app-add-article", data)
 
 	return nil
 }
