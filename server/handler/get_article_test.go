@@ -30,7 +30,7 @@ func (f *fakeArticleSelector) SelectArticle(ctx context.Context, id string) (*ar
 		}
 	}
 
-	return nil, &database.ErrNotFound{Err: fmt.Errorf("article with id %q not found", id)}
+	return nil, database.ErrNotFound{Err: fmt.Errorf("article with id %q not found", id)}
 }
 
 func TestGetArticle(t *testing.T) {

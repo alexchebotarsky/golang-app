@@ -48,7 +48,7 @@ func (c *Client) SelectArticle(ctx context.Context, id string) (*article.Article
 	if err := stmt.GetContext(ctx, article, args); err != nil {
 		switch err {
 		case sql.ErrNoRows:
-			return nil, &ErrNotFound{Err: err}
+			return nil, ErrNotFound{Err: err}
 		default:
 			return nil, fmt.Errorf("error selecting article with id %q: %v", id, err)
 		}
