@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/goodleby/golang-app/env"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"go.opentelemetry.io/otel/sdk/resource"
@@ -15,13 +14,13 @@ import (
 // If empty, default name will be used
 const tracerName = ""
 
-func Init(env *env.Config) error {
+func Init(serviceName string) error {
 	exporter, err := newFileExporter("traces.txt")
 	if err != nil {
 		return fmt.Errorf("error creating new file exporter: %v", err)
 	}
 
-	tp, err := newTracerProvider(env.ServiceName, exporter)
+	tp, err := newTracerProvider(serviceName, exporter)
 	if err != nil {
 		return fmt.Errorf("error creating new tracer provider: %v", err)
 	}

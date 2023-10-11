@@ -36,7 +36,7 @@ func LoadConfig(ctx context.Context, envPath string) (*Config, error) {
 		return nil, fmt.Errorf("error loading environment variables: %v", err)
 	}
 
-	if err := envconfig.Process(ctx, &c); err != nil {
+	if err := envconfig.Process(ctx, c); err != nil {
 		return nil, fmt.Errorf("error processing environment variables: %v", err)
 	}
 

@@ -18,7 +18,7 @@ func main() {
 		log.Fatalf("Error loading env config: %v", err)
 	}
 
-	if err := tracing.Init(env); err != nil {
+	if err := tracing.Init(env.ServiceName); err != nil {
 		log.Fatalf("Error initializing tracing: %v", err)
 	}
 
