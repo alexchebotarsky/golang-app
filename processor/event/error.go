@@ -2,7 +2,8 @@ package event
 
 import (
 	"context"
-	"log"
+	"fmt"
+	"log/slog"
 
 	"github.com/goodleby/golang-app/tracing"
 )
@@ -13,6 +14,6 @@ func HandleError(ctx context.Context, err error, shouldLog bool) {
 	span.RecordError(err)
 
 	if shouldLog {
-		log.Printf("Event error: %v", err)
+		slog.Error(fmt.Sprintf("Event error: %v", err))
 	}
 }

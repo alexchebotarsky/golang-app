@@ -3,7 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"os/signal"
 
@@ -60,10 +60,10 @@ func (app *App) Launch(ctx context.Context) {
 	<-ctx.Done()
 
 	if err := app.Clients.DB.Close(); err != nil {
-		log.Printf("Error closing database client: %v", err)
+		slog.Error(fmt.Sprintf("Error closing database client: %v", err))
 	}
 
-	log.Printf("App has gracefully stopped")
+	slog.Debug("App has gracefully stopped")
 }
 
 func setupClients(ctx context.Context, env *env.Config) (*Clients, error) {

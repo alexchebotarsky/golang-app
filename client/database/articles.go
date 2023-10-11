@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"log"
+	"log/slog"
 
 	"github.com/goodleby/golang-app/article"
 	"github.com/goodleby/golang-app/tracing"
@@ -34,7 +34,7 @@ func (c *Client) SelectArticle(ctx context.Context, id string) (*article.Article
 	}
 	defer func() {
 		if err := stmt.Close(); err != nil {
-			log.Printf("Error closing prepared named statement: %v", err)
+			slog.Error(fmt.Sprintf("Error closing prepared named statement: %v", err))
 		}
 	}()
 

@@ -3,7 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -74,19 +74,19 @@ func (s *Server) Run(ctx context.Context) {
 
 	s.shutdown(ctx)
 
-	log.Print("Server has been gracefully shut down")
+	slog.Debug("Server has been gracefully shut down")
 }
 
 func (s *Server) listenAndServe() {
-	log.Printf("Server is listening on port: %d", s.Port)
+	slog.Info(fmt.Sprintf("Server is listening on port: %d", s.Port))
 	if err := s.HTTP.ListenAndServe(); err != http.ErrServerClosed {
-		log.Printf("Error listening and serving: %v", err)
+		slog.Error(fmt.Sprintf("Error listening and serving: %v", err))
 	}
 }
 
 func (s *Server) shutdown(ctx context.Context) {
 	if err := s.HTTP.Shutdown(ctx); err != nil {
-		log.Printf("error shutting down http server: %v", err)
+		slog.Error(fmt.Sprintf("Error shutting down http server: %v", err))
 	}
 }
 

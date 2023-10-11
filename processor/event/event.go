@@ -2,7 +2,8 @@ package event
 
 import (
 	"context"
-	"log"
+	"fmt"
+	"log/slog"
 
 	"cloud.google.com/go/pubsub"
 )
@@ -17,6 +18,6 @@ type Event struct {
 
 func (e *Event) Listen(ctx context.Context) {
 	if err := e.Subscription.Receive(ctx, e.Handler); err != nil {
-		log.Printf("Error listening to %q subscription: %v", e.ID, err)
+		slog.Error(fmt.Sprintf("Error listening to %q subscription: %v", e.ID, err), "subscriptionID", e.ID)
 	}
 }

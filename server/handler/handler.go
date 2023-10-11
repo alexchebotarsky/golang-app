@@ -1,9 +1,13 @@
 package handler
 
-import "log"
+import (
+	"fmt"
+
+	"log/slog"
+)
 
 func handleWritingErr(err error) {
 	if err != nil {
-		log.Printf("Error writing to http.ResponseWriter: %v", err)
+		slog.Error(fmt.Sprintf("Error writing to http.ResponseWriter: %v", err))
 	}
 }

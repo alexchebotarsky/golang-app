@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 
 	"github.com/goodleby/golang-app/tracing"
@@ -21,7 +21,7 @@ func HandleError(ctx context.Context, w http.ResponseWriter, err error, statusCo
 	span.RecordError(err)
 
 	if shouldLog {
-		log.Printf("Handler error: %v", err)
+		slog.Error(fmt.Sprintf("Handler error: %v", err), "status", statusCode)
 	}
 
 	w.Header().Add("Content-Type", "application/json")
