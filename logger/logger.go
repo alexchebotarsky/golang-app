@@ -14,7 +14,7 @@ func Init() {
 	slog.SetDefault(logger)
 }
 
-func renameMessageKey(group []string, a slog.Attr) slog.Attr {
+func renameMessageKey(groups []string, a slog.Attr) slog.Attr {
 	if a.Key == slog.MessageKey {
 		return slog.Attr{
 			Key:   MessageKey,
