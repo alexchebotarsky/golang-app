@@ -2,8 +2,11 @@
 
 Includes features:
 
-- OpenTelemetry Tracing
-- Prometheus Metrics Collection
-- PostgreSQL database
-- JWT-based authorization
+- REST API
 - PubSub events publishing and subscribing
+- PostgreSQL database
+- JWT-based authentication
+- Environment variables loading
+- Structured logging
+- OpenTelemetry tracing
+- Prometheus metrics collection
