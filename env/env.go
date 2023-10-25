@@ -30,15 +30,15 @@ type Config struct {
 }
 
 func LoadConfig(ctx context.Context, envPath string) (*Config, error) {
-	c := &Config{}
+	var c Config
 
 	if err := godotenv.Load(envPath); err != nil {
 		return nil, fmt.Errorf("error loading environment variables: %v", err)
 	}
 
-	if err := envconfig.Process(ctx, c); err != nil {
+	if err := envconfig.Process(ctx, &c); err != nil {
 		return nil, fmt.Errorf("error processing environment variables: %v", err)
 	}
 
-	return c, nil
+	return &c, nil
 }

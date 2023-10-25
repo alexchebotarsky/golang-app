@@ -135,7 +135,7 @@ func TestGetArticle(t *testing.T) {
 			}
 
 			// Decode the response body into a article.Article struct for comparison.
-			resBody := &article.Article{}
+			var resBody article.Article
 			if err := json.NewDecoder(w.Body).Decode(&resBody); err != nil {
 				t.Fatalf("GetArticle() error json decoding response body: %v", err)
 			}

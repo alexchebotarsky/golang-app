@@ -50,10 +50,10 @@ func (c *Client) FetchExampleData(ctx context.Context) (*ExampleData, error) {
 		return nil, fmt.Errorf("error doing http request: %v", err)
 	}
 
-	exampleData := &ExampleData{}
-	if err := json.NewDecoder(res.Body).Decode(exampleData); err != nil {
+	var exampleData ExampleData
+	if err := json.NewDecoder(res.Body).Decode(&exampleData); err != nil {
 		return nil, fmt.Errorf("error decoding request body as json: %v", err)
 	}
 
-	return exampleData, nil
+	return &exampleData, nil
 }

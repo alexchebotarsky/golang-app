@@ -16,7 +16,7 @@ func (c *Client) SelectAllArticles(ctx context.Context) ([]article.Article, erro
 
 	query := `SELECT id, title, description, body FROM articles`
 
-	articles := []article.Article{}
+	var articles []article.Article
 	if err := c.DB.SelectContext(ctx, &articles, query); err != nil {
 		return nil, fmt.Errorf("error selecting articles: %v", err)
 	}
@@ -44,8 +44,8 @@ func (c *Client) SelectArticle(ctx context.Context, id string) (*article.Article
 		ID: id,
 	}
 
-	article := &article.Article{}
-	if err := stmt.GetContext(ctx, article, args); err != nil {
+	var article article.Article
+	if err := stmt.GetContext(ctx, &article, args); err != nil {
 		switch err {
 		case sql.ErrNoRows:
 			return nil, ErrNotFound{Err: err}
@@ -54,7 +54,7 @@ func (c *Client) SelectArticle(ctx context.Context, id string) (*article.Article
 		}
 	}
 
-	return article, nil
+	return &article, nil
 }
 
 func (c *Client) InsertArticle(ctx context.Context, article article.Article) error {

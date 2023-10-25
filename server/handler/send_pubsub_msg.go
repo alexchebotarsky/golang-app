@@ -17,7 +17,7 @@ func SendPubSubMsg(publisher AddArticlePublisher) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		article := &article.Article{}
+		var article article.Article
 		if err := json.NewDecoder(r.Body).Decode(&article); err != nil {
 			HandleError(ctx, w, fmt.Errorf("error decoding request body: %v", err), http.StatusBadRequest, true)
 			return
@@ -28,7 +28,7 @@ func SendPubSubMsg(publisher AddArticlePublisher) http.HandlerFunc {
 			return
 		}
 
-		err := publisher.PublishAddArticle(ctx, article)
+		err := publisher.PublishAddArticle(ctx, &article)
 		if err != nil {
 			HandleError(ctx, w, fmt.Errorf("error publishing add article: %v", err), http.StatusInternalServerError, true)
 			return

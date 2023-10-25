@@ -46,7 +46,7 @@ func Test_handleError(t *testing.T) {
 			}
 
 			// Decode the response body into a article.Article struct for comparison.
-			resBody := &errorResponse{}
+			var resBody errorResponse
 			if err := json.NewDecoder(w.Body).Decode(&resBody); err != nil {
 				t.Fatalf("GetArticle() error json decoding response body: %v", err)
 			}
