@@ -116,7 +116,7 @@ func TestGetAllArticles(t *testing.T) {
 			// If we expect an error, we just need to check the response body is not empty.
 			if tt.wantErr {
 				if w.Body.Len() == 0 {
-					t.Fatalf("GetArticle() response body is empty, want error")
+					t.Fatalf("GetAllArticles() response body is empty, want error")
 				}
 				return
 			}

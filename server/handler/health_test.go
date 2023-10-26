@@ -36,16 +36,16 @@ func TestHealth(t *testing.T) {
 			Health(w, tt.args.req)
 
 			if w.Code != tt.wantStatus {
-				t.Fatalf("Healthz() status = %v, want %v", w.Code, tt.wantStatus)
+				t.Fatalf("Health() status = %v, want %v", w.Code, tt.wantStatus)
 			}
 
 			var resBody HealthStatus
 			if err := json.NewDecoder(w.Body).Decode(&resBody); err != nil {
-				t.Fatalf("Healthz() error json decoding response body: %v", err)
+				t.Fatalf("Health() error json decoding response body: %v", err)
 			}
 
 			if !reflect.DeepEqual(&resBody, tt.wantBody) {
-				t.Fatalf("Healthz() response body = %v, want %v", resBody, tt.wantBody)
+				t.Fatalf("Health() response body = %v, want %v", resBody, tt.wantBody)
 			}
 		})
 	}

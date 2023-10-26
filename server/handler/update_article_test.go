@@ -176,16 +176,16 @@ func TestUpdateArticle(t *testing.T) {
 			handler(w, tt.args.req)
 
 			if w.Code != tt.wantStatus {
-				t.Fatalf("GetArticle() status = %v, want %v", w.Code, tt.wantStatus)
+				t.Fatalf("UpdateArticle() status = %v, want %v", w.Code, tt.wantStatus)
 			}
 
 			if !reflect.DeepEqual(tt.args.articleUpdater.articles, tt.wantArticles) {
-				t.Fatalf("GetArticle() articles = %v, want %v", tt.args.articleUpdater.articles, tt.wantArticles)
+				t.Fatalf("UpdateArticle() articles = %v, want %v", tt.args.articleUpdater.articles, tt.wantArticles)
 			}
 
 			// If we expect an error, we just need to check the response body is not empty.
 			if tt.wantErr && w.Body.Len() == 0 {
-				t.Fatalf("GetArticle() response body is empty, want error")
+				t.Fatalf("UpdateArticle() response body is empty, want error")
 			}
 		})
 	}

@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func Test_handleError(t *testing.T) {
+func TestHandleError(t *testing.T) {
 	type args struct {
 		err        error
 		statusCode int
@@ -42,17 +42,17 @@ func Test_handleError(t *testing.T) {
 			HandleError(context.TODO(), w, tt.args.err, tt.args.statusCode, tt.args.shouldLog)
 
 			if w.Code != tt.wantStatus {
-				t.Fatalf("handleError() status = %v, want %v", w.Code, tt.wantStatus)
+				t.Fatalf("HandleError() status = %v, want %v", w.Code, tt.wantStatus)
 			}
 
 			// Decode the response body into a article.Article struct for comparison.
 			var resBody errorResponse
 			if err := json.NewDecoder(w.Body).Decode(&resBody); err != nil {
-				t.Fatalf("GetArticle() error json decoding response body: %v", err)
+				t.Fatalf("HandleError() error json decoding response body: %v", err)
 			}
 
 			if !reflect.DeepEqual(&resBody, tt.wantBody) {
-				t.Fatalf("GetArticle() response body = %v, want %v", resBody, tt.wantBody)
+				t.Fatalf("HandleError() response body = %v, want %v", resBody, tt.wantBody)
 			}
 		})
 	}
