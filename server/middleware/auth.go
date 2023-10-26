@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/goodleby/golang-app/client/auth"
 	"github.com/goodleby/golang-app/server/handler"
@@ -23,11 +22,6 @@ func Auth(tokenParser TokenParser, expectedAccessLevel int) func(next http.Handl
 			tokenCookie, err := r.Cookie("token")
 			if err != nil {
 				handler.HandleError(ctx, w, fmt.Errorf("error reading auth token cookie: %v", err), http.StatusUnauthorized, true)
-				return
-			}
-
-			if time.Now().After(tokenCookie.Expires) {
-				handler.HandleError(ctx, w, errors.New("cookie has expired"), http.StatusUnauthorized, true)
 				return
 			}
 

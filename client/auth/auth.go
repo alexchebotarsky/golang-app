@@ -63,7 +63,7 @@ func (c *Client) NewToken(ctx context.Context, roleName, roleKey string) (string
 		return "", time.Time{}, fmt.Errorf("error validating role ket: %v", err)
 	}
 
-	expires := time.Now().Add(5 * time.Minute)
+	expires := time.Now().Add(TokenTTL)
 
 	claims := &Claims{
 		RoleName:    role.Name,
@@ -130,7 +130,7 @@ func (c *Client) RefreshToken(ctx context.Context, tokenString string) (string, 
 		return "", time.Time{}, errors.New("invalid auth token")
 	}
 
-	expires := time.Now().Add(5 * time.Minute)
+	expires := time.Now().Add(TokenTTL)
 
 	claims.ExpiresAt = jwt.NewNumericDate(expires)
 
@@ -168,3 +168,5 @@ const EditorAccess = 20
 
 const ViewerRole = "viewer"
 const ViewerAccess = 10
+
+const TokenTTL = 1 * time.Hour
