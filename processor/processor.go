@@ -2,6 +2,7 @@ package processor
 
 import (
 	"context"
+	"log/slog"
 
 	"cloud.google.com/go/pubsub"
 	"github.com/goodleby/golang-app/processor/event"
@@ -35,14 +36,16 @@ func New(ctx context.Context, projectID string, pubsub PubSubClient, db DBClient
 	return p, nil
 }
 
-func (p *Processor) Run(ctx context.Context) {
-	go p.listenToEvents(ctx)
-}
-
-func (p *Processor) listenToEvents(ctx context.Context) {
+func (p *Processor) Start(ctx context.Context) {
 	for _, event := range p.Events {
 		go event.Listen(ctx)
 	}
+}
+
+func (p *Processor) Stop(ctx context.Context) error {
+	slog.Debug("Processor has stopped gracefully")
+
+	return nil
 }
 
 func (p *Processor) handle(subID string, handler event.Handler) {

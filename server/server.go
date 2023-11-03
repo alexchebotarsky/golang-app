@@ -67,27 +67,21 @@ func New(ctx context.Context, port uint16, db DBClient, auth AuthClient, pubsub 
 	return s, nil
 }
 
-func (s *Server) Run(ctx context.Context) {
-	go s.listenAndServe()
-
-	<-ctx.Done()
-
-	s.shutdown(ctx)
-
-	slog.Debug("Server has been gracefully shut down")
-}
-
-func (s *Server) listenAndServe() {
+func (s *Server) Start(ctx context.Context) {
 	slog.Info(fmt.Sprintf("Server is listening on port: %d", s.Port))
 	if err := s.HTTP.ListenAndServe(); err != http.ErrServerClosed {
 		slog.Error(fmt.Sprintf("Error listening and serving: %v", err))
 	}
 }
 
-func (s *Server) shutdown(ctx context.Context) {
+func (s *Server) Stop(ctx context.Context) error {
 	if err := s.HTTP.Shutdown(ctx); err != nil {
-		slog.Error(fmt.Sprintf("Error shutting down http server: %v", err))
+		return fmt.Errorf("error shutting down http server: %v", err)
 	}
+
+	slog.Debug("Server has stopped gracefully")
+
+	return nil
 }
 
 func (s *Server) setupRoutes() {

@@ -17,7 +17,8 @@ import (
 )
 
 type Service interface {
-	Run(context.Context)
+	Start(context.Context)
+	Stop(context.Context) error
 }
 
 type Clients struct {
@@ -54,16 +55,22 @@ func (app *App) Launch(ctx context.Context) {
 	defer cancel()
 
 	for _, service := range app.Services {
-		go service.Run(ctx)
+		go service.Start(ctx)
 	}
 
 	<-ctx.Done()
+
+	for _, service := range app.Services {
+		if err := service.Stop(ctx); err != nil {
+			slog.Error(fmt.Sprintf("Error stopping a service: %v", err))
+		}
+	}
 
 	if err := app.Clients.DB.Close(); err != nil {
 		slog.Error(fmt.Sprintf("Error closing database client: %v", err))
 	}
 
-	slog.Debug("App has gracefully stopped")
+	slog.Debug("App has stopped gracefully")
 }
 
 func setupClients(ctx context.Context, env *env.Config) (*Clients, error) {
