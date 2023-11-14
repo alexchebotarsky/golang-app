@@ -114,7 +114,7 @@ func (s *Server) setupRoutes() {
 
 			r.Post("/articles", handler.AddArticle(s.DB))
 			r.Delete("/articles/{id}", handler.DeleteArticle(s.DB))
-			r.Patch("/articles/{id}", handler.UpdateArticle(s.DB))
+			r.Put("/articles/{id}", handler.UpdateArticle(s.DB))
 		})
 	})
 }
