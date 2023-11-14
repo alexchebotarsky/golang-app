@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"log/slog"
 
 	"github.com/goodleby/golang-app/article"
 	"github.com/goodleby/golang-app/tracing"
@@ -32,11 +31,7 @@ func (c *Client) SelectArticle(ctx context.Context, id string) (*article.Article
 	if err != nil {
 		return nil, fmt.Errorf("error preparing named statement: %v", err)
 	}
-	defer func() {
-		if err := stmt.Close(); err != nil {
-			slog.Error(fmt.Sprintf("Error closing prepared named statement: %v", err))
-		}
-	}()
+	defer closeAndLogErr(stmt)
 
 	args := struct {
 		ID string `db:"id"`

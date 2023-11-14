@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
 	"github.com/jmoiron/sqlx"
 
@@ -50,4 +51,15 @@ func (c *Client) Close() error {
 	}
 
 	return nil
+}
+
+type Closer interface {
+	Close() error
+}
+
+func closeAndLogErr(closer Closer) {
+	err := closer.Close()
+	if err != nil {
+		slog.Error("Error closing: %v", err)
+	}
 }
