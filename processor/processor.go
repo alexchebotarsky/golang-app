@@ -48,13 +48,8 @@ func (p *Processor) Stop(ctx context.Context) error {
 	return nil
 }
 
-func (p *Processor) handle(subID string, handler event.Handler) {
-	sub := event.Event{
-		ID:           subID,
-		Subscription: p.PubSub.Subscription(subID),
-		Handler:      handler,
-	}
-	p.Events = append(p.Events, sub)
+func (p *Processor) handle(event event.Event) {
+	p.Events = append(p.Events, event)
 }
 
 func (p *Processor) use(middlewares ...middleware.Middleware) {
@@ -64,7 +59,7 @@ func (p *Processor) use(middlewares ...middleware.Middleware) {
 func (p *Processor) setupMiddlewares() {
 	for _, event := range p.Events {
 		for _, middleware := range p.Middlewares {
-			event.Handler = middleware(event.ID, event.Handler)
+			event.Handler = middleware(event.Name, event.Handler)
 		}
 	}
 }
@@ -72,5 +67,9 @@ func (p *Processor) setupMiddlewares() {
 func (p *Processor) setupEvents() {
 	p.use(middleware.Trace, middleware.Metrics)
 
-	p.handle("golang-app-add-article", event.AddArticle(p.DB))
+	p.handle(event.Event{
+		Name:         "AddArticle",
+		Subscription: p.PubSub.Subscription("golang-app-add-article"),
+		Handler:      event.AddArticle(p.DB),
+	})
 }

@@ -9,13 +9,13 @@ import (
 	"github.com/goodleby/golang-app/processor/event"
 )
 
-func Metrics(id string, next event.Handler) event.Handler {
+func Metrics(name string, next event.Handler) event.Handler {
 	return func(ctx context.Context, msg *pubsub.Message) {
 		start := time.Now()
 		next(ctx, msg)
 		duration := time.Since(start)
 
-		metrics.RecordEventProcessed(id)
+		metrics.RecordEventProcessed(name)
 		metrics.ObserveEventDuration(duration.Seconds())
 	}
 }

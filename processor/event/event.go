@@ -11,13 +11,13 @@ import (
 type Handler = func(ctx context.Context, msg *pubsub.Message)
 
 type Event struct {
-	ID           string
+	Name         string
 	Subscription *pubsub.Subscription
 	Handler      Handler
 }
 
 func (e *Event) Listen(ctx context.Context) {
 	if err := e.Subscription.Receive(ctx, e.Handler); err != nil {
-		slog.Error(fmt.Sprintf("Error listening to %q subscription: %v", e.ID, err), "subscriptionID", e.ID)
+		slog.Error(fmt.Sprintf("Error listening to %q subscription: %v", e.Name, err), "subscriptionName", e.Name)
 	}
 }
