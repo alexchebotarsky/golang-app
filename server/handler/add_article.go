@@ -10,25 +10,25 @@ import (
 )
 
 type ArticleInserter interface {
-	InsertArticle(ctx context.Context, article article.Article) error
+	InsertArticle(ctx context.Context, payload article.Payload) error
 }
 
 func AddArticle(articleInserter ArticleInserter) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		var article article.Article
-		if err := json.NewDecoder(r.Body).Decode(&article); err != nil {
-			HandleError(ctx, w, fmt.Errorf("error decoding request body: %v", err), http.StatusBadRequest, true)
+		var payload article.Payload
+		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+			HandleError(ctx, w, fmt.Errorf("error decoding article payload: %v", err), http.StatusBadRequest, true)
 			return
 		}
 
-		if err := article.Validate(); err != nil {
-			HandleError(ctx, w, fmt.Errorf("error invalid article: %v", err), http.StatusBadRequest, true)
+		if err := payload.Validate(); err != nil {
+			HandleError(ctx, w, fmt.Errorf("error invalid article payload: %v", err), http.StatusBadRequest, true)
 			return
 		}
 
-		if err := articleInserter.InsertArticle(ctx, article); err != nil {
+		if err := articleInserter.InsertArticle(ctx, payload); err != nil {
 			HandleError(ctx, w, fmt.Errorf("error inserting article: %v", err), http.StatusInternalServerError, true)
 			return
 		}

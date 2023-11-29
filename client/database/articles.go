@@ -52,22 +52,16 @@ func (c *Client) SelectArticle(ctx context.Context, id string) (*article.Article
 	return &article, nil
 }
 
-func (c *Client) InsertArticle(ctx context.Context, article article.Article) error {
+func (c *Client) InsertArticle(ctx context.Context, payload article.Payload) error {
 	ctx, span := tracing.StartSpan(ctx, "InsertArticle")
 	defer span.End()
 
-	query := `INSERT INTO articles (id, title, description, body) VALUES (:id, :title, :description, :body)`
+	query := `INSERT INTO articles (title, description, body) VALUES (:title, :description, :body)`
 
 	args := struct {
-		ID          string `db:"id"`
-		Title       string `db:"title"`
-		Description string `db:"description"`
-		Body        string `db:"body"`
+		article.Payload
 	}{
-		ID:          article.ID,
-		Title:       article.Title,
-		Description: article.Description,
-		Body:        article.Body,
+		Payload: payload,
 	}
 
 	if _, err := c.DB.NamedExecContext(ctx, query, args); err != nil {
@@ -96,24 +90,18 @@ func (c *Client) DeleteArticle(ctx context.Context, id string) error {
 	return nil
 }
 
-func (c *Client) UpdateArticle(ctx context.Context, id string, article article.Article) error {
+func (c *Client) UpdateArticle(ctx context.Context, id string, payload article.Payload) error {
 	ctx, span := tracing.StartSpan(ctx, "UpdateArticle")
 	defer span.End()
 
-	query := `UPDATE articles SET id = :new_id, title = :new_title, description = :new_description, body = :new_body WHERE id = :id`
+	query := `UPDATE articles SET title = :title, description = :description, body = :body WHERE id = :id`
 
 	args := struct {
-		ID             string `db:"id"`
-		NewID          string `db:"new_id"`
-		NewTitle       string `db:"new_title"`
-		NewDescription string `db:"new_description"`
-		NewBody        string `db:"new_body"`
+		article.Payload
+		ID string `db:"id"`
 	}{
-		ID:             id,
-		NewID:          article.ID,
-		NewTitle:       article.Title,
-		NewDescription: article.Description,
-		NewBody:        article.Body,
+		Payload: payload,
+		ID:      id,
 	}
 
 	if _, err := c.DB.NamedExecContext(ctx, query, args); err != nil {

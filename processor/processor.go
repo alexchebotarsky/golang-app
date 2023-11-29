@@ -37,6 +37,7 @@ func New(ctx context.Context, projectID string, pubsub PubSubClient, db DBClient
 }
 
 func (p *Processor) Start(ctx context.Context) {
+	slog.Info("Processor has started listening to events")
 	for _, event := range p.Events {
 		go event.Listen(ctx)
 	}

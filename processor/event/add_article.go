@@ -10,19 +10,19 @@ import (
 )
 
 type ArticleInserter interface {
-	InsertArticle(ctx context.Context, article article.Article) error
+	InsertArticle(ctx context.Context, payload article.Payload) error
 }
 
 func AddArticle(articleInserter ArticleInserter) Handler {
 	return func(ctx context.Context, msg *pubsub.Message) {
-		var article article.Article
-		if err := json.Unmarshal(msg.Data, &article); err != nil {
+		var payload article.Payload
+		if err := json.Unmarshal(msg.Data, &payload); err != nil {
 			msg.Ack()
 			HandleError(ctx, fmt.Errorf("error decoding message data: %v", err), true)
 			return
 		}
 
-		if err := articleInserter.InsertArticle(ctx, article); err != nil {
+		if err := articleInserter.InsertArticle(ctx, payload); err != nil {
 			msg.Nack()
 			HandleError(ctx, fmt.Errorf("error inserting article: %v", err), true)
 			return

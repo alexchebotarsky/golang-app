@@ -52,7 +52,7 @@ func (c *Client) FetchExampleData(ctx context.Context) (*ExampleData, error) {
 
 	var exampleData ExampleData
 	if err := json.NewDecoder(res.Body).Decode(&exampleData); err != nil {
-		return nil, fmt.Errorf("error decoding request body as json: %v", err)
+		return nil, fmt.Errorf("error decoding example data: %v", err)
 	}
 
 	return &exampleData, nil

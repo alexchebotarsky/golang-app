@@ -3,27 +3,27 @@ package article
 import "errors"
 
 type Article struct {
+	Payload
+	ID string `json:"id" db:"id"`
+}
+
+type Payload struct {
 	Title       string `json:"title" db:"title"`
 	Description string `json:"description" db:"description"`
 	Body        string `json:"body" db:"body"`
-	ID          string `json:"id" db:"id"`
 }
 
-func (a *Article) Validate() error {
-	if a.Title == "" {
-		return errors.New("article Title is empty")
+func (p *Payload) Validate() error {
+	if p.Title == "" {
+		return errors.New("article payload Title is empty")
 	}
 
-	if a.Description == "" {
-		return errors.New("article Description is empty")
+	if p.Description == "" {
+		return errors.New("article payload Description is empty")
 	}
 
-	if a.Body == "" {
-		return errors.New("article Body is empty")
-	}
-
-	if a.ID == "" {
-		return errors.New("article ID is empty")
+	if p.Body == "" {
+		return errors.New("article payload Body is empty")
 	}
 
 	return nil

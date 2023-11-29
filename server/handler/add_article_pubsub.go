@@ -6,23 +6,16 @@ import (
 	"fmt"
 	"net/http"
 
-	chi "github.com/go-chi/chi/v5"
 	"github.com/goodleby/golang-app/article"
-	"github.com/goodleby/golang-app/tracing"
 )
 
-type ArticleUpdater interface {
-	UpdateArticle(ctx context.Context, id string, payload article.Payload) error
+type AddArticlePublisher interface {
+	PublishAddArticle(ctx context.Context, payload article.Payload) error
 }
 
-func UpdateArticle(articleUpdater ArticleUpdater) http.HandlerFunc {
+func AddArticlePubSub(publisher AddArticlePublisher) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		span := tracing.SpanFromContext(ctx)
-
-		id := chi.URLParam(r, "id")
-
-		span.SetTag("id", id)
 
 		var payload article.Payload
 		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
@@ -35,11 +28,12 @@ func UpdateArticle(articleUpdater ArticleUpdater) http.HandlerFunc {
 			return
 		}
 
-		if err := articleUpdater.UpdateArticle(ctx, id, payload); err != nil {
-			HandleError(ctx, w, fmt.Errorf("error updating article: %v", err), http.StatusInternalServerError, true)
+		err := publisher.PublishAddArticle(ctx, payload)
+		if err != nil {
+			HandleError(ctx, w, fmt.Errorf("error publishing add article: %v", err), http.StatusInternalServerError, true)
 			return
 		}
 
-		w.WriteHeader(http.StatusNoContent)
+		w.WriteHeader(http.StatusAccepted)
 	}
 }

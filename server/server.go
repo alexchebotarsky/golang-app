@@ -92,6 +92,7 @@ func (s *Server) setupRoutes() {
 		r.Use(middleware.Trace, middleware.Metrics)
 
 		r.Get("/example", handler.GetExampleData(s.Example))
+		r.Post("/pubsub/articles", handler.AddArticlePubSub(s.PubSub))
 
 		// Auth routes
 		r.Group(func(r chi.Router) {
