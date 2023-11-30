@@ -12,7 +12,7 @@ import (
 )
 
 type ArticleUpdater interface {
-	UpdateArticle(ctx context.Context, id string, payload article.Payload) error
+	UpdateArticle(ctx context.Context, id string, payload article.Payload) (*article.Article, error)
 }
 
 func UpdateArticle(articleUpdater ArticleUpdater) http.HandlerFunc {
@@ -35,11 +35,16 @@ func UpdateArticle(articleUpdater ArticleUpdater) http.HandlerFunc {
 			return
 		}
 
-		if err := articleUpdater.UpdateArticle(ctx, id, payload); err != nil {
+		article, err := articleUpdater.UpdateArticle(ctx, id, payload)
+		if err != nil {
 			HandleError(ctx, w, fmt.Errorf("error updating article: %v", err), http.StatusInternalServerError, true)
 			return
 		}
 
-		w.WriteHeader(http.StatusNoContent)
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		err = json.NewEncoder(w).Encode(article)
+		handleWritingErr(err)
 	}
 }

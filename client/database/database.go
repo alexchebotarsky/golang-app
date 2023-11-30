@@ -2,8 +2,9 @@ package database
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"log/slog"
+	"strings"
 
 	"github.com/jmoiron/sqlx"
 
@@ -12,7 +13,8 @@ import (
 )
 
 type Client struct {
-	DB *sqlx.DB
+	DB                *sqlx.DB
+	ArticleStatements *ArticleStatements
 }
 
 type Credentials struct {
@@ -26,6 +28,7 @@ type Credentials struct {
 
 func New(ctx context.Context, creds Credentials) (*Client, error) {
 	c := &Client{}
+	var err error
 
 	dataSourceName := fmt.Sprintf("postgres://%s:%s@%s:%d/%s%s",
 		creds.User,
@@ -36,30 +39,33 @@ func New(ctx context.Context, creds Credentials) (*Client, error) {
 		creds.Options,
 	)
 
-	db, err := sqlx.ConnectContext(ctx, "postgres", dataSourceName)
+	c.DB, err = sqlx.ConnectContext(ctx, "postgres", dataSourceName)
 	if err != nil {
 		return nil, fmt.Errorf("error connecting to database, %+v", err)
 	}
-	c.DB = db
+
+	c.ArticleStatements, err = c.prepareArticleStatements(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("error preparing article statements: %v", err)
+	}
 
 	return c, nil
 }
 
 func (c *Client) Close() error {
+	errStrings := []string{}
+
 	if err := c.DB.Close(); err != nil {
-		return err
+		errStrings = append(errStrings, err.Error())
+	}
+
+	if err := c.ArticleStatements.Close(); err != nil {
+		errStrings = append(errStrings, err.Error())
+	}
+
+	if len(errStrings) > 0 {
+		return errors.New(strings.Join(errStrings, "; "))
 	}
 
 	return nil
-}
-
-type Closer interface {
-	Close() error
-}
-
-func closeAndLogErr(closer Closer) {
-	err := closer.Close()
-	if err != nil {
-		slog.Error("Error closing: %v", err)
-	}
 }

@@ -10,7 +10,7 @@ import (
 )
 
 type ArticleInserter interface {
-	InsertArticle(ctx context.Context, payload article.Payload) error
+	InsertArticle(ctx context.Context, payload article.Payload) (*article.Article, error)
 }
 
 func AddArticle(articleInserter ArticleInserter) Handler {
@@ -22,9 +22,10 @@ func AddArticle(articleInserter ArticleInserter) Handler {
 			return
 		}
 
-		if err := articleInserter.InsertArticle(ctx, payload); err != nil {
+		_, err := articleInserter.InsertArticle(ctx, payload)
+		if err != nil {
 			msg.Nack()
-			HandleError(ctx, fmt.Errorf("error inserting article: %v", err), true)
+			HandleError(ctx, fmt.Errorf("error adding an article: %v", err), true)
 			return
 		}
 

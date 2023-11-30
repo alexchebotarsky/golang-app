@@ -10,7 +10,7 @@ import (
 )
 
 type ArticleInserter interface {
-	InsertArticle(ctx context.Context, payload article.Payload) error
+	InsertArticle(ctx context.Context, payload article.Payload) (*article.Article, error)
 }
 
 func AddArticle(articleInserter ArticleInserter) http.HandlerFunc {
@@ -28,11 +28,16 @@ func AddArticle(articleInserter ArticleInserter) http.HandlerFunc {
 			return
 		}
 
-		if err := articleInserter.InsertArticle(ctx, payload); err != nil {
-			HandleError(ctx, w, fmt.Errorf("error inserting article: %v", err), http.StatusInternalServerError, true)
+		article, err := articleInserter.InsertArticle(ctx, payload)
+		if err != nil {
+			HandleError(ctx, w, fmt.Errorf("error adding an article: %v", err), http.StatusInternalServerError, true)
 			return
 		}
 
-		w.WriteHeader(http.StatusNoContent)
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		err = json.NewEncoder(w).Encode(article)
+		handleWritingErr(err)
 	}
 }
