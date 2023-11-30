@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	chi "github.com/go-chi/chi/v5"
+	"github.com/goodleby/golang-app/client/database"
 	"github.com/goodleby/golang-app/tracing"
 )
 
@@ -23,7 +24,12 @@ func DeleteArticle(articleDeleter ArticleDeleter) http.HandlerFunc {
 		span.SetTag("id", id)
 
 		if err := articleDeleter.DeleteArticle(ctx, id); err != nil {
-			HandleError(ctx, w, fmt.Errorf("error deleting article: %v", err), http.StatusInternalServerError, true)
+			switch err.(type) {
+			case database.ErrNotFound:
+				HandleError(ctx, w, fmt.Errorf("error deleting article with id %q: %v", id, err), http.StatusNotFound, false)
+			default:
+				HandleError(ctx, w, fmt.Errorf("error deleting article: %v", err), http.StatusInternalServerError, true)
+			}
 			return
 		}
 

@@ -139,8 +139,18 @@ func (c *Client) DeleteArticle(ctx context.Context, id string) error {
 		ID: id,
 	}
 
-	if _, err := c.ArticleStatements.Delete.ExecContext(ctx, args); err != nil {
+	result, err := c.ArticleStatements.Delete.ExecContext(ctx, args)
+	if err != nil {
 		return fmt.Errorf("error deleting article: %v", err)
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("error getting affected rows: %v", err)
+	}
+
+	if rows == 0 {
+		return ErrNotFound{Err: errors.New("no rows to delete")}
 	}
 
 	return nil
