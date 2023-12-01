@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/goodleby/golang-app/client"
 	"github.com/goodleby/golang-app/client/auth"
 	"github.com/goodleby/golang-app/server/handler"
 )
@@ -21,18 +22,23 @@ func Auth(tokenParser TokenParser, expectedAccessLevel int) func(next http.Handl
 
 			tokenCookie, err := r.Cookie("token")
 			if err != nil {
-				handler.HandleError(ctx, w, fmt.Errorf("error reading auth token cookie: %v", err), http.StatusUnauthorized, true)
+				handler.HandleError(ctx, w, fmt.Errorf("error reading auth token cookie: %v", err), http.StatusUnauthorized, false)
 				return
 			}
 
 			claims, err := tokenParser.ParseToken(ctx, tokenCookie.Value)
 			if err != nil {
-				handler.HandleError(ctx, w, fmt.Errorf("error validating auth token: %v", err), http.StatusUnauthorized, true)
+				switch err.(type) {
+				case client.ErrUnauthorized:
+					handler.HandleError(ctx, w, fmt.Errorf("error validating auth token: %v", err), http.StatusUnauthorized, false)
+				default:
+					handler.HandleError(ctx, w, fmt.Errorf("error validating auth token: %v", err), http.StatusInternalServerError, true)
+				}
 				return
 			}
 
 			if expectedAccessLevel > claims.AccessLevel {
-				handler.HandleError(ctx, w, errors.New("insufficient access level"), http.StatusForbidden, true)
+				handler.HandleError(ctx, w, errors.New("insufficient access level"), http.StatusForbidden, false)
 				return
 			}
 

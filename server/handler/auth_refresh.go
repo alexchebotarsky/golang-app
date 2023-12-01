@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+
+	"github.com/goodleby/golang-app/client"
 )
 
 type TokenRefresher interface {
@@ -17,13 +19,18 @@ func AuthRefresh(tokenRefresher TokenRefresher) http.HandlerFunc {
 
 		tokenCookie, err := r.Cookie("token")
 		if err != nil {
-			HandleError(ctx, w, fmt.Errorf("error reading auth token cookie: %v", err), http.StatusUnauthorized, true)
+			HandleError(ctx, w, fmt.Errorf("error reading auth token cookie: %v", err), http.StatusUnauthorized, false)
 			return
 		}
 
 		token, expires, err := tokenRefresher.RefreshToken(ctx, tokenCookie.Value)
 		if err != nil {
-			HandleError(ctx, w, fmt.Errorf("error refreshing token: %v", err), http.StatusUnauthorized, true)
+			switch err.(type) {
+			case client.ErrUnauthorized:
+				HandleError(ctx, w, fmt.Errorf("error refreshing token: %v", err), http.StatusUnauthorized, false)
+			default:
+				HandleError(ctx, w, fmt.Errorf("error refreshing token: %v", err), http.StatusInternalServerError, true)
+			}
 			return
 		}
 

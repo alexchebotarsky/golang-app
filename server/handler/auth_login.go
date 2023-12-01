@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+
+	"github.com/goodleby/golang-app/client"
 )
 
 type AuthLoginPayload struct {
@@ -23,13 +25,18 @@ func AuthLogin(tokenCreator TokenCreator) http.HandlerFunc {
 
 		var payload AuthLoginPayload
 		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-			HandleError(ctx, w, fmt.Errorf("error decoding auth payload: %v", err), http.StatusBadRequest, true)
+			HandleError(ctx, w, fmt.Errorf("error decoding auth payload: %v", err), http.StatusBadRequest, false)
 			return
 		}
 
 		token, expires, err := tokenCreator.NewToken(ctx, payload.Role, payload.Key)
 		if err != nil {
-			HandleError(ctx, w, fmt.Errorf("error creating new auth token: %v", err), http.StatusUnauthorized, true)
+			switch err.(type) {
+			case client.ErrUnauthorized:
+				HandleError(ctx, w, fmt.Errorf("error creating new auth token: %v", err), http.StatusUnauthorized, false)
+			default:
+				HandleError(ctx, w, fmt.Errorf("error creating new auth token: %v", err), http.StatusInternalServerError, true)
+			}
 			return
 		}
 
