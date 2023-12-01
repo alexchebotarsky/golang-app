@@ -19,12 +19,12 @@ func AddArticlePubSub(publisher AddArticlePublisher) http.HandlerFunc {
 
 		var payload article.Payload
 		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-			HandleError(ctx, w, fmt.Errorf("error decoding article payload: %v", err), http.StatusBadRequest, true)
+			HandleError(ctx, w, fmt.Errorf("error decoding article payload: %v", err), http.StatusBadRequest, false)
 			return
 		}
 
 		if err := payload.Validate(); err != nil {
-			HandleError(ctx, w, fmt.Errorf("error invalid article payload: %v", err), http.StatusBadRequest, true)
+			HandleError(ctx, w, fmt.Errorf("error invalid article payload: %v", err), http.StatusBadRequest, false)
 			return
 		}
 
