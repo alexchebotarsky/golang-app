@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	chi "github.com/go-chi/chi/v5"
 	"github.com/goodleby/golang-app/article"
@@ -12,7 +13,7 @@ import (
 )
 
 type ArticleUpdater interface {
-	UpdateArticle(ctx context.Context, id string, payload article.Payload) (*article.Article, error)
+	UpdateArticle(ctx context.Context, id int, payload article.Payload) (*article.Article, error)
 }
 
 func UpdateArticle(articleUpdater ArticleUpdater) http.HandlerFunc {
@@ -20,9 +21,13 @@ func UpdateArticle(articleUpdater ArticleUpdater) http.HandlerFunc {
 		ctx := r.Context()
 		span := tracing.SpanFromContext(ctx)
 
-		id := chi.URLParam(r, "id")
+		id, err := strconv.Atoi(chi.URLParam(r, "id"))
+		if err != nil {
+			HandleError(ctx, w, fmt.Errorf("error converting id to int: %v", err), http.StatusBadRequest, false)
+			return
+		}
 
-		span.SetTag("id", id)
+		span.SetTag("id", chi.URLParam(r, "id"))
 
 		var payload article.Payload
 		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {

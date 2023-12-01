@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	chi "github.com/go-chi/chi/v5"
 	"github.com/goodleby/golang-app/article"
@@ -13,7 +14,7 @@ import (
 )
 
 type ArticleSelector interface {
-	SelectArticle(ctx context.Context, id string) (*article.Article, error)
+	SelectArticle(ctx context.Context, id int) (*article.Article, error)
 }
 
 func GetArticle(articleSelector ArticleSelector) http.HandlerFunc {
@@ -21,15 +22,19 @@ func GetArticle(articleSelector ArticleSelector) http.HandlerFunc {
 		ctx := r.Context()
 		span := tracing.SpanFromContext(ctx)
 
-		id := chi.URLParam(r, "id")
+		id, err := strconv.Atoi(chi.URLParam(r, "id"))
+		if err != nil {
+			HandleError(ctx, w, fmt.Errorf("error converting id to int: %v", err), http.StatusBadRequest, false)
+			return
+		}
 
-		span.SetTag("id", id)
+		span.SetTag("id", chi.URLParam(r, "id"))
 
 		article, err := articleSelector.SelectArticle(ctx, id)
 		if err != nil {
 			switch err.(type) {
 			case database.ErrNotFound:
-				HandleError(ctx, w, fmt.Errorf("article with id %q not found: %v", id, err), http.StatusNotFound, false)
+				HandleError(ctx, w, fmt.Errorf("article with id %d not found: %v", id, err), http.StatusNotFound, false)
 			default:
 				HandleError(ctx, w, fmt.Errorf("error selecting article: %v", err), http.StatusInternalServerError, true)
 			}

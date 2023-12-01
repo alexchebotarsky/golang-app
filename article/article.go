@@ -4,7 +4,7 @@ import "errors"
 
 type Article struct {
 	Payload
-	ID string `json:"id" db:"id"`
+	ID int `json:"id" db:"id"`
 }
 
 type Payload struct {

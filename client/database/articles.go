@@ -88,12 +88,12 @@ func (c *Client) SelectAllArticles(ctx context.Context) ([]article.Article, erro
 	return articles, nil
 }
 
-func (c *Client) SelectArticle(ctx context.Context, id string) (*article.Article, error) {
+func (c *Client) SelectArticle(ctx context.Context, id int) (*article.Article, error) {
 	ctx, span := tracing.StartSpan(ctx, "SelectArticle")
 	defer span.End()
 
 	args := struct {
-		ID string `db:"id"`
+		ID int `db:"id"`
 	}{
 		ID: id,
 	}
@@ -104,7 +104,7 @@ func (c *Client) SelectArticle(ctx context.Context, id string) (*article.Article
 		case sql.ErrNoRows:
 			return nil, ErrNotFound{Err: err}
 		default:
-			return nil, fmt.Errorf("error selecting article with id %q: %v", id, err)
+			return nil, fmt.Errorf("error selecting article with id %d: %v", id, err)
 		}
 	}
 
@@ -129,12 +129,12 @@ func (c *Client) InsertArticle(ctx context.Context, payload article.Payload) (*a
 	return &article, nil
 }
 
-func (c *Client) DeleteArticle(ctx context.Context, id string) error {
+func (c *Client) DeleteArticle(ctx context.Context, id int) error {
 	ctx, span := tracing.StartSpan(ctx, "DeleteArticle")
 	defer span.End()
 
 	args := struct {
-		ID string `db:"id"`
+		ID int `db:"id"`
 	}{
 		ID: id,
 	}
@@ -156,13 +156,13 @@ func (c *Client) DeleteArticle(ctx context.Context, id string) error {
 	return nil
 }
 
-func (c *Client) UpdateArticle(ctx context.Context, id string, payload article.Payload) (*article.Article, error) {
+func (c *Client) UpdateArticle(ctx context.Context, id int, payload article.Payload) (*article.Article, error) {
 	ctx, span := tracing.StartSpan(ctx, "UpdateArticle")
 	defer span.End()
 
 	args := struct {
 		article.Payload
-		ID string `db:"id"`
+		ID int `db:"id"`
 	}{
 		Payload: payload,
 		ID:      id,
