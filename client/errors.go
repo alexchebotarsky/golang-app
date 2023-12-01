@@ -1,4 +1,4 @@
-package database
+package client
 
 type ErrNotFound struct {
 	Err error

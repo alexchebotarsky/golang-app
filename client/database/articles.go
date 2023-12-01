@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/goodleby/golang-app/article"
+	"github.com/goodleby/golang-app/client"
 	"github.com/goodleby/golang-app/tracing"
 	"github.com/jmoiron/sqlx"
 )
@@ -102,7 +103,7 @@ func (c *Client) SelectArticle(ctx context.Context, id int) (*article.Article, e
 	if err := c.ArticleStatements.Select.GetContext(ctx, &article, args); err != nil {
 		switch err {
 		case sql.ErrNoRows:
-			return nil, ErrNotFound{Err: err}
+			return nil, client.ErrNotFound{Err: err}
 		default:
 			return nil, fmt.Errorf("error selecting article with id %d: %v", id, err)
 		}
@@ -150,7 +151,7 @@ func (c *Client) DeleteArticle(ctx context.Context, id int) error {
 	}
 
 	if rows == 0 {
-		return ErrNotFound{Err: errors.New("no rows to delete")}
+		return client.ErrNotFound{Err: errors.New("no rows to delete")}
 	}
 
 	return nil
