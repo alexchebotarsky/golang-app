@@ -45,7 +45,6 @@ func TestHandleError(t *testing.T) {
 				t.Fatalf("HandleError() status = %v, want %v", w.Code, tt.wantStatus)
 			}
 
-			// Decode the response body into a article.Article struct for comparison.
 			var resBody errorResponse
 			if err := json.NewDecoder(w.Body).Decode(&resBody); err != nil {
 				t.Fatalf("HandleError() error json decoding response body: %v", err)
