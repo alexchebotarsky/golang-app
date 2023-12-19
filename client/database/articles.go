@@ -81,7 +81,7 @@ func (c *Client) SelectAllArticles(ctx context.Context) ([]article.Article, erro
 	ctx, span := tracing.StartSpan(ctx, "SelectAllArticles")
 	defer span.End()
 
-	var articles []article.Article
+	articles := []article.Article{}
 	if err := c.ArticleStatements.SelectAll.SelectContext(ctx, &articles); err != nil {
 		return nil, fmt.Errorf("error selecting articles: %v", err)
 	}
