@@ -114,7 +114,7 @@ func setupClients(ctx context.Context, env *env.Config) (*Clients, error) {
 func setupServices(ctx context.Context, env *env.Config, clients *Clients) ([]Service, error) {
 	var services []Service
 
-	server, err := server.New(ctx, env.Port, clients.DB, clients.Auth, clients.PubSub, clients.Example)
+	server, err := server.New(ctx, env.Port, env.AllowedOrigin, clients.DB, clients.Auth, clients.PubSub, clients.Example)
 	if err != nil {
 		return nil, fmt.Errorf("error creating new server: %v", err)
 	}

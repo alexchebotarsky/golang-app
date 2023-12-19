@@ -8,6 +8,7 @@ import (
 	"time"
 
 	chi "github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
 	"github.com/goodleby/golang-app/client/auth"
 	"github.com/goodleby/golang-app/server/handler"
 	"github.com/goodleby/golang-app/server/middleware"
@@ -46,7 +47,7 @@ type Server struct {
 	Example ExampleClient
 }
 
-func New(ctx context.Context, port uint16, db DBClient, auth AuthClient, pubsub PubSubClient, example ExampleClient) (*Server, error) {
+func New(ctx context.Context, port uint16, allowedOrigin string, db DBClient, auth AuthClient, pubsub PubSubClient, example ExampleClient) (*Server, error) {
 	s := &Server{}
 
 	s.Port = port
@@ -62,7 +63,7 @@ func New(ctx context.Context, port uint16, db DBClient, auth AuthClient, pubsub 
 	s.PubSub = pubsub
 	s.Example = example
 
-	s.setupRoutes()
+	s.setupRoutes(allowedOrigin)
 
 	return s, nil
 }
@@ -84,12 +85,18 @@ func (s *Server) Stop(ctx context.Context) error {
 	return nil
 }
 
-func (s *Server) setupRoutes() {
+func (s *Server) setupRoutes(allowedOrigin string) {
 	s.Router.Get("/_healthz", handler.Health)
 	s.Router.Handle("/metrics", promhttp.Handler())
 
 	s.Router.Route(v1API, func(r chi.Router) {
 		r.Use(middleware.Trace, middleware.Metrics)
+
+		r.Use(cors.Handler(cors.Options{
+			AllowedOrigins:   []string{allowedOrigin},
+			AllowedMethods:   []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodOptions},
+			AllowCredentials: true,
+		}))
 
 		r.Get("/example", handler.GetExampleData(s.Example))
 		r.Post("/pubsub/articles", handler.AddArticlePubSub(s.PubSub))

@@ -25,8 +25,9 @@ type Config struct {
 
 	PubSubProjectID string `env:"PUBSUB_PROJECT_ID,required"`
 
-	Port        uint16 `env:"PORT,default=8000"`
-	ServiceName string `env:"SERVICE_NAME,default=unknown"`
+	Port          uint16 `env:"PORT,default=8000"`
+	AllowedOrigin string `env:"ALLOWED_ORIGIN,default="`
+	ServiceName   string `env:"SERVICE_NAME,default=unknown"`
 }
 
 func LoadConfig(ctx context.Context, envPath string) (*Config, error) {
