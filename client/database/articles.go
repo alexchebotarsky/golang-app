@@ -24,8 +24,24 @@ type ArticleStatements struct {
 func (s *ArticleStatements) Close() error {
 	errStrings := []string{}
 
+	if err := s.SelectAll.Close(); err != nil {
+		errStrings = append(errStrings, fmt.Sprintf("error closing select all statement: %v", err))
+	}
+
 	if err := s.Select.Close(); err != nil {
 		errStrings = append(errStrings, fmt.Sprintf("error closing select statement: %v", err))
+	}
+
+	if err := s.Insert.Close(); err != nil {
+		errStrings = append(errStrings, fmt.Sprintf("error closing insert statement: %v", err))
+	}
+
+	if err := s.Delete.Close(); err != nil {
+		errStrings = append(errStrings, fmt.Sprintf("error closing delete statement: %v", err))
+	}
+
+	if err := s.Update.Close(); err != nil {
+		errStrings = append(errStrings, fmt.Sprintf("error closing update statement: %v", err))
 	}
 
 	if len(errStrings) > 0 {
