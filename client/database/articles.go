@@ -55,42 +55,37 @@ func (c *Client) prepareArticleStatements(ctx context.Context) (*ArticleStatemen
 	var statements ArticleStatements
 	var err error
 
-	query := `SELECT id, title, description, body FROM articles`
-	statements.SelectAll, err = c.DB.PreparexContext(ctx, query)
+	statements.SelectAll, err = c.prepareSelectAllArticles(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("error preparing select all article statement: %v", err)
+		return nil, fmt.Errorf("error preparing select all articles statement: %v", err)
 	}
 
-	query = `SELECT id, title, description, body FROM articles WHERE id = :id`
-	statements.Select, err = c.DB.PrepareNamedContext(ctx, query)
+	statements.Select, err = c.prepareSelectArticle(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("error preparing select article statement: %v", err)
 	}
 
-	query = `INSERT INTO articles (title, description, body)
-	        	VALUES (:title, :description, :body)
-						RETURNING id, title, description, body`
-	statements.Insert, err = c.DB.PrepareNamedContext(ctx, query)
+	statements.Insert, err = c.prepareInsertArticle(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("error preparing insert article statement: %v", err)
 	}
 
-	query = `DELETE FROM articles WHERE id = :id`
-	statements.Delete, err = c.DB.PrepareNamedContext(ctx, query)
+	statements.Delete, err = c.prepareDeleteArticle(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("error preparing delete article statement: %v", err)
 	}
 
-	query = `UPDATE articles
-						SET title = :title, description = :description, body = :body
-						WHERE id = :id
-						RETURNING id, title, description, body`
-	statements.Update, err = c.DB.PrepareNamedContext(ctx, query)
+	statements.Update, err = c.prepareUpdateArticle(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("error preparing update article statement: %v", err)
 	}
 
 	return &statements, nil
+}
+
+func (c *Client) prepareSelectAllArticles(ctx context.Context) (*sqlx.Stmt, error) {
+	query := "SELECT id, title, description, body FROM articles"
+	return c.DB.PreparexContext(ctx, query)
 }
 
 func (c *Client) SelectAllArticles(ctx context.Context) ([]article.Article, error) {
@@ -103,6 +98,11 @@ func (c *Client) SelectAllArticles(ctx context.Context) ([]article.Article, erro
 	}
 
 	return articles, nil
+}
+
+func (c *Client) prepareSelectArticle(ctx context.Context) (*sqlx.NamedStmt, error) {
+	query := "SELECT id, title, description, body FROM articles WHERE id = :id"
+	return c.DB.PrepareNamedContext(ctx, query)
 }
 
 func (c *Client) SelectArticle(ctx context.Context, id int) (*article.Article, error) {
@@ -128,6 +128,13 @@ func (c *Client) SelectArticle(ctx context.Context, id int) (*article.Article, e
 	return &article, nil
 }
 
+func (c *Client) prepareInsertArticle(ctx context.Context) (*sqlx.NamedStmt, error) {
+	query := `INSERT INTO articles (title, description, body)
+	        	VALUES (:title, :description, :body)
+						RETURNING id, title, description, body`
+	return c.DB.PrepareNamedContext(ctx, query)
+}
+
 func (c *Client) InsertArticle(ctx context.Context, payload article.Payload) (*article.Article, error) {
 	ctx, span := tracing.StartSpan(ctx, "InsertArticle")
 	defer span.End()
@@ -144,6 +151,11 @@ func (c *Client) InsertArticle(ctx context.Context, payload article.Payload) (*a
 	}
 
 	return &article, nil
+}
+
+func (c *Client) prepareDeleteArticle(ctx context.Context) (*sqlx.NamedStmt, error) {
+	query := `DELETE FROM articles WHERE id = :id`
+	return c.DB.PrepareNamedContext(ctx, query)
 }
 
 func (c *Client) DeleteArticle(ctx context.Context, id int) error {
@@ -171,6 +183,14 @@ func (c *Client) DeleteArticle(ctx context.Context, id int) error {
 	}
 
 	return nil
+}
+
+func (c *Client) prepareUpdateArticle(ctx context.Context) (*sqlx.NamedStmt, error) {
+	query := `UPDATE articles
+						SET title = :title, description = :description, body = :body
+						WHERE id = :id
+						RETURNING id, title, description, body`
+	return c.DB.PrepareNamedContext(ctx, query)
 }
 
 func (c *Client) UpdateArticle(ctx context.Context, id int, payload article.Payload) (*article.Article, error) {

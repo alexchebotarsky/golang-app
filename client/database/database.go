@@ -55,11 +55,11 @@ func New(ctx context.Context, creds Credentials) (*Client, error) {
 func (c *Client) Close() error {
 	errStrings := []string{}
 
-	if err := c.DB.Close(); err != nil {
+	if err := c.ArticleStatements.Close(); err != nil {
 		errStrings = append(errStrings, err.Error())
 	}
 
-	if err := c.ArticleStatements.Close(); err != nil {
+	if err := c.DB.Close(); err != nil {
 		errStrings = append(errStrings, err.Error())
 	}
 
