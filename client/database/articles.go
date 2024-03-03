@@ -13,44 +13,6 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type ArticleStatements struct {
-	SelectAll *sqlx.Stmt
-	Select    *sqlx.NamedStmt
-	Insert    *sqlx.NamedStmt
-	Delete    *sqlx.NamedStmt
-	Update    *sqlx.NamedStmt
-}
-
-func (s *ArticleStatements) Close() error {
-	errStrings := []string{}
-
-	if err := s.SelectAll.Close(); err != nil {
-		errStrings = append(errStrings, fmt.Sprintf("error closing select all statement: %v", err))
-	}
-
-	if err := s.Select.Close(); err != nil {
-		errStrings = append(errStrings, fmt.Sprintf("error closing select statement: %v", err))
-	}
-
-	if err := s.Insert.Close(); err != nil {
-		errStrings = append(errStrings, fmt.Sprintf("error closing insert statement: %v", err))
-	}
-
-	if err := s.Delete.Close(); err != nil {
-		errStrings = append(errStrings, fmt.Sprintf("error closing delete statement: %v", err))
-	}
-
-	if err := s.Update.Close(); err != nil {
-		errStrings = append(errStrings, fmt.Sprintf("error closing update statement: %v", err))
-	}
-
-	if len(errStrings) > 0 {
-		return errors.New(strings.Join(errStrings, "; "))
-	}
-
-	return nil
-}
-
 func (c *Client) prepareArticleStatements(ctx context.Context) (*ArticleStatements, error) {
 	var statements ArticleStatements
 	var err error
@@ -211,4 +173,42 @@ func (c *Client) UpdateArticle(ctx context.Context, id int, payload article.Payl
 	}
 
 	return &article, nil
+}
+
+type ArticleStatements struct {
+	SelectAll *sqlx.Stmt
+	Select    *sqlx.NamedStmt
+	Insert    *sqlx.NamedStmt
+	Delete    *sqlx.NamedStmt
+	Update    *sqlx.NamedStmt
+}
+
+func (s *ArticleStatements) Close() error {
+	errStrings := []string{}
+
+	if err := s.SelectAll.Close(); err != nil {
+		errStrings = append(errStrings, fmt.Sprintf("error closing select all statement: %v", err))
+	}
+
+	if err := s.Select.Close(); err != nil {
+		errStrings = append(errStrings, fmt.Sprintf("error closing select statement: %v", err))
+	}
+
+	if err := s.Insert.Close(); err != nil {
+		errStrings = append(errStrings, fmt.Sprintf("error closing insert statement: %v", err))
+	}
+
+	if err := s.Delete.Close(); err != nil {
+		errStrings = append(errStrings, fmt.Sprintf("error closing delete statement: %v", err))
+	}
+
+	if err := s.Update.Close(); err != nil {
+		errStrings = append(errStrings, fmt.Sprintf("error closing update statement: %v", err))
+	}
+
+	if len(errStrings) > 0 {
+		return errors.New(strings.Join(errStrings, "; "))
+	}
+
+	return nil
 }
