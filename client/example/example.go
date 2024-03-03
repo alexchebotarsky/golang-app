@@ -50,6 +50,10 @@ func (c *Client) FetchExampleData(ctx context.Context) (*ExampleData, error) {
 		return nil, fmt.Errorf("error doing http request: %v", err)
 	}
 
+	if res.StatusCode >= 400 {
+		return nil, fmt.Errorf("received non-successful status code: %s", res.Status)
+	}
+
 	var exampleData ExampleData
 	if err := json.NewDecoder(res.Body).Decode(&exampleData); err != nil {
 		return nil, fmt.Errorf("error decoding example data: %v", err)
