@@ -26,12 +26,10 @@ func main() {
 
 	if err := tracing.Init(env.ServiceName); err != nil {
 		slog.Error(fmt.Sprintf("Error initializing tracing: %v", err))
-		os.Exit(1)
 	}
 
 	if err := metrics.Init(); err != nil {
 		slog.Error(fmt.Sprintf("Error initializing metrics: %v", err))
-		os.Exit(1)
 	}
 
 	app, err := app.New(ctx, env)
