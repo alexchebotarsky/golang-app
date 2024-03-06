@@ -3,6 +3,7 @@ package env
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
 	"github.com/joho/godotenv"
 	"github.com/sethvargo/go-envconfig"
@@ -30,11 +31,12 @@ type Config struct {
 	ServiceName   string `env:"SERVICE_NAME,default=unknown"`
 }
 
-func LoadConfig(ctx context.Context, envPath string) (*Config, error) {
+func LoadConfig(ctx context.Context) (*Config, error) {
 	var c Config
 
-	if err := godotenv.Load(envPath); err != nil {
-		return nil, fmt.Errorf("error loading environment variables: %v", err)
+	// We are loading env variables from .env file only for local development
+	if err := godotenv.Load(".env"); err != nil {
+		slog.Debug("error loading .env file: %v", err)
 	}
 
 	if err := envconfig.Process(ctx, &c); err != nil {
