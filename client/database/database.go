@@ -2,10 +2,9 @@ package database
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"strings"
 
+	"github.com/goodleby/golang-app/client"
 	"github.com/jmoiron/sqlx"
 
 	// Postgres driver
@@ -53,18 +52,18 @@ func New(ctx context.Context, creds Credentials) (*Client, error) {
 }
 
 func (c *Client) Close() error {
-	errStrings := []string{}
+	errs := []error{}
 
 	if err := c.ArticleStatements.Close(); err != nil {
-		errStrings = append(errStrings, err.Error())
+		errs = append(errs, fmt.Errorf("error closing article statements: %v", err))
 	}
 
 	if err := c.DB.Close(); err != nil {
-		errStrings = append(errStrings, err.Error())
+		errs = append(errs, err)
 	}
 
-	if len(errStrings) > 0 {
-		return errors.New(strings.Join(errStrings, "; "))
+	if len(errs) > 0 {
+		return client.ErrMultiple{Errs: errs}
 	}
 
 	return nil
