@@ -12,7 +12,7 @@ type TracedTransport struct {
 	http.RoundTripper
 }
 
-func (tt TracedTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+func (tt *TracedTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	_, span := StartSpan(req.Context(), "RoundTrip")
 	defer span.End()
 
