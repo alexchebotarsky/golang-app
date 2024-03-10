@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"fmt"
+	"net/url"
 
 	"github.com/goodleby/golang-app/client"
 	"github.com/jmoiron/sqlx"
@@ -16,31 +17,13 @@ type Client struct {
 	ArticleStatements *ArticleStatements
 }
 
-type Credentials struct {
-	User     string
-	Password string
-	Host     string
-	Port     uint16
-	Name     string
-	Options  string
-}
-
 func New(ctx context.Context, creds Credentials) (*Client, error) {
 	c := &Client{}
 	var err error
 
-	dataSourceName := fmt.Sprintf("postgres://%s:%s@%s:%d/%s%s",
-		creds.User,
-		creds.Password,
-		creds.Host,
-		creds.Port,
-		creds.Name,
-		creds.Options,
-	)
-
-	c.DB, err = sqlx.ConnectContext(ctx, "postgres", dataSourceName)
+	c.DB, err = sqlx.ConnectContext(ctx, "postgres", creds.ToConnectionString())
 	if err != nil {
-		return nil, fmt.Errorf("error connecting to database, %+v", err)
+		return nil, fmt.Errorf("error connecting to database: %v", err)
 	}
 
 	c.ArticleStatements, err = c.prepareArticleStatements(ctx)
@@ -67,4 +50,24 @@ func (c *Client) Close() error {
 	}
 
 	return nil
+}
+
+type Credentials struct {
+	User     string
+	Password string
+	Host     string
+	Port     uint16
+	Name     string
+	Options  string
+}
+
+func (c *Credentials) ToConnectionString() string {
+	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s%s",
+		c.User,
+		url.QueryEscape(c.Password),
+		c.Host,
+		c.Port,
+		c.Name,
+		c.Options,
+	)
 }
