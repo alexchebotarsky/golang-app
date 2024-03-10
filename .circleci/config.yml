@@ -1,0 +1,132 @@
+version: 2.1
+
+workflows:
+  main:
+    jobs:
+      - build:
+          context: 'main'
+      - test
+      - approve_deploy_stage:
+          type: approval
+      - deploy_stage:
+          context: 'main'
+          requires:
+            - build
+            - test
+            - approve_deploy_stage
+      - deploy_prod:
+          context: 'main'
+          requires:
+            - build
+            - test
+          filters:
+            branches:
+              only:
+                - main
+
+jobs:
+  build:
+    executor: docker_executor
+    steps:
+      - checkout
+      - setup_docker
+      - docker_login
+      - docker_build
+      - docker_push
+  test:
+    executor: golang_executor
+    steps:
+      - checkout
+      - go_test
+  deploy_prod:
+    executor: gcloud_executor
+    steps:
+      - checkout
+      - deploy_to_env:
+          env: prod
+  deploy_stage:
+    executor: gcloud_executor
+    steps:
+      - checkout
+      - deploy_to_env:
+          env: stage
+
+commands:
+  setup_docker:
+    steps:
+      - setup_remote_docker:
+          version: '20.10.18'
+          docker_layer_caching: true
+  docker_login:
+    steps:
+      - run:
+          name: 'Docker login with Google Cloud service account credentials'
+          command: echo $GCLOUD_CREDENTIALS | docker login -u _json_key --password-stdin https://$GCR
+  docker_build:
+    steps:
+      - run:
+          name: 'Docker build app image'
+          command: docker build --tag $GCR/$CIRCLE_PROJECT_REPONAME:$CIRCLE_SHA1 .
+  docker_push:
+    steps:
+      - run:
+          name: 'Docker push image to Google Cloud Artifact Registry'
+          command: docker push --all-tags $GCR/$CIRCLE_PROJECT_REPONAME
+  go_test:
+    steps:
+      - run:
+          name: 'Run go test'
+          command: go test -race ./...
+  deploy_to_env:
+    parameters:
+      env:
+        default: stage
+        type: enum
+        enum: ['stage', 'prod']
+    steps:
+      - run:
+          name: 'Install required dependencies'
+          command: apt-get install -y gettext
+      - run:
+          name: 'Authorize gcloud and kubectl'
+          command: |
+            echo $GCLOUD_CREDENTIALS | gcloud auth activate-service-account --quiet --key-file=-
+            gcloud config set project $GCLOUD_PROJECT --quiet
+            gcloud config set compute/region $GCLOUD_REGION --quiet
+
+            GKE_CLUSTER=""
+            case "<< parameters.env >>" in
+                prod) GKE_CLUSTER=$GKE_CLUSTER_PROD ;;
+                stage) GKE_CLUSTER=$GKE_CLUSTER_STAGE ;;
+            esac
+
+            gcloud container clusters get-credentials $GKE_CLUSTER --quiet
+      - run:
+          name: 'Deploy to GKE'
+          command: |
+            export REPONAME=$CIRCLE_PROJECT_REPONAME
+            export DOCKER_IMAGE=$GCR/$CIRCLE_PROJECT_REPONAME:$CIRCLE_SHA1
+            export $(grep -v '^#' ./.kubefiles/env_<< parameters.env >>/values | xargs)
+
+            kubefiles=(
+              "./.kubefiles/namespace.yml"
+              "./.kubefiles/env_<< parameters.env >>/configuration.yml"
+              "./.kubefiles/deployments.yml"
+            )
+
+            for kubefile in "${kubefiles[@]}"; do
+              cat $kubefile | envsubst | kubectl apply -f -
+            done
+
+            kubectl rollout status deployment/${CIRCLE_PROJECT_REPONAME} --namespace=${CIRCLE_PROJECT_REPONAME}
+
+executors:
+  docker_executor:
+    docker:
+      - image: 'docker:20.10.18'
+  golang_executor:
+    docker:
+      - image: 'golang:1.22'
+  gcloud_executor:
+    docker:
+      - image: 'google/cloud-sdk:468.0.0'

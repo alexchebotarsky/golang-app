@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: configuration
+  namespace: ${REPONAME}
+data:
+  SERVICE_NAME: '${REPONAME}'
+  LOG_LEVEL: 'debug'
+
+  PORT: '${PORT}'
+  ALLOWED_ORIGIN: 'http://localhost:3000'
+
+  AUTH_SECRET: '${AUTH_SECRET_PROD}'
+  AUTH_ADMIN_KEY: '${AUTH_ADMIN_KEY_PROD}'
+  AUTH_EDITOR_KEY: '${AUTH_EDITOR_KEY_PROD}'
+  AUTH_VIEWER_KEY: '${AUTH_VIEWER_KEY_PROD}'
+
+  EXAMPLE_ENDPOINT: 'https://swapi.dev/api/people/1'

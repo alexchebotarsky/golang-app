@@ -1,0 +1,130 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ${REPONAME}
+  namespace: ${REPONAME}
+spec:
+  strategy:
+    rollingUpdate:
+      maxSurge: 3
+      maxUnavailable: 0
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: ${REPONAME}
+  replicas: ${REPLICAS}
+  revisionHistoryLimit: 2
+  template:
+    metadata:
+      labels:
+        app: ${REPONAME}
+      annotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: 'true'
+    spec:
+      # Affinity to make sure that multiple pods does not run on the same node
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            # prefer to run in different data centres
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - ${REPONAME}
+                topologyKey: failure-domain.beta.kubernetes.io/zone
+            # prefer to run on different "physical" nodes
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - ${REPONAME}
+                topologyKey: kubernetes.io/hostname
+      tolerations:
+        - key: cloud.google.com/gke-preemptible
+          operator: Equal
+          value: 'true'
+          effect: NoSchedule
+      containers:
+        - name: app
+          image: ${DOCKER_IMAGE}
+          # Resource limits for each pod, cpu: 1.0 == 1 CPU core. Over-use causes CPU-usage to get throttled
+          # Memory-usage over-usage causes the pod to get killed, and a new one created.
+          # Try to focus on keeping limits and requests the same, so that the node can reserve the resources
+          # needed when it is starting up the pod.
+          resources:
+            limits:
+              cpu: '0.1'
+              memory: 50Mi
+            requests:
+              cpu: '0.1'
+              memory: 50Mi
+          envFrom:
+            - configMapRef:
+                name: configuration
+          ports:
+            - containerPort: ${PORT}
+              name: http-port
+          livenessProbe:
+            httpGet:
+              path: /_healthz
+              port: http-port
+            initialDelaySeconds: 120
+            timeoutSeconds: 10
+            periodSeconds: 5
+            successThreshold: 1
+            failureThreshold: 6
+          readinessProbe:
+            httpGet:
+              path: /_healthz
+              port: http-port
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+            periodSeconds: 5
+            successThreshold: 1
+            failureThreshold: 2
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: ${REPONAME}
+  namespace: ${REPONAME}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ${REPONAME}
+  minReplicas: ${MINREPLICAS}
+  maxReplicas: ${MAXREPLICAS}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 70
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ${REPONAME}
+  namespace: ${REPONAME}
+spec:
+  type: LoadBalancer
+  selector:
+    app: ${REPONAME}
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: http-port
