@@ -6,9 +6,10 @@ import (
 	"log/slog"
 )
 
-func Init() {
+func Init(level slog.Level) {
 	opts := &slog.HandlerOptions{
 		ReplaceAttr: renameMessageKey,
+		Level:       level,
 	}
 	logger := slog.New(slog.NewTextHandler(os.Stdout, opts))
 	slog.SetDefault(logger)

@@ -10,6 +10,12 @@ import (
 )
 
 type Config struct {
+	ServiceName string     `env:"SERVICE_NAME,default=unknown"`
+	LogLevel    slog.Level `env:"LOG_LEVEL,default=debug"`
+
+	Port          uint16 `env:"PORT,default=8000"`
+	AllowedOrigin string `env:"ALLOWED_ORIGIN,default=http://localhost:3000"`
+
 	DatabaseUser     string `env:"DATABASE_USER,required"`
 	DatabasePassword string `env:"DATABASE_PASSWORD,required"`
 	DatabaseHost     string `env:"DATABASE_HOST,default=localhost"`
@@ -22,13 +28,10 @@ type Config struct {
 	AuthEditorKey string `env:"AUTH_EDITOR_KEY,required"`
 	AuthViewerKey string `env:"AUTH_VIEWER_KEY,required"`
 
+	GoogleApplicationCredentials string `env:"GOOGLE_APPLICATION_CREDENTIALS,required"`
+	PubSubProjectID              string `env:"PUBSUB_PROJECT_ID,required"`
+
 	ExampleEndpoint string `env:"EXAMPLE_ENDPOINT,default=https://swapi.dev/api/people/1"`
-
-	PubSubProjectID string `env:"PUBSUB_PROJECT_ID,required"`
-
-	Port          uint16 `env:"PORT,default=8000"`
-	AllowedOrigin string `env:"ALLOWED_ORIGIN,default="`
-	ServiceName   string `env:"SERVICE_NAME,default=unknown"`
 }
 
 func LoadConfig(ctx context.Context) (*Config, error) {

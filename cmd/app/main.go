@@ -16,13 +16,13 @@ import (
 func main() {
 	ctx := context.Background()
 
-	logger.Init()
-
 	env, err := env.LoadConfig(ctx)
 	if err != nil {
 		slog.Error(fmt.Sprintf("Error loading env config: %v", err))
 		os.Exit(1)
 	}
+
+	logger.Init(env.LogLevel)
 
 	if err := tracing.Init(env.ServiceName); err != nil {
 		slog.Error(fmt.Sprintf("Error initializing tracing: %v", err))
