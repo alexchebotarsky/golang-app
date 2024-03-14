@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"time"
 
 	"github.com/goodleby/golang-app/client/auth"
 	"github.com/goodleby/golang-app/client/database"
@@ -59,6 +60,9 @@ func (app *App) Launch(ctx context.Context) {
 	}
 
 	<-ctx.Done()
+
+	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	for _, service := range app.Services {
 		if err := service.Stop(ctx); err != nil {
