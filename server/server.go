@@ -9,19 +9,18 @@ import (
 
 	chi "github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
-	"github.com/goodleby/golang-app/client/auth"
 	"github.com/goodleby/golang-app/server/handler"
 	"github.com/goodleby/golang-app/server/middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-type DBClient interface {
-	handler.AllArticlesSelector
-	handler.ArticleSelector
-	handler.ArticleInserter
-	handler.ArticleUpdater
-	handler.ArticleDeleter
-}
+// type DBClient interface {
+// 	handler.AllArticlesSelector
+// 	handler.ArticleSelector
+// 	handler.ArticleInserter
+// 	handler.ArticleUpdater
+// 	handler.ArticleDeleter
+// }
 
 type AuthClient interface {
 	handler.TokenCreator
@@ -29,25 +28,25 @@ type AuthClient interface {
 	middleware.TokenParser
 }
 
-type PubSubClient interface {
-	handler.AddArticlePublisher
-}
+// type PubSubClient interface {
+// 	handler.AddArticlePublisher
+// }
 
 type ExampleClient interface {
 	handler.ExampleDataFetcher
 }
 
 type Server struct {
-	Port    uint16
-	Router  chi.Router
-	HTTP    *http.Server
-	DB      DBClient
-	Auth    AuthClient
-	PubSub  PubSubClient
+	Port   uint16
+	Router chi.Router
+	HTTP   *http.Server
+	// DB      DBClient
+	Auth AuthClient
+	// PubSub  PubSubClient
 	Example ExampleClient
 }
 
-func New(ctx context.Context, port uint16, allowedOrigin string, db DBClient, auth AuthClient, pubsub PubSubClient, example ExampleClient) (*Server, error) {
+func New(ctx context.Context, port uint16, allowedOrigin string, auth AuthClient, example ExampleClient) (*Server, error) {
 	s := &Server{}
 
 	s.Port = port
@@ -58,9 +57,9 @@ func New(ctx context.Context, port uint16, allowedOrigin string, db DBClient, au
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 5 * time.Second,
 	}
-	s.DB = db
+	// s.DB = db
 	s.Auth = auth
-	s.PubSub = pubsub
+	// s.PubSub = pubsub
 	s.Example = example
 
 	s.setupRoutes(allowedOrigin)
@@ -99,7 +98,7 @@ func (s *Server) setupRoutes(allowedOrigin string) {
 		}))
 
 		r.Get("/example", handler.GetExampleData(s.Example))
-		r.Post("/pubsub/articles", handler.AddArticlePubSub(s.PubSub))
+		// r.Post("/pubsub/articles", handler.AddArticlePubSub(s.PubSub))
 
 		// Auth routes
 		r.Group(func(r chi.Router) {
@@ -108,22 +107,22 @@ func (s *Server) setupRoutes(allowedOrigin string) {
 			r.Post("/auth/logout", handler.AuthLogout)
 		})
 
-		// View articles
-		r.Group(func(r chi.Router) {
-			r.Use(middleware.Auth(s.Auth, auth.ViewerAccess))
+		// // View articles
+		// r.Group(func(r chi.Router) {
+		// 	r.Use(middleware.Auth(s.Auth, auth.ViewerAccess))
 
-			r.Get("/articles", handler.GetAllArticles(s.DB))
-			r.Get("/articles/{id}", handler.GetArticle(s.DB))
-		})
+		// 	r.Get("/articles", handler.GetAllArticles(s.DB))
+		// 	r.Get("/articles/{id}", handler.GetArticle(s.DB))
+		// })
 
-		// Edit articles
-		r.Group(func(r chi.Router) {
-			r.Use(middleware.Auth(s.Auth, auth.EditorAccess))
+		// // Edit articles
+		// r.Group(func(r chi.Router) {
+		// 	r.Use(middleware.Auth(s.Auth, auth.EditorAccess))
 
-			r.Post("/articles", handler.AddArticle(s.DB))
-			r.Delete("/articles/{id}", handler.DeleteArticle(s.DB))
-			r.Put("/articles/{id}", handler.UpdateArticle(s.DB))
-		})
+		// 	r.Post("/articles", handler.AddArticle(s.DB))
+		// 	r.Delete("/articles/{id}", handler.DeleteArticle(s.DB))
+		// 	r.Put("/articles/{id}", handler.UpdateArticle(s.DB))
+		// })
 	})
 }
 
