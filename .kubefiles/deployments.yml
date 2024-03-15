@@ -50,6 +50,10 @@ spec:
           operator: Equal
           value: 'true'
           effect: NoSchedule
+      volumes:
+        - name: secret-files-volume
+          secret:
+            secretName: secret-files
       containers:
         - name: app
           image: ${DOCKER_IMAGE}
@@ -67,6 +71,12 @@ spec:
           envFrom:
             - configMapRef:
                 name: configuration
+            - secretRef:
+                name: secret-values
+          volumeMounts:
+            - name: secret-files-volume
+              mountPath: /app/secret-files
+              readOnly: true
           ports:
             - containerPort: ${PORT}
               name: http-port

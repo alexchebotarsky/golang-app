@@ -55,7 +55,7 @@ commands:
   setup_docker:
     steps:
       - setup_remote_docker:
-          version: '20.10.18'
+          version: 'docker23'
           docker_layer_caching: true
   docker_login:
     steps:
@@ -112,11 +112,11 @@ commands:
           command: |
             export REPONAME=$CIRCLE_PROJECT_REPONAME
             export DOCKER_IMAGE=$GCR/$CIRCLE_PROJECT_REPONAME:$CIRCLE_SHA1
-            export $(grep -v '^#' ./.kubefiles/env_<< parameters.env >>/values | xargs)
+            export $(grep -v '^#' ./.kubefiles/<< parameters.env >>/values | xargs)
 
             kubefiles=(
               "./.kubefiles/namespace.yml"
-              "./.kubefiles/env_<< parameters.env >>/configuration.yml"
+              "./.kubefiles/<< parameters.env >>/env.yml"
               "./.kubefiles/deployments.yml"
             )
 
@@ -129,7 +129,7 @@ commands:
 executors:
   docker_executor:
     docker:
-      - image: 'docker:20.10.18'
+      - image: 'docker:23.0.6'
   golang_executor:
     docker:
       - image: 'golang:1.22'
