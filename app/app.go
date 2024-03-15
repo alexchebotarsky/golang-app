@@ -10,7 +10,9 @@ import (
 
 	"github.com/goodleby/golang-app/client/auth"
 	"github.com/goodleby/golang-app/client/example"
+	"github.com/goodleby/golang-app/client/pubsub"
 	"github.com/goodleby/golang-app/env"
+	"github.com/goodleby/golang-app/processor"
 	"github.com/goodleby/golang-app/server"
 )
 
@@ -21,8 +23,8 @@ type Service interface {
 
 type Clients struct {
 	// DB      *database.Client
-	Auth *auth.Client
-	// PubSub  *pubsub.Client
+	Auth    *auth.Client
+	PubSub  *pubsub.Client
 	Example *example.Client
 }
 
@@ -99,10 +101,10 @@ func setupClients(ctx context.Context, env *env.Config) (*Clients, error) {
 		return nil, fmt.Errorf("error creating auth client: %v", err)
 	}
 
-	// c.PubSub, err = pubsub.New(ctx, env.PubSubProjectID)
-	// if err != nil {
-	// 	return nil, fmt.Errorf("error creating example client: %v", err)
-	// }
+	c.PubSub, err = pubsub.New(ctx, env.PubSubProjectID)
+	if err != nil {
+		return nil, fmt.Errorf("error creating example client: %v", err)
+	}
 
 	c.Example, err = example.New(env.ExampleEndpoint)
 	if err != nil {
@@ -121,11 +123,11 @@ func setupServices(ctx context.Context, env *env.Config, clients *Clients) ([]Se
 	}
 	services = append(services, server)
 
-	// processor, err := processor.New(ctx, env.PubSubProjectID, clients.PubSub, clients.DB)
-	// if err != nil {
-	// 	return nil, fmt.Errorf("error creating new processor: %v", err)
-	// }
-	// services = append(services, processor)
+	processor, err := processor.New(ctx, env.PubSubProjectID, clients.PubSub)
+	if err != nil {
+		return nil, fmt.Errorf("error creating new processor: %v", err)
+	}
+	services = append(services, processor)
 
 	return services, nil
 }

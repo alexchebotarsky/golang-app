@@ -13,22 +13,22 @@ type PubSubClient interface {
 	Subscription(id string) *pubsub.Subscription
 }
 
-type DBClient interface {
-	event.ArticleInserter
-}
+// type DBClient interface {
+// 	event.ArticleInserter
+// }
 
 type Processor struct {
 	Events      []event.Event
 	Middlewares []middleware.Middleware
 	PubSub      PubSubClient
-	DB          DBClient
+	// DB          DBClient
 }
 
-func New(ctx context.Context, projectID string, pubsub PubSubClient, db DBClient) (*Processor, error) {
+func New(ctx context.Context, projectID string, pubsub PubSubClient) (*Processor, error) {
 	p := &Processor{}
 
 	p.PubSub = pubsub
-	p.DB = db
+	// p.DB = db
 
 	p.setupEvents()
 	p.setupMiddlewares()
@@ -71,6 +71,6 @@ func (p *Processor) setupEvents() {
 	p.handle(event.Event{
 		Name:         "AddArticle",
 		Subscription: p.PubSub.Subscription("golang-app-add-article-sub"),
-		Handler:      event.AddArticle(p.DB),
+		Handler:      event.AddArticle(),
 	})
 }

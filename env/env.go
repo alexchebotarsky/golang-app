@@ -28,8 +28,8 @@ type Config struct {
 	AuthEditorKey string `env:"AUTH_EDITOR_KEY,required"`
 	AuthViewerKey string `env:"AUTH_VIEWER_KEY,required"`
 
-	// GoogleApplicationCredentials string `env:"GOOGLE_APPLICATION_CREDENTIALS,required"`
-	// PubSubProjectID              string `env:"PUBSUB_PROJECT_ID,required"`
+	GoogleApplicationCredentials string `env:"GOOGLE_APPLICATION_CREDENTIALS,required"`
+	PubSubProjectID              string `env:"PUBSUB_PROJECT_ID,required"`
 
 	ExampleEndpoint string `env:"EXAMPLE_ENDPOINT,default=https://swapi.dev/api/people/1"`
 }
