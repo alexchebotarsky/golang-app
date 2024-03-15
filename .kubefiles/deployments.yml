@@ -53,9 +53,9 @@ spec:
       volumes:
         - name: secret-files-volume
           secret:
-            secretName: secret-files
+            secretName: ${REPONAME}-secret-files
       containers:
-        - name: app
+        - name: ${REPONAME}-container
           image: ${DOCKER_IMAGE}
           # Resource limits for each pod, cpu: 1.0 == 1 CPU core. Over-use causes CPU-usage to get throttled
           # Memory-usage over-usage causes the pod to get killed, and a new one created.
@@ -70,9 +70,9 @@ spec:
               memory: 50Mi
           envFrom:
             - configMapRef:
-                name: configuration
+                name: ${REPONAME}-config
             - secretRef:
-                name: secret-values
+                name: ${REPONAME}-secret-values
           volumeMounts:
             - name: secret-files-volume
               mountPath: /app/secret-files
@@ -102,7 +102,7 @@ spec:
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: ${REPONAME}
+  name: ${REPONAME}-hpa
   namespace: ${REPONAME}
 spec:
   scaleTargetRef:
@@ -128,7 +128,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: ${REPONAME}
+  name: ${REPONAME}-load-balancer
   namespace: ${REPONAME}
 spec:
   type: LoadBalancer
