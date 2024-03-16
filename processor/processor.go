@@ -70,7 +70,7 @@ func (p *Processor) setupEvents() {
 
 	p.handle(event.Event{
 		Name:         "AddArticle",
-		Subscription: p.PubSub.Subscription("golang-app-add-article"),
+		Subscription: p.PubSub.Subscription("golang-app-add-article-sub"),
 		Handler:      event.AddArticle(p.DB),
 	})
 }

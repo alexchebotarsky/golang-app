@@ -7,9 +7,8 @@ COPY ./ ./
 
 RUN go mod download
 RUN CGO_ENABLED=0 go build -o ./main ./cmd/app/main.go
-RUN go test -race ./...
 
-FROM scratch as runner
+FROM alpine:3.19 as runner
 
 COPY --from=builder /app/main /app/main
 

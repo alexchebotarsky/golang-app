@@ -1,0 +1,278 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ${APP_NAME}
+  namespace: ${APP_NAME}
+spec:
+  selector:
+    matchLabels:
+      app: ${APP_NAME}
+  strategy:
+    rollingUpdate:
+      maxSurge: 3
+      maxUnavailable: 0
+    type: RollingUpdate
+  revisionHistoryLimit: 2
+  template:
+    metadata:
+      labels:
+        app: ${APP_NAME}
+      annotations:
+        prometheus.io/scrape: 'true'
+        cluster-autoscaler.kubernetes.io/safe-to-evict: 'true'
+    spec:
+      # Affinity to make sure that multiple pods does not run on the same node
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            # prefer to run in different data centres
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - ${APP_NAME}
+                topologyKey: failure-domain.beta.kubernetes.io/zone
+            # prefer to run on different "physical" nodes
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - ${APP_NAME}
+                topologyKey: kubernetes.io/hostname
+      tolerations:
+        - key: cloud.google.com/gke-preemptible
+          operator: Equal
+          value: 'true'
+          effect: NoSchedule
+      containers:
+        - name: container
+          image: ${DOCKER_IMAGE}
+          resources:
+            limits:
+              cpu: '${APP_CPU_LIMIT}m'
+              memory: '${APP_MEM_LIMIT}Mi'
+            requests:
+              cpu: '${APP_CPU_REQUEST}m'
+              memory: '${APP_MEM_REQUEST}Mi'
+          envFrom:
+            - configMapRef:
+                name: ${APP_NAME}-config
+            - secretRef:
+                name: ${APP_NAME}-secret-values
+          ports:
+            - containerPort: ${APP_PORT}
+              name: http-port
+          livenessProbe:
+            httpGet:
+              path: /_healthz
+              port: http-port
+            initialDelaySeconds: 120
+            timeoutSeconds: 10
+            periodSeconds: 5
+            successThreshold: 1
+            failureThreshold: 6
+          readinessProbe:
+            httpGet:
+              path: /_healthz
+              port: http-port
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+            periodSeconds: 5
+            successThreshold: 1
+            failureThreshold: 2
+          volumeMounts:
+            - name: secret-files-volume
+              mountPath: /app/secret-files
+              readOnly: true
+      volumes:
+        - name: secret-files-volume
+          secret:
+            secretName: ${APP_NAME}-secret-files
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ${APP_NAME}-load-balancer
+  namespace: ${APP_NAME}
+spec:
+  type: LoadBalancer
+  selector:
+    app: ${APP_NAME}
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: http-port
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: app-hpa
+  namespace: ${APP_NAME}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ${APP_NAME}
+  minReplicas: ${APP_MIN_REPLICAS}
+  maxReplicas: ${APP_MAX_REPLICAS}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 70
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ${APP_NAME}-sql-proxy
+  namespace: ${APP_NAME}
+spec:
+  selector:
+    matchLabels:
+      app: ${APP_NAME}-sql-proxy
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  revisionHistoryLimit: 2
+  template:
+    metadata:
+      labels:
+        app: ${APP_NAME}-sql-proxy
+      annotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: 'true'
+    spec:
+      # Affinity to make sure that multiple pods do not run on the same node
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            # prefer to run in different data centres
+            - weight: 100
+              podAffinityTerm:
+                topologyKey: failure-domain.beta.kubernetes.io/zone
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - ${APP_NAME}-sql-proxy
+            # prefer to run on different "physical" nodes
+            - weight: 100
+              podAffinityTerm:
+                topologyKey: kubernetes.io/hostname
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - ${APP_NAME}-sql-proxy
+      tolerations:
+        - key: cloud.google.com/gke-preemptible
+          operator: Equal
+          value: 'true'
+          effect: NoSchedule
+      restartPolicy: Always
+      containers:
+        - name: container
+          image: b.gcr.io/cloudsql-docker/gce-proxy:1.16
+          command:
+            - '/cloud_sql_proxy'
+            - '--dir=/cloudsql'
+            - '-instances=${SQL_INSTANCE}=tcp:0.0.0.0:${SQL_PORT}'
+            - '-verbose=false'
+            - '-credential_file=/app/secret-files/gcp.json'
+          securityContext:
+            runAsUser: 2 # non-root user
+            allowPrivilegeEscalation: false
+          livenessProbe:
+            tcpSocket:
+              port: ${SQL_PORT}
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+            successThreshold: 1
+          readinessProbe:
+            tcpSocket:
+              port: ${SQL_PORT}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+            successThreshold: 1
+          resources:
+            limits:
+              cpu: '${SQL_CPU_LIMIT}m'
+              memory: '${SQL_MEM_LIMIT}Mi'
+            requests:
+              cpu: '${SQL_CPU_REQUEST}m'
+              memory: '${SQL_MEM_REQUEST}Mi'
+          volumeMounts:
+            - name: secret-files-volume
+              mountPath: /app/secret-files
+              readOnly: true
+            - name: cloudsql-empty-volume
+              mountPath: /cloudsql
+      volumes:
+        - name: secret-files-volume
+          secret:
+            secretName: ${APP_NAME}-secret-files
+        - name: cloudsql-empty-volume
+          emptyDir:
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ${APP_NAME}-sql-proxy
+  namespace: ${APP_NAME}
+  labels:
+    app: ${APP_NAME}-sql-proxy
+spec:
+  type: ClusterIP
+  selector:
+    app: ${APP_NAME}-sql-proxy
+  ports:
+    - protocol: TCP
+      port: ${SQL_PORT}
+      targetPort: ${SQL_PORT}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: sql-proxy-hpa
+  namespace: ${APP_NAME}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ${APP_NAME}-sql-proxy
+  minReplicas: ${SQL_MIN_REPLICAS}
+  maxReplicas: ${SQL_MAX_REPLICAS}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 70

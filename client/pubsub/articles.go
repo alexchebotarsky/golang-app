@@ -14,7 +14,7 @@ func (c *Client) PublishAddArticle(ctx context.Context, payload article.Payload)
 		return fmt.Errorf("error marshalling article payload: %v", err)
 	}
 
-	if err := c.send(ctx, "alex-test-topic", data); err != nil {
+	if err := c.send(ctx, "golang-app-add-article", data); err != nil {
 		return fmt.Errorf("error sending add article message: %v", err)
 	}
 
