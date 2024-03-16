@@ -109,8 +109,8 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: ${REPONAME}
-  minReplicas: ${MINREPLICAS}
-  maxReplicas: ${MAXREPLICAS}
+  minReplicas: ${MIN_REPLICAS}
+  maxReplicas: ${MAX_REPLICAS}
   metrics:
     - type: Resource
       resource:
