@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/goodleby/golang-app/client/auth"
+	"github.com/goodleby/golang-app/client/database"
 	"github.com/goodleby/golang-app/client/example"
 	"github.com/goodleby/golang-app/client/pubsub"
 	"github.com/goodleby/golang-app/env"
@@ -22,7 +23,7 @@ type Service interface {
 }
 
 type Clients struct {
-	// DB      *database.Client
+	DB      *database.Client
 	Auth    *auth.Client
 	PubSub  *pubsub.Client
 	Example *example.Client
@@ -69,9 +70,9 @@ func (app *App) Launch(ctx context.Context) {
 		}
 	}
 
-	// if err := app.Clients.DB.Close(); err != nil {
-	// 	slog.Error(fmt.Sprintf("Error closing database client: %v", err))
-	// }
+	if err := app.Clients.DB.Close(); err != nil {
+		slog.Error(fmt.Sprintf("Error closing database client: %v", err))
+	}
 
 	slog.Debug("App has stopped gracefully")
 }
@@ -80,17 +81,17 @@ func setupClients(ctx context.Context, env *env.Config) (*Clients, error) {
 	c := &Clients{}
 	var err error
 
-	// c.DB, err = database.New(ctx, database.Credentials{
-	// 	User:     env.DatabaseUser,
-	// 	Password: env.DatabasePassword,
-	// 	Host:     env.DatabaseHost,
-	// 	Port:     env.DatabasePort,
-	// 	Name:     env.DatabaseName,
-	// 	Options:  env.DatabaseOptions,
-	// })
-	// if err != nil {
-	// 	return nil, fmt.Errorf("error creating database client: %v", err)
-	// }
+	c.DB, err = database.New(ctx, database.Credentials{
+		User:     env.DatabaseUser,
+		Password: env.DatabasePassword,
+		Host:     env.DatabaseHost,
+		Port:     env.DatabasePort,
+		Name:     env.DatabaseName,
+		Options:  env.DatabaseOptions,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error creating database client: %v", err)
+	}
 
 	c.Auth, err = auth.New(ctx, env.AuthSecret, auth.Keys{
 		Admin:  env.AuthAdminKey,
@@ -117,13 +118,13 @@ func setupClients(ctx context.Context, env *env.Config) (*Clients, error) {
 func setupServices(ctx context.Context, env *env.Config, clients *Clients) ([]Service, error) {
 	var services []Service
 
-	server, err := server.New(ctx, env.Port, env.AllowedOrigin, clients.Auth, clients.Example)
+	server, err := server.New(ctx, env.Port, env.AllowedOrigin, clients.DB, clients.Auth, clients.PubSub, clients.Example)
 	if err != nil {
 		return nil, fmt.Errorf("error creating new server: %v", err)
 	}
 	services = append(services, server)
 
-	processor, err := processor.New(ctx, env.PubSubProjectID, clients.PubSub)
+	processor, err := processor.New(ctx, env.PubSubProjectID, clients.PubSub, clients.DB)
 	if err != nil {
 		return nil, fmt.Errorf("error creating new processor: %v", err)
 	}

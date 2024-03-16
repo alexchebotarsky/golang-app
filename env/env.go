@@ -16,12 +16,12 @@ type Config struct {
 	Port          uint16 `env:"PORT,default=8000"`
 	AllowedOrigin string `env:"ALLOWED_ORIGIN,default=http://localhost:3000"`
 
-	// DatabaseUser     string `env:"DATABASE_USER,required"`
-	// DatabasePassword string `env:"DATABASE_PASSWORD,required"`
-	// DatabaseHost     string `env:"DATABASE_HOST,default=localhost"`
-	// DatabasePort     uint16 `env:"DATABASE_PORT,default=5432"`
-	// DatabaseName     string `env:"DATABASE_NAME,required"`
-	// DatabaseOptions  string `env:"DATABASE_OPTIONS,default=?sslmode=disable"`
+	DatabaseUser     string `env:"DATABASE_USER,required"`
+	DatabasePassword string `env:"DATABASE_PASSWORD,required"`
+	DatabaseHost     string `env:"DATABASE_HOST,default=localhost"`
+	DatabasePort     uint16 `env:"DATABASE_PORT,default=5432"`
+	DatabaseName     string `env:"DATABASE_NAME,required"`
+	DatabaseOptions  string `env:"DATABASE_OPTIONS,default=?sslmode=disable"`
 
 	AuthSecret    string `env:"AUTH_SECRET,required"`
 	AuthAdminKey  string `env:"AUTH_ADMIN_KEY,required"`
