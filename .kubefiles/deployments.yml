@@ -138,146 +138,146 @@ spec:
     - port: 80
       protocol: TCP
       targetPort: http-port
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: ${REPONAME}-sql-proxy
-  namespace: ${REPONAME}
-spec:
-  strategy:
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 1
-    type: RollingUpdate
-  replicas: ${SQL_REPLICAS}
-  revisionHistoryLimit: 2
-  selector:
-    matchLabels:
-      app: ${REPONAME}-sql-proxy
-  template:
-    metadata:
-      labels:
-        app: ${REPONAME}-sql-proxy
-      annotations:
-        cluster-autoscaler.kubernetes.io/safe-to-evict: 'true'
-    spec:
-      # Affinity to make sure that multiple pods do not run on the same node
-      affinity:
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-            # prefer to run in different data centres
-            - weight: 100
-              podAffinityTerm:
-                topologyKey: failure-domain.beta.kubernetes.io/zone
-                labelSelector:
-                  matchExpressions:
-                    - key: app
-                      operator: In
-                      values:
-                        - ${REPONAME}-sql-proxy
-            # prefer to run on different "physical" nodes
-            - weight: 100
-              podAffinityTerm:
-                topologyKey: kubernetes.io/hostname
-                labelSelector:
-                  matchExpressions:
-                    - key: app
-                      operator: In
-                      values:
-                        - ${REPONAME}-sql-proxy
-      tolerations:
-        - key: cloud.google.com/gke-preemptible
-          operator: Equal
-          value: 'true'
-          effect: NoSchedule
-      restartPolicy: Always
-      volumes:
-        - name: secret-files-volume
-          secret:
-            secretName: ${REPONAME}-secret-files
-        - name: cloudsql-empty-volume
-          emptyDir:
-      containers:
-        - name: ${REPONAME}-sql-proxy-container
-          image: b.gcr.io/cloudsql-docker/gce-proxy:1.16
-          command:
-            - '/cloud_sql_proxy'
-            - '--dir=/cloudsql'
-            - '-instances=${SQL_INSTANCE}=tcp:0.0.0.0:${SQL_PORT}'
-            - '-verbose=false'
-            - '-credential_file=/app/secret-files/gcp.json'
-          volumeMounts:
-            - name: secret-files-volume
-              mountPath: /app/secret-files
-              readOnly: true
-            - name: cloudsql-empty-volume
-              mountPath: /cloudsql
-          securityContext:
-            runAsUser: 2 # non-root user
-            allowPrivilegeEscalation: false
-          livenessProbe:
-            tcpSocket:
-              port: ${SQL_PORT}
-            initialDelaySeconds: 30
-            periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 6
-            successThreshold: 1
-          readinessProbe:
-            tcpSocket:
-              port: ${SQL_PORT}
-            initialDelaySeconds: 5
-            periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 6
-            successThreshold: 1
-          resources:
-            limits:
-              cpu: '150m'
-              memory: '150Mi'
-            requests:
-              cpu: '100m'
-              memory: '100Mi'
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: ${REPONAME}-sql-proxy-service
-  namespace: ${REPONAME}
-  labels:
-    app: ${REPONAME}-sql-proxy-service
-spec:
-  type: ClusterIP
-  ports:
-    - protocol: TCP
-      port: ${SQL_PORT}
-      targetPort: ${SQL_PORT}
-  selector:
-    app: ${REPONAME}-sql-proxy
----
-apiVersion: autoscaling/v2
-kind: HorizontalPodAutoscaler
-metadata:
-  name: ${REPONAME}-sql-proxy-hpa
-  namespace: ${REPONAME}
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: ${REPONAME}-sql-proxy
-  minReplicas: ${SQL_MIN_REPLICAS}
-  maxReplicas: ${SQL_MAX_REPLICAS}
-  metrics:
-    - type: Resource
-      resource:
-        name: cpu
-        target:
-          type: Utilization
-          averageUtilization: 70
-    - type: Resource
-      resource:
-        name: memory
-        target:
-          type: Utilization
-          averageUtilization: 70
+# ---
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: ${REPONAME}-sql-proxy
+#   namespace: ${REPONAME}
+# spec:
+#   strategy:
+#     rollingUpdate:
+#       maxSurge: 1
+#       maxUnavailable: 1
+#     type: RollingUpdate
+#   replicas: ${SQL_REPLICAS}
+#   revisionHistoryLimit: 2
+#   selector:
+#     matchLabels:
+#       app: ${REPONAME}-sql-proxy
+#   template:
+#     metadata:
+#       labels:
+#         app: ${REPONAME}-sql-proxy
+#       annotations:
+#         cluster-autoscaler.kubernetes.io/safe-to-evict: 'true'
+#     spec:
+#       # Affinity to make sure that multiple pods do not run on the same node
+#       affinity:
+#         podAntiAffinity:
+#           preferredDuringSchedulingIgnoredDuringExecution:
+#             # prefer to run in different data centres
+#             - weight: 100
+#               podAffinityTerm:
+#                 topologyKey: failure-domain.beta.kubernetes.io/zone
+#                 labelSelector:
+#                   matchExpressions:
+#                     - key: app
+#                       operator: In
+#                       values:
+#                         - ${REPONAME}-sql-proxy
+#             # prefer to run on different "physical" nodes
+#             - weight: 100
+#               podAffinityTerm:
+#                 topologyKey: kubernetes.io/hostname
+#                 labelSelector:
+#                   matchExpressions:
+#                     - key: app
+#                       operator: In
+#                       values:
+#                         - ${REPONAME}-sql-proxy
+#       tolerations:
+#         - key: cloud.google.com/gke-preemptible
+#           operator: Equal
+#           value: 'true'
+#           effect: NoSchedule
+#       restartPolicy: Always
+#       volumes:
+#         - name: secret-files-volume
+#           secret:
+#             secretName: ${REPONAME}-secret-files
+#         - name: cloudsql-empty-volume
+#           emptyDir:
+#       containers:
+#         - name: ${REPONAME}-sql-proxy-container
+#           image: b.gcr.io/cloudsql-docker/gce-proxy:1.16
+#           command:
+#             - '/cloud_sql_proxy'
+#             - '--dir=/cloudsql'
+#             - '-instances=${SQL_INSTANCE}=tcp:0.0.0.0:${SQL_PORT}'
+#             - '-verbose=false'
+#             - '-credential_file=/app/secret-files/gcp.json'
+#           volumeMounts:
+#             - name: secret-files-volume
+#               mountPath: /app/secret-files
+#               readOnly: true
+#             - name: cloudsql-empty-volume
+#               mountPath: /cloudsql
+#           securityContext:
+#             runAsUser: 2 # non-root user
+#             allowPrivilegeEscalation: false
+#           livenessProbe:
+#             tcpSocket:
+#               port: ${SQL_PORT}
+#             initialDelaySeconds: 30
+#             periodSeconds: 10
+#             timeoutSeconds: 5
+#             failureThreshold: 6
+#             successThreshold: 1
+#           readinessProbe:
+#             tcpSocket:
+#               port: ${SQL_PORT}
+#             initialDelaySeconds: 5
+#             periodSeconds: 10
+#             timeoutSeconds: 5
+#             failureThreshold: 6
+#             successThreshold: 1
+#           resources:
+#             limits:
+#               cpu: '150m'
+#               memory: '150Mi'
+#             requests:
+#               cpu: '100m'
+#               memory: '100Mi'
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: ${REPONAME}-sql-proxy-service
+#   namespace: ${REPONAME}
+#   labels:
+#     app: ${REPONAME}-sql-proxy-service
+# spec:
+#   type: ClusterIP
+#   ports:
+#     - protocol: TCP
+#       port: ${SQL_PORT}
+#       targetPort: ${SQL_PORT}
+#   selector:
+#     app: ${REPONAME}-sql-proxy
+# ---
+# apiVersion: autoscaling/v2
+# kind: HorizontalPodAutoscaler
+# metadata:
+#   name: ${REPONAME}-sql-proxy-hpa
+#   namespace: ${REPONAME}
+# spec:
+#   scaleTargetRef:
+#     apiVersion: apps/v1
+#     kind: Deployment
+#     name: ${REPONAME}-sql-proxy
+#   minReplicas: ${SQL_MIN_REPLICAS}
+#   maxReplicas: ${SQL_MAX_REPLICAS}
+#   metrics:
+#     - type: Resource
+#       resource:
+#         name: cpu
+#         target:
+#           type: Utilization
+#           averageUtilization: 70
+#     - type: Resource
+#       resource:
+#         name: memory
+#         target:
+#           type: Utilization
+#           averageUtilization: 70
