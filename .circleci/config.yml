@@ -8,13 +8,31 @@ workflows:
       - test
       - approve_deploy_stage:
           type: approval
+          filters:
+            branches:
+              ignore:
+                - main
       - deploy_stage:
           context: 'main'
           requires:
             - build
             - test
             - approve_deploy_stage
+          filters:
+            branches:
+              ignore:
+                - main
       - deploy_prod:
+          context: 'main'
+          requires:
+            - build
+            - test
+          filters:
+            branches:
+              only:
+                - main
+      - deploy_stage:
+          name: 'deploy_stage_from_prod'
           context: 'main'
           requires:
             - build
