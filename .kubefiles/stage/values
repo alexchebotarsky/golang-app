@@ -6,5 +6,5 @@ SQL_INSTANCE=chebotarsky-stage:europe-west4:golang-app-db
 SQL_REPLICAS=1
 SQL_MIN_REPLICAS=1
 SQL_MAX_REPLICAS=1
-SQL_HOST="127.0.0.1"
+SQL_HOST="0.0.0.0"
 SQL_PORT=5432
