@@ -204,7 +204,7 @@ spec:
           command:
             - '/cloud_sql_proxy'
             - '--dir=/cloudsql'
-            - '-instances=${SQL_INSTANCE}=tcp:${SQL_HOST}:${SQL_PORT}'
+            - '-instances=${SQL_INSTANCE}=tcp:0.0.0.0:${SQL_PORT}'
             - '-verbose=false'
             - '-credential_file=/app/secret-files/gcp.json'
           volumeMounts:
