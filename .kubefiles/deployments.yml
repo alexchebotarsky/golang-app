@@ -1,24 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ${REPONAME}
-  namespace: ${REPONAME}
+  name: ${APP_NAME}
+  namespace: ${APP_NAME}
 spec:
+  selector:
+    matchLabels:
+      app: ${APP_NAME}
   strategy:
     rollingUpdate:
       maxSurge: 3
       maxUnavailable: 0
     type: RollingUpdate
-  selector:
-    matchLabels:
-      app: ${REPONAME}
-  replicas: ${REPLICAS}
   revisionHistoryLimit: 2
   template:
     metadata:
       labels:
-        app: ${REPONAME}
+        app: ${APP_NAME}
       annotations:
+        prometheus.io/scrape: 'true'
         cluster-autoscaler.kubernetes.io/safe-to-evict: 'true'
     spec:
       # Affinity to make sure that multiple pods does not run on the same node
@@ -33,7 +33,7 @@ spec:
                     - key: app
                       operator: In
                       values:
-                        - ${REPONAME}
+                        - ${APP_NAME}
                 topologyKey: failure-domain.beta.kubernetes.io/zone
             # prefer to run on different "physical" nodes
             - weight: 100
@@ -43,42 +43,30 @@ spec:
                     - key: app
                       operator: In
                       values:
-                        - ${REPONAME}
+                        - ${APP_NAME}
                 topologyKey: kubernetes.io/hostname
       tolerations:
         - key: cloud.google.com/gke-preemptible
           operator: Equal
           value: 'true'
           effect: NoSchedule
-      volumes:
-        - name: secret-files-volume
-          secret:
-            secretName: ${REPONAME}-secret-files
       containers:
-        - name: ${REPONAME}-container
+        - name: container
           image: ${DOCKER_IMAGE}
-          # Resource limits for each pod, cpu: 1.0 == 1 CPU core. Over-use causes CPU-usage to get throttled
-          # Memory-usage over-usage causes the pod to get killed, and a new one created.
-          # Try to focus on keeping limits and requests the same, so that the node can reserve the resources
-          # needed when it is starting up the pod.
           resources:
             limits:
-              cpu: '0.1'
-              memory: 50Mi
+              cpu: '${APP_CPU_LIMIT}m'
+              memory: '${APP_MEM_LIMIT}Mi'
             requests:
-              cpu: '0.1'
-              memory: 50Mi
+              cpu: '${APP_CPU_REQUEST}m'
+              memory: '${APP_MEM_REQUEST}Mi'
           envFrom:
             - configMapRef:
-                name: ${REPONAME}-config
+                name: ${APP_NAME}-config
             - secretRef:
-                name: ${REPONAME}-secret-values
-          volumeMounts:
-            - name: secret-files-volume
-              mountPath: /app/secret-files
-              readOnly: true
+                name: ${APP_NAME}-secret-values
           ports:
-            - containerPort: ${PORT}
+            - containerPort: ${APP_PORT}
               name: http-port
           livenessProbe:
             httpGet:
@@ -98,19 +86,41 @@ spec:
             periodSeconds: 5
             successThreshold: 1
             failureThreshold: 2
+          volumeMounts:
+            - name: secret-files-volume
+              mountPath: /app/secret-files
+              readOnly: true
+      volumes:
+        - name: secret-files-volume
+          secret:
+            secretName: ${APP_NAME}-secret-files
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ${APP_NAME}-load-balancer
+  namespace: ${APP_NAME}
+spec:
+  type: LoadBalancer
+  selector:
+    app: ${APP_NAME}
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: http-port
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: ${REPONAME}-hpa
-  namespace: ${REPONAME}
+  name: app-hpa
+  namespace: ${APP_NAME}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: ${REPONAME}
-  minReplicas: ${MIN_REPLICAS}
-  maxReplicas: ${MAX_REPLICAS}
+    name: ${APP_NAME}
+  minReplicas: ${APP_MIN_REPLICAS}
+  maxReplicas: ${APP_MAX_REPLICAS}
   metrics:
     - type: Resource
       resource:
@@ -125,40 +135,25 @@ spec:
           type: Utilization
           averageUtilization: 70
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  name: ${REPONAME}-load-balancer
-  namespace: ${REPONAME}
-spec:
-  type: LoadBalancer
-  selector:
-    app: ${REPONAME}
-  ports:
-    - port: 80
-      protocol: TCP
-      targetPort: http-port
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ${REPONAME}-sql-proxy
-  namespace: ${REPONAME}
+  name: ${APP_NAME}-sql-proxy
+  namespace: ${APP_NAME}
 spec:
+  selector:
+    matchLabels:
+      app: ${APP_NAME}-sql-proxy
   strategy:
     rollingUpdate:
       maxSurge: 1
-      maxUnavailable: 1
+      maxUnavailable: 0
     type: RollingUpdate
-  replicas: ${SQL_REPLICAS}
   revisionHistoryLimit: 2
-  selector:
-    matchLabels:
-      app: ${REPONAME}-sql-proxy
   template:
     metadata:
       labels:
-        app: ${REPONAME}-sql-proxy
+        app: ${APP_NAME}-sql-proxy
       annotations:
         cluster-autoscaler.kubernetes.io/safe-to-evict: 'true'
     spec:
@@ -175,7 +170,7 @@ spec:
                     - key: app
                       operator: In
                       values:
-                        - ${REPONAME}-sql-proxy
+                        - ${APP_NAME}-sql-proxy
             # prefer to run on different "physical" nodes
             - weight: 100
               podAffinityTerm:
@@ -185,21 +180,15 @@ spec:
                     - key: app
                       operator: In
                       values:
-                        - ${REPONAME}-sql-proxy
+                        - ${APP_NAME}-sql-proxy
       tolerations:
         - key: cloud.google.com/gke-preemptible
           operator: Equal
           value: 'true'
           effect: NoSchedule
       restartPolicy: Always
-      volumes:
-        - name: secret-files-volume
-          secret:
-            secretName: ${REPONAME}-secret-files
-        - name: cloudsql-empty-volume
-          emptyDir:
       containers:
-        - name: ${REPONAME}-sql-proxy-container
+        - name: container
           image: b.gcr.io/cloudsql-docker/gce-proxy:1.16
           command:
             - '/cloud_sql_proxy'
@@ -207,12 +196,6 @@ spec:
             - '-instances=${SQL_INSTANCE}=tcp:0.0.0.0:${SQL_PORT}'
             - '-verbose=false'
             - '-credential_file=/app/secret-files/gcp.json'
-          volumeMounts:
-            - name: secret-files-volume
-              mountPath: /app/secret-files
-              readOnly: true
-            - name: cloudsql-empty-volume
-              mountPath: /cloudsql
           securityContext:
             runAsUser: 2 # non-root user
             allowPrivilegeEscalation: false
@@ -234,38 +217,50 @@ spec:
             successThreshold: 1
           resources:
             limits:
-              cpu: '150m'
-              memory: '150Mi'
+              cpu: '${SQL_CPU_LIMIT}m'
+              memory: '${SQL_MEM_LIMIT}Mi'
             requests:
-              cpu: '100m'
-              memory: '100Mi'
+              cpu: '${SQL_CPU_REQUEST}m'
+              memory: '${SQL_MEM_REQUEST}Mi'
+          volumeMounts:
+            - name: secret-files-volume
+              mountPath: /app/secret-files
+              readOnly: true
+            - name: cloudsql-empty-volume
+              mountPath: /cloudsql
+      volumes:
+        - name: secret-files-volume
+          secret:
+            secretName: ${APP_NAME}-secret-files
+        - name: cloudsql-empty-volume
+          emptyDir:
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: ${REPONAME}-sql-proxy-service
-  namespace: ${REPONAME}
+  name: ${APP_NAME}-sql-proxy
+  namespace: ${APP_NAME}
   labels:
-    app: ${REPONAME}-sql-proxy-service
+    app: ${APP_NAME}-sql-proxy
 spec:
   type: ClusterIP
+  selector:
+    app: ${APP_NAME}-sql-proxy
   ports:
     - protocol: TCP
       port: ${SQL_PORT}
       targetPort: ${SQL_PORT}
-  selector:
-    app: ${REPONAME}-sql-proxy
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: ${REPONAME}-sql-proxy-hpa
-  namespace: ${REPONAME}
+  name: sql-proxy-hpa
+  namespace: ${APP_NAME}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: ${REPONAME}-sql-proxy
+    name: ${APP_NAME}-sql-proxy
   minReplicas: ${SQL_MIN_REPLICAS}
   maxReplicas: ${SQL_MAX_REPLICAS}
   metrics:

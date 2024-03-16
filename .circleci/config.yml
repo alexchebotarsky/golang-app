@@ -109,7 +109,7 @@ commands:
       - run:
           name: 'Deploy to GKE'
           command: |
-            export REPONAME=$CIRCLE_PROJECT_REPONAME
+            export APP_NAME=$CIRCLE_PROJECT_REPONAME
             export DOCKER_IMAGE=$GCR/$CIRCLE_PROJECT_REPONAME:$CIRCLE_SHA1
             export $(grep -v '^#' ./.kubefiles/<< parameters.env >>/values | xargs)
 
@@ -123,7 +123,7 @@ commands:
               cat $kubefile | envsubst | kubectl apply -f -
             done
 
-            kubectl rollout status deployment/${CIRCLE_PROJECT_REPONAME} --namespace=${CIRCLE_PROJECT_REPONAME}
+            kubectl rollout status deployment/$CIRCLE_PROJECT_REPONAME --namespace=$CIRCLE_PROJECT_REPONAME
 
 executors:
   docker_executor:
