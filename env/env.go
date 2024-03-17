@@ -11,6 +11,7 @@ import (
 
 type Config struct {
 	ServiceName string     `env:"SERVICE_NAME,default=unknown"`
+	Environment string     `env:"ENVIRONMENT,default=stage"`
 	LogLevel    slog.Level `env:"LOG_LEVEL,default=debug"`
 
 	Port          uint16 `env:"PORT,default=8000"`

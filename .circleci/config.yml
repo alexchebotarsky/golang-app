@@ -107,41 +107,28 @@ commands:
       - run:
           name: 'Authorize gcloud and kubectl'
           command: |
-            GCLOUD_PROJECT=""
-            GCLOUD_REGION=""
-            GKE_CREDENTIALS=""
-            if [[ "<< parameters.env >>" == "prod" ]]; then
-              GCLOUD_PROJECT=$GCLOUD_PROJECT_PROD
-              GCLOUD_REGION=$GCLOUD_REGION_PROD
-              GKE_CREDENTIALS=$GKE_CREDENTIALS_PROD
-            elif [[ "<< parameters.env >>" == "stage" ]]; then
-              GCLOUD_PROJECT=$GCLOUD_PROJECT_STAGE
-              GCLOUD_REGION=$GCLOUD_REGION_STAGE
-              GKE_CREDENTIALS=$GKE_CREDENTIALS_STAGE
-            fi
-
             echo $GKE_CREDENTIALS | gcloud auth activate-service-account --quiet --key-file=-
-            gcloud config set project $GCLOUD_PROJECT --quiet
-            gcloud config set compute/region $GCLOUD_REGION --quiet
+            gcloud config set project $GKE_PROJECT --quiet
+            gcloud config set compute/region $GKE_REGION --quiet
             gcloud container clusters get-credentials $GKE_CLUSTER --quiet
       - run:
           name: 'Deploy to GKE'
           command: |
+            export ENVIRONMENT="<< parameters.env >>"
             export APP_NAME=$CIRCLE_PROJECT_REPONAME
             export DOCKER_IMAGE=$GCR/$CIRCLE_PROJECT_REPONAME:$CIRCLE_SHA1
-            export $(grep -v '^#' ./.kubefiles/<< parameters.env >>/values | xargs)
+            export $(grep -v "^#" ./.kubefiles/$ENVIRONMENT/values | xargs)
 
             kubefiles=(
-              "./.kubefiles/namespace.yml"
-              "./.kubefiles/<< parameters.env >>/env.yml"
-              "./.kubefiles/deployments.yml"
+              "./.kubefiles/$ENVIRONMENT/env.yml"
+              "./.kubefiles/k8s.yml"
             )
 
             for kubefile in "${kubefiles[@]}"; do
               cat $kubefile | envsubst | kubectl apply -f -
             done
 
-            kubectl rollout status deployment/$CIRCLE_PROJECT_REPONAME --namespace=$CIRCLE_PROJECT_REPONAME
+            kubectl rollout status deployment/$CIRCLE_PROJECT_REPONAME --namespace=$ENVIRONMENT
 
 executors:
   docker_executor:

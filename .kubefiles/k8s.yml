@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ${APP_NAME}
-  namespace: ${APP_NAME}
+  namespace: ${ENVIRONMENT}
 spec:
   selector:
     matchLabels:
@@ -99,7 +99,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: ${APP_NAME}-load-balancer
-  namespace: ${APP_NAME}
+  namespace: ${ENVIRONMENT}
 spec:
   type: LoadBalancer
   selector:
@@ -112,8 +112,8 @@ spec:
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: app-hpa
-  namespace: ${APP_NAME}
+  name: ${APP_NAME}-hpa
+  namespace: ${ENVIRONMENT}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
@@ -139,7 +139,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ${APP_NAME}-sql-proxy
-  namespace: ${APP_NAME}
+  namespace: ${ENVIRONMENT}
 spec:
   selector:
     matchLabels:
@@ -239,7 +239,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: ${APP_NAME}-sql-proxy
-  namespace: ${APP_NAME}
+  namespace: ${ENVIRONMENT}
   labels:
     app: ${APP_NAME}-sql-proxy
 spec:
@@ -254,8 +254,8 @@ spec:
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: sql-proxy-hpa
-  namespace: ${APP_NAME}
+  name: ${APP_NAME}-sql-proxy-hpa
+  namespace: ${ENVIRONMENT}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1

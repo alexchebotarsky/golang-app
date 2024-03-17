@@ -10,11 +10,14 @@ import (
 
 type Client struct {
 	*pubsub.Client
+	envTag string
 }
 
-func New(ctx context.Context, projectID string) (*Client, error) {
+func New(ctx context.Context, projectID, envTag string) (*Client, error) {
 	c := &Client{}
 	var err error
+
+	c.envTag = envTag
 
 	c.Client, err = pubsub.NewClient(ctx, projectID)
 	if err != nil {
@@ -24,11 +27,15 @@ func New(ctx context.Context, projectID string) (*Client, error) {
 	return c, nil
 }
 
-func (ps *Client) send(ctx context.Context, topicID string, data []byte) error {
+func (c *Client) Subscription(id string) *pubsub.Subscription {
+	return c.Client.Subscription(c.withEnvTag(id))
+}
+
+func (c *Client) send(ctx context.Context, topicID string, data []byte) error {
 	ctx, span := tracing.StartSpan(ctx, topicID)
 	defer span.End()
 
-	topic := ps.Topic(topicID)
+	topic := c.Client.Topic(c.withEnvTag(topicID))
 	defer topic.Stop()
 
 	var results []*pubsub.PublishResult
@@ -41,4 +48,12 @@ func (ps *Client) send(ctx context.Context, topicID string, data []byte) error {
 		}
 	}
 	return nil
+}
+
+func (c *Client) withEnvTag(id string) string {
+	if c.envTag == "" || id == "" {
+		return id
+	}
+
+	return fmt.Sprintf("%s-%s", id, c.envTag)
 }

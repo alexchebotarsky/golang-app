@@ -24,7 +24,7 @@ type Processor struct {
 	DB          DBClient
 }
 
-func New(ctx context.Context, projectID string, pubsub PubSubClient, db DBClient) (*Processor, error) {
+func New(ctx context.Context, pubsub PubSubClient, db DBClient) (*Processor, error) {
 	p := &Processor{}
 
 	p.PubSub = pubsub

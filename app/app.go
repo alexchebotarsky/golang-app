@@ -102,7 +102,7 @@ func setupClients(ctx context.Context, env *env.Config) (*Clients, error) {
 		return nil, fmt.Errorf("error creating auth client: %v", err)
 	}
 
-	c.PubSub, err = pubsub.New(ctx, env.PubSubProjectID)
+	c.PubSub, err = pubsub.New(ctx, env.PubSubProjectID, env.Environment)
 	if err != nil {
 		return nil, fmt.Errorf("error creating example client: %v", err)
 	}
@@ -124,7 +124,7 @@ func setupServices(ctx context.Context, env *env.Config, clients *Clients) ([]Se
 	}
 	services = append(services, server)
 
-	processor, err := processor.New(ctx, env.PubSubProjectID, clients.PubSub, clients.DB)
+	processor, err := processor.New(ctx, clients.PubSub, clients.DB)
 	if err != nil {
 		return nil, fmt.Errorf("error creating new processor: %v", err)
 	}
