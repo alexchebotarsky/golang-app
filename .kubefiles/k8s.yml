@@ -50,6 +50,8 @@ spec:
           operator: Equal
           value: 'true'
           effect: NoSchedule
+      nodeSelector:
+        cloud.google.com/gke-preemptible: 'true'
       containers:
         - name: container
           image: ${DOCKER_IMAGE}
@@ -186,6 +188,8 @@ spec:
           operator: Equal
           value: 'true'
           effect: NoSchedule
+      nodeSelector:
+        cloud.google.com/gke-preemptible: 'true'
       restartPolicy: Always
       containers:
         - name: container
