@@ -13,8 +13,8 @@ import (
 )
 
 type Client struct {
-	DB                *sqlx.DB
-	ArticleStatements *ArticleStatements
+	DB          *sqlx.DB
+	ArticleStmt *ArticleStmt
 }
 
 func New(ctx context.Context, creds Credentials) (*Client, error) {
@@ -26,7 +26,7 @@ func New(ctx context.Context, creds Credentials) (*Client, error) {
 		return nil, fmt.Errorf("error connecting to database: %v", err)
 	}
 
-	c.ArticleStatements, err = c.prepareArticleStatements(ctx)
+	c.ArticleStmt, err = c.prepareArticleStatements(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("error preparing article statements: %v", err)
 	}
@@ -37,7 +37,7 @@ func New(ctx context.Context, creds Credentials) (*Client, error) {
 func (c *Client) Close() error {
 	errs := []error{}
 
-	if err := c.ArticleStatements.Close(); err != nil {
+	if err := c.ArticleStmt.Close(); err != nil {
 		errs = append(errs, fmt.Errorf("error closing article statements: %v", err))
 	}
 
