@@ -32,7 +32,7 @@ func DeleteArticle(articleDeleter ArticleDeleter) http.HandlerFunc {
 		if err != nil {
 			switch err.(type) {
 			case *client.ErrNotFound:
-				HandleError(ctx, w, fmt.Errorf("error deleting article with id %d: %v", id, err), http.StatusNotFound, false)
+				HandleError(ctx, w, fmt.Errorf("error deleting article: %v", err), http.StatusNotFound, false)
 			default:
 				HandleError(ctx, w, fmt.Errorf("error deleting article: %v", err), http.StatusInternalServerError, true)
 			}
