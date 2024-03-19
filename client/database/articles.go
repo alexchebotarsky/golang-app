@@ -57,27 +57,27 @@ func (articleStmt *ArticleStmt) Close() error {
 
 	err := articleStmt.SelectAll.Close()
 	if err != nil {
-		errs = append(errs, fmt.Errorf("error closing select all statement: %v", err))
+		errs = append(errs, fmt.Errorf("error closing select all articles statement: %v", err))
 	}
 
 	err = articleStmt.Select.Close()
 	if err != nil {
-		errs = append(errs, fmt.Errorf("error closing select statement: %v", err))
+		errs = append(errs, fmt.Errorf("error closing select article statement: %v", err))
 	}
 
 	err = articleStmt.Insert.Close()
 	if err != nil {
-		errs = append(errs, fmt.Errorf("error closing insert statement: %v", err))
+		errs = append(errs, fmt.Errorf("error closing insert article statement: %v", err))
 	}
 
 	err = articleStmt.Delete.Close()
 	if err != nil {
-		errs = append(errs, fmt.Errorf("error closing delete statement: %v", err))
+		errs = append(errs, fmt.Errorf("error closing delete article statement: %v", err))
 	}
 
 	err = articleStmt.Update.Close()
 	if err != nil {
-		errs = append(errs, fmt.Errorf("error closing update statement: %v", err))
+		errs = append(errs, fmt.Errorf("error closing update article statement: %v", err))
 	}
 
 	if len(errs) > 0 {
@@ -125,7 +125,7 @@ func (c *Client) SelectArticle(ctx context.Context, id int) (*article.Article, e
 	if err != nil {
 		switch err {
 		case sql.ErrNoRows:
-			return nil, &client.ErrNotFound{Err: err}
+			return nil, &client.ErrNotFound{Err: fmt.Errorf("article with id %d not found: %v", id, err)}
 		default:
 			return nil, fmt.Errorf("error selecting article with id %d: %v", id, err)
 		}
@@ -177,7 +177,7 @@ func (c *Client) DeleteArticle(ctx context.Context, id int) error {
 
 	result, err := c.ArticleStmt.Delete.ExecContext(ctx, args)
 	if err != nil {
-		return fmt.Errorf("error deleting article: %v", err)
+		return fmt.Errorf("error deleting article with id %d: %v", id, err)
 	}
 
 	rows, err := result.RowsAffected()
@@ -215,7 +215,12 @@ func (c *Client) UpdateArticle(ctx context.Context, id int, payload article.Payl
 	var article article.Article
 	err := c.ArticleStmt.Update.GetContext(ctx, &article, args)
 	if err != nil {
-		return nil, fmt.Errorf("error updating article: %v", err)
+		switch err {
+		case sql.ErrNoRows:
+			return nil, &client.ErrNotFound{Err: fmt.Errorf("article with id %d not found: %v", id, err)}
+		default:
+			return nil, fmt.Errorf("error updating article with id %d: %v", id, err)
+		}
 	}
 
 	return &article, nil

@@ -9,6 +9,7 @@ import (
 
 	chi "github.com/go-chi/chi/v5"
 	"github.com/goodleby/golang-app/article"
+	"github.com/goodleby/golang-app/client"
 	"github.com/goodleby/golang-app/tracing"
 )
 
@@ -44,7 +45,12 @@ func UpdateArticle(articleUpdater ArticleUpdater) http.HandlerFunc {
 
 		article, err := articleUpdater.UpdateArticle(ctx, id, payload)
 		if err != nil {
-			HandleError(ctx, w, fmt.Errorf("error updating article: %v", err), http.StatusInternalServerError, true)
+			switch err.(type) {
+			case *client.ErrNotFound:
+				HandleError(ctx, w, fmt.Errorf("error updating article: %v", err), http.StatusNotFound, false)
+			default:
+				HandleError(ctx, w, fmt.Errorf("error updating article: %v", err), http.StatusInternalServerError, true)
+			}
 			return
 		}
 
