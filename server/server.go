@@ -48,7 +48,7 @@ type Server struct {
 }
 
 func New(ctx context.Context, port uint16, allowedOrigin string, db DBClient, auth AuthClient, pubsub PubSubClient, example ExampleClient) (*Server, error) {
-	s := &Server{}
+	var s Server
 
 	s.Port = port
 	s.Router = chi.NewRouter()
@@ -65,7 +65,7 @@ func New(ctx context.Context, port uint16, allowedOrigin string, db DBClient, au
 
 	s.setupRoutes(allowedOrigin)
 
-	return s, nil
+	return &s, nil
 }
 
 func (s *Server) Start(ctx context.Context) {

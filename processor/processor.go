@@ -25,7 +25,7 @@ type Processor struct {
 }
 
 func New(ctx context.Context, pubsub PubSubClient, db DBClient) (*Processor, error) {
-	p := &Processor{}
+	var p Processor
 
 	p.PubSub = pubsub
 	p.DB = db
@@ -33,7 +33,7 @@ func New(ctx context.Context, pubsub PubSubClient, db DBClient) (*Processor, err
 	p.setupEvents()
 	p.setupMiddlewares()
 
-	return p, nil
+	return &p, nil
 }
 
 func (p *Processor) Start(ctx context.Context) {

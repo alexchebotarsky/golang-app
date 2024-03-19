@@ -14,7 +14,7 @@ type Client struct {
 }
 
 func New(ctx context.Context, projectID, envTag string) (*Client, error) {
-	c := &Client{}
+	var c Client
 	var err error
 
 	c.envTag = envTag
@@ -24,7 +24,7 @@ func New(ctx context.Context, projectID, envTag string) (*Client, error) {
 		return nil, fmt.Errorf("error creating new pubsub client: %v", err)
 	}
 
-	return c, nil
+	return &c, nil
 }
 
 func (c *Client) Subscription(id string) *pubsub.Subscription {

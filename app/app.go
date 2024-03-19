@@ -35,7 +35,7 @@ type App struct {
 }
 
 func New(ctx context.Context, env *env.Config) (*App, error) {
-	app := &App{}
+	var app App
 	var err error
 
 	app.Clients, err = setupClients(ctx, env)
@@ -48,7 +48,7 @@ func New(ctx context.Context, env *env.Config) (*App, error) {
 		return nil, fmt.Errorf("error setting up services: %v", err)
 	}
 
-	return app, nil
+	return &app, nil
 }
 
 func (app *App) Launch(ctx context.Context) {
@@ -80,7 +80,7 @@ func (app *App) Launch(ctx context.Context) {
 }
 
 func setupClients(ctx context.Context, env *env.Config) (*Clients, error) {
-	c := &Clients{}
+	var c Clients
 	var err error
 
 	c.DB, err = database.New(ctx, database.Credentials{
@@ -111,7 +111,7 @@ func setupClients(ctx context.Context, env *env.Config) (*Clients, error) {
 		return nil, fmt.Errorf("error creating example client: %v", err)
 	}
 
-	return c, nil
+	return &c, nil
 }
 
 func setupServices(ctx context.Context, env *env.Config, clients *Clients) ([]Service, error) {
