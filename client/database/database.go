@@ -18,7 +18,7 @@ type Client struct {
 }
 
 func New(ctx context.Context, creds Credentials) (*Client, error) {
-	c := &Client{}
+	var c Client
 	var err error
 
 	c.DB, err = sqlx.ConnectContext(ctx, "postgres", creds.ToConnectionString())
@@ -31,7 +31,7 @@ func New(ctx context.Context, creds Credentials) (*Client, error) {
 		return nil, fmt.Errorf("error preparing article statements: %v", err)
 	}
 
-	return c, nil
+	return &c, nil
 }
 
 func (c *Client) Close() error {
