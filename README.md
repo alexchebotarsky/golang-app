@@ -10,3 +10,5 @@ Includes features:
 - Structured logging
 - OpenTelemetry tracing
 - Prometheus metrics collection
+- CircleCI configuration
+- Kubernetes deployment
