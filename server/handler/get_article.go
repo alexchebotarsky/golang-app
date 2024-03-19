@@ -33,7 +33,7 @@ func GetArticle(articleSelector ArticleSelector) http.HandlerFunc {
 		article, err := articleSelector.SelectArticle(ctx, id)
 		if err != nil {
 			switch err.(type) {
-			case client.ErrNotFound:
+			case *client.ErrNotFound:
 				HandleError(ctx, w, fmt.Errorf("article with id %d not found: %v", id, err), http.StatusNotFound, false)
 			default:
 				HandleError(ctx, w, fmt.Errorf("error selecting article: %v", err), http.StatusInternalServerError, true)

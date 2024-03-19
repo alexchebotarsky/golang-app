@@ -81,7 +81,7 @@ func (articleStmt *ArticleStmt) Close() error {
 	}
 
 	if len(errs) > 0 {
-		return client.ErrMultiple{Errs: errs}
+		return &client.ErrMultiple{Errs: errs}
 	}
 
 	return nil
@@ -125,7 +125,7 @@ func (c *Client) SelectArticle(ctx context.Context, id int) (*article.Article, e
 	if err != nil {
 		switch err {
 		case sql.ErrNoRows:
-			return nil, client.ErrNotFound{Err: err}
+			return nil, &client.ErrNotFound{Err: err}
 		default:
 			return nil, fmt.Errorf("error selecting article with id %d: %v", id, err)
 		}
@@ -186,7 +186,7 @@ func (c *Client) DeleteArticle(ctx context.Context, id int) error {
 	}
 
 	if rows == 0 {
-		return client.ErrNotFound{Err: errors.New("no rows to delete")}
+		return &client.ErrNotFound{Err: errors.New("no rows to delete")}
 	}
 
 	return nil

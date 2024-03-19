@@ -29,7 +29,7 @@ func Auth(tokenParser TokenParser, expectedAccessLevel int) func(next http.Handl
 			claims, err := tokenParser.ParseToken(ctx, tokenCookie.Value)
 			if err != nil {
 				switch err.(type) {
-				case client.ErrUnauthorized:
+				case *client.ErrUnauthorized:
 					handler.HandleError(ctx, w, fmt.Errorf("error validating auth token: %v", err), http.StatusUnauthorized, false)
 				default:
 					handler.HandleError(ctx, w, fmt.Errorf("error validating auth token: %v", err), http.StatusInternalServerError, true)

@@ -48,7 +48,7 @@ func (c *Client) Close() error {
 	}
 
 	if len(errs) > 0 {
-		return client.ErrMultiple{Errs: errs}
+		return &client.ErrMultiple{Errs: errs}
 	}
 
 	return nil

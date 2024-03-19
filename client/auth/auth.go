@@ -61,7 +61,7 @@ func (c *Client) NewToken(ctx context.Context, roleName, roleKey string) (string
 
 	role, err := c.validateRole(roleName, roleKey)
 	if err != nil {
-		return "", time.Time{}, client.ErrUnauthorized{Err: err}
+		return "", time.Time{}, &client.ErrUnauthorized{Err: err}
 	}
 
 	expires := time.Now().Add(TokenTTL)
@@ -103,7 +103,7 @@ func (c *Client) ParseToken(ctx context.Context, tokenString string) (*Claims, e
 	}
 
 	if !token.Valid {
-		return nil, client.ErrUnauthorized{Err: errors.New("invalid auth token")}
+		return nil, &client.ErrUnauthorized{Err: errors.New("invalid auth token")}
 	}
 
 	return claims, nil
@@ -128,7 +128,7 @@ func (c *Client) RefreshToken(ctx context.Context, tokenString string) (string, 
 	}
 
 	if !oldToken.Valid {
-		return "", time.Time{}, client.ErrUnauthorized{Err: errors.New("invalid auth token")}
+		return "", time.Time{}, &client.ErrUnauthorized{Err: errors.New("invalid auth token")}
 	}
 
 	expires := time.Now().Add(TokenTTL)

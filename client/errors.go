@@ -9,11 +9,11 @@ type ErrNotFound struct {
 	Err error
 }
 
-func (e ErrNotFound) Error() string {
+func (e *ErrNotFound) Error() string {
 	return e.Err.Error()
 }
 
-func (e ErrNotFound) Unwrap() error {
+func (e *ErrNotFound) Unwrap() error {
 	return e.Err
 }
 
@@ -21,11 +21,11 @@ type ErrUnauthorized struct {
 	Err error
 }
 
-func (e ErrUnauthorized) Error() string {
+func (e *ErrUnauthorized) Error() string {
 	return e.Err.Error()
 }
 
-func (e ErrUnauthorized) Unwrap() error {
+func (e *ErrUnauthorized) Unwrap() error {
 	return e.Err
 }
 
@@ -33,7 +33,7 @@ type ErrMultiple struct {
 	Errs []error
 }
 
-func (e ErrMultiple) Error() string {
+func (e *ErrMultiple) Error() string {
 	errStrings := make([]string, 0, len(e.Errs))
 
 	for _, err := range e.Errs {
@@ -43,6 +43,6 @@ func (e ErrMultiple) Error() string {
 	return strings.Join(errStrings, " | ")
 }
 
-func (e ErrMultiple) Unwrap() error {
+func (e *ErrMultiple) Unwrap() error {
 	return errors.New(e.Error())
 }
