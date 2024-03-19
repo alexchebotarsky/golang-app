@@ -17,7 +17,8 @@ type Event struct {
 }
 
 func (e *Event) Listen(ctx context.Context) {
-	if err := e.Subscription.Receive(ctx, e.Handler); err != nil {
+	err := e.Subscription.Receive(ctx, e.Handler)
+	if err != nil {
 		slog.Error(fmt.Sprintf("Error listening to %q subscription: %v", e.Name, err), "subscriptionName", e.Name)
 	}
 }

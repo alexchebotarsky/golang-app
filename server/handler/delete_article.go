@@ -28,7 +28,8 @@ func DeleteArticle(articleDeleter ArticleDeleter) http.HandlerFunc {
 
 		span.SetTag("id", chi.URLParam(r, "id"))
 
-		if err := articleDeleter.DeleteArticle(ctx, id); err != nil {
+		err = articleDeleter.DeleteArticle(ctx, id)
+		if err != nil {
 			switch err.(type) {
 			case client.ErrNotFound:
 				HandleError(ctx, w, fmt.Errorf("error deleting article with id %d: %v", id, err), http.StatusNotFound, false)

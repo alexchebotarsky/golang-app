@@ -24,11 +24,13 @@ func main() {
 
 	logger.Init(env.LogLevel)
 
-	if err := tracing.Init(env.ServiceName); err != nil {
+	err = tracing.Init(env.ServiceName)
+	if err != nil {
 		slog.Error(fmt.Sprintf("Error initializing tracing: %v", err))
 	}
 
-	if err := metrics.Init(); err != nil {
+	err = metrics.Init()
+	if err != nil {
 		slog.Error(fmt.Sprintf("Error initializing metrics: %v", err))
 	}
 

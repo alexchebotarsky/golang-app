@@ -24,7 +24,8 @@ func AuthLogin(tokenCreator TokenCreator) http.HandlerFunc {
 		ctx := r.Context()
 
 		var payload AuthLoginPayload
-		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		err := json.NewDecoder(r.Body).Decode(&payload)
+		if err != nil {
 			HandleError(ctx, w, fmt.Errorf("error decoding auth payload: %v", err), http.StatusBadRequest, false)
 			return
 		}

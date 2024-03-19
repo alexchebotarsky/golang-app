@@ -55,23 +55,28 @@ func (c *Client) prepareArticleStatements(ctx context.Context) (*ArticleStmt, er
 func (articleStmt *ArticleStmt) Close() error {
 	errs := []error{}
 
-	if err := articleStmt.SelectAll.Close(); err != nil {
+	err := articleStmt.SelectAll.Close()
+	if err != nil {
 		errs = append(errs, fmt.Errorf("error closing select all statement: %v", err))
 	}
 
-	if err := articleStmt.Select.Close(); err != nil {
+	err = articleStmt.Select.Close()
+	if err != nil {
 		errs = append(errs, fmt.Errorf("error closing select statement: %v", err))
 	}
 
-	if err := articleStmt.Insert.Close(); err != nil {
+	err = articleStmt.Insert.Close()
+	if err != nil {
 		errs = append(errs, fmt.Errorf("error closing insert statement: %v", err))
 	}
 
-	if err := articleStmt.Delete.Close(); err != nil {
+	err = articleStmt.Delete.Close()
+	if err != nil {
 		errs = append(errs, fmt.Errorf("error closing delete statement: %v", err))
 	}
 
-	if err := articleStmt.Update.Close(); err != nil {
+	err = articleStmt.Update.Close()
+	if err != nil {
 		errs = append(errs, fmt.Errorf("error closing update statement: %v", err))
 	}
 
@@ -92,7 +97,8 @@ func (c *Client) SelectAllArticles(ctx context.Context) ([]article.Article, erro
 	defer span.End()
 
 	articles := []article.Article{}
-	if err := c.ArticleStmt.SelectAll.SelectContext(ctx, &articles); err != nil {
+	err := c.ArticleStmt.SelectAll.SelectContext(ctx, &articles)
+	if err != nil {
 		return nil, fmt.Errorf("error selecting articles: %v", err)
 	}
 
@@ -115,7 +121,8 @@ func (c *Client) SelectArticle(ctx context.Context, id int) (*article.Article, e
 	}
 
 	var article article.Article
-	if err := c.ArticleStmt.Select.GetContext(ctx, &article, args); err != nil {
+	err := c.ArticleStmt.Select.GetContext(ctx, &article, args)
+	if err != nil {
 		switch err {
 		case sql.ErrNoRows:
 			return nil, client.ErrNotFound{Err: err}
@@ -145,7 +152,8 @@ func (c *Client) InsertArticle(ctx context.Context, payload article.Payload) (*a
 	}
 
 	var article article.Article
-	if err := c.ArticleStmt.Insert.GetContext(ctx, &article, args); err != nil {
+	err := c.ArticleStmt.Insert.GetContext(ctx, &article, args)
+	if err != nil {
 		return nil, fmt.Errorf("error inserting an article: %v", err)
 	}
 
@@ -205,7 +213,8 @@ func (c *Client) UpdateArticle(ctx context.Context, id int, payload article.Payl
 	}
 
 	var article article.Article
-	if err := c.ArticleStmt.Update.GetContext(ctx, &article, args); err != nil {
+	err := c.ArticleStmt.Update.GetContext(ctx, &article, args)
+	if err != nil {
 		return nil, fmt.Errorf("error updating article: %v", err)
 	}
 

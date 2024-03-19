@@ -65,12 +65,14 @@ func (app *App) Launch(ctx context.Context) {
 	defer cancel()
 
 	for _, service := range app.Services {
-		if err := service.Stop(ctx); err != nil {
+		err := service.Stop(ctx)
+		if err != nil {
 			slog.Error(fmt.Sprintf("Error stopping a service: %v", err))
 		}
 	}
 
-	if err := app.Clients.DB.Close(); err != nil {
+	err := app.Clients.DB.Close()
+	if err != nil {
 		slog.Error(fmt.Sprintf("Error closing database client: %v", err))
 	}
 

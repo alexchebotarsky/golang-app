@@ -34,19 +34,23 @@ var (
 )
 
 func Init() error {
-	if err := prometheus.Register(requestStatusCode); err != nil {
+	err := prometheus.Register(requestStatusCode)
+	if err != nil {
 		return fmt.Errorf("error registering requestStatusCodes metrics collector: %v", err)
 	}
 
-	if err := prometheus.Register(requestDuration); err != nil {
+	err = prometheus.Register(requestDuration)
+	if err != nil {
 		return fmt.Errorf("error registering timeToProcessRequest metrics collector: %v", err)
 	}
 
-	if err := prometheus.Register(eventProcessed); err != nil {
+	err = prometheus.Register(eventProcessed)
+	if err != nil {
 		return fmt.Errorf("error registering eventProcessed metrics collector: %v", err)
 	}
 
-	if err := prometheus.Register(eventDuration); err != nil {
+	err = prometheus.Register(eventDuration)
+	if err != nil {
 		return fmt.Errorf("error registering eventDuration metrics collector: %v", err)
 	}
 

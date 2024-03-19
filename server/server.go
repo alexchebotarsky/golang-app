@@ -70,13 +70,15 @@ func New(ctx context.Context, port uint16, allowedOrigin string, db DBClient, au
 
 func (s *Server) Start(ctx context.Context) {
 	slog.Info(fmt.Sprintf("Server is listening on port: %d", s.Port))
-	if err := s.HTTP.ListenAndServe(); err != http.ErrServerClosed {
+	err := s.HTTP.ListenAndServe()
+	if err != http.ErrServerClosed {
 		slog.Error(fmt.Sprintf("Error listening and serving: %v", err))
 	}
 }
 
 func (s *Server) Stop(ctx context.Context) error {
-	if err := s.HTTP.Shutdown(ctx); err != nil {
+	err := s.HTTP.Shutdown(ctx)
+	if err != nil {
 		return fmt.Errorf("error shutting down http server: %v", err)
 	}
 

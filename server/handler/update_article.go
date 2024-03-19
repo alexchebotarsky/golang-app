@@ -30,12 +30,14 @@ func UpdateArticle(articleUpdater ArticleUpdater) http.HandlerFunc {
 		span.SetTag("id", chi.URLParam(r, "id"))
 
 		var payload article.Payload
-		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		err = json.NewDecoder(r.Body).Decode(&payload)
+		if err != nil {
 			HandleError(ctx, w, fmt.Errorf("error decoding article payload: %v", err), http.StatusBadRequest, false)
 			return
 		}
 
-		if err := payload.Validate(); err != nil {
+		err = payload.Validate()
+		if err != nil {
 			HandleError(ctx, w, fmt.Errorf("error invalid article payload: %v", err), http.StatusBadRequest, false)
 			return
 		}

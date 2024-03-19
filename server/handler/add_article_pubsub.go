@@ -18,17 +18,19 @@ func AddArticlePubSub(publisher AddArticlePublisher) http.HandlerFunc {
 		ctx := r.Context()
 
 		var payload article.Payload
-		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		err := json.NewDecoder(r.Body).Decode(&payload)
+		if err != nil {
 			HandleError(ctx, w, fmt.Errorf("error decoding article payload: %v", err), http.StatusBadRequest, false)
 			return
 		}
 
-		if err := payload.Validate(); err != nil {
+		err = payload.Validate()
+		if err != nil {
 			HandleError(ctx, w, fmt.Errorf("error invalid article payload: %v", err), http.StatusBadRequest, false)
 			return
 		}
 
-		err := publisher.PublishAddArticle(ctx, payload)
+		err = publisher.PublishAddArticle(ctx, payload)
 		if err != nil {
 			HandleError(ctx, w, fmt.Errorf("error publishing add article: %v", err), http.StatusInternalServerError, true)
 			return

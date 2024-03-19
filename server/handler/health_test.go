@@ -40,7 +40,8 @@ func TestHealth(t *testing.T) {
 			}
 
 			var resBody HealthStatus
-			if err := json.NewDecoder(w.Body).Decode(&resBody); err != nil {
+			err := json.NewDecoder(w.Body).Decode(&resBody)
+			if err != nil {
 				t.Fatalf("Health() error json decoding response body: %v", err)
 			}
 

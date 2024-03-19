@@ -39,11 +39,13 @@ func LoadConfig(ctx context.Context) (*Config, error) {
 	var c Config
 
 	// We are loading env variables from .env file only for local development
-	if err := godotenv.Load(".env"); err != nil {
+	err := godotenv.Load(".env")
+	if err != nil {
 		slog.Debug("error loading .env file: %v", err)
 	}
 
-	if err := envconfig.Process(ctx, &c); err != nil {
+	err = envconfig.Process(ctx, &c)
+	if err != nil {
 		return nil, fmt.Errorf("error processing environment variables: %v", err)
 	}
 

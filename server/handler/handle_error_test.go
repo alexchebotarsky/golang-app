@@ -46,7 +46,8 @@ func TestHandleError(t *testing.T) {
 			}
 
 			var resBody errorResponse
-			if err := json.NewDecoder(w.Body).Decode(&resBody); err != nil {
+			err := json.NewDecoder(w.Body).Decode(&resBody)
+			if err != nil {
 				t.Fatalf("HandleError() error json decoding response body: %v", err)
 			}
 

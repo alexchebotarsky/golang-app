@@ -37,11 +37,13 @@ func New(ctx context.Context, creds Credentials) (*Client, error) {
 func (c *Client) Close() error {
 	errs := []error{}
 
-	if err := c.ArticleStmt.Close(); err != nil {
+	err := c.ArticleStmt.Close()
+	if err != nil {
 		errs = append(errs, fmt.Errorf("error closing article statements: %v", err))
 	}
 
-	if err := c.DB.Close(); err != nil {
+	err = c.DB.Close()
+	if err != nil {
 		errs = append(errs, err)
 	}
 
