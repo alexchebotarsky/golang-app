@@ -11,7 +11,7 @@ func Init(level slog.Level) {
 		ReplaceAttr: renameMessageKey,
 		Level:       level,
 	}
-	logger := slog.New(slog.NewTextHandler(os.Stdout, opts))
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, opts))
 	slog.SetDefault(logger)
 }
 
