@@ -10,7 +10,7 @@ import (
 )
 
 type ExampleDataFetcher interface {
-	FetchExampleData(ctx context.Context) (*example.ExampleData, error)
+	FetchExampleData(ctx context.Context) (example.ExampleData, error)
 }
 
 func GetExampleData(exampleFetcher ExampleDataFetcher) http.HandlerFunc {

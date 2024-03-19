@@ -26,7 +26,7 @@ type Config struct {
 	DatabaseOptions  string `env:"DATABASE_OPTIONS,default=?sslmode=disable"`
 
 	AuthSecret    string        `env:"AUTH_SECRET,required"`
-	AuthTokenTTL  time.Duration `env:"AUTH_TOKEN_TTL,default=1200000000000"` // 20 minutes in nanoseconds
+	AuthTokenTTL  time.Duration `env:"AUTH_TOKEN_TTL,default=20m"`
 	AuthAdminKey  string        `env:"AUTH_ADMIN_KEY,required"`
 	AuthEditorKey string        `env:"AUTH_EDITOR_KEY,required"`
 	AuthViewerKey string        `env:"AUTH_VIEWER_KEY,required"`

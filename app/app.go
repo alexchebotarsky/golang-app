@@ -106,10 +106,7 @@ func setupClients(ctx context.Context, env *env.Config) (*Clients, error) {
 		return nil, fmt.Errorf("error creating example client: %v", err)
 	}
 
-	c.Example, err = example.New(env.ExampleEndpoint)
-	if err != nil {
-		return nil, fmt.Errorf("error creating example client: %v", err)
-	}
+	c.Example = example.New(env.ExampleEndpoint)
 
 	return &c, nil
 }
