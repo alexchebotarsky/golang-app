@@ -15,6 +15,7 @@ import (
 const tracerName = ""
 
 func Init(serviceName string) error {
+	// TODO: replace this exporter with actual exporter
 	exporter, err := newFileExporter("traces.txt")
 	if err != nil {
 		return fmt.Errorf("error creating new file exporter: %v", err)

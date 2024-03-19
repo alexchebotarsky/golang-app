@@ -30,6 +30,7 @@ func New(ctx context.Context, pubsub PubSubClient, db DBClient) (*Processor, err
 	p.PubSub = pubsub
 	p.DB = db
 
+	// Order is important here, middlewares expect events to be setup first.
 	p.setupEvents()
 	p.setupMiddlewares()
 
