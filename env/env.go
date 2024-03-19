@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/sethvargo/go-envconfig"
@@ -24,10 +25,11 @@ type Config struct {
 	DatabaseName     string `env:"DATABASE_NAME,required"`
 	DatabaseOptions  string `env:"DATABASE_OPTIONS,default=?sslmode=disable"`
 
-	AuthSecret    string `env:"AUTH_SECRET,required"`
-	AuthAdminKey  string `env:"AUTH_ADMIN_KEY,required"`
-	AuthEditorKey string `env:"AUTH_EDITOR_KEY,required"`
-	AuthViewerKey string `env:"AUTH_VIEWER_KEY,required"`
+	AuthSecret    string        `env:"AUTH_SECRET,required"`
+	AuthTokenTTL  time.Duration `env:"AUTH_TOKEN_TTL,default=1200000000000"` // 20 minutes in nanoseconds
+	AuthAdminKey  string        `env:"AUTH_ADMIN_KEY,required"`
+	AuthEditorKey string        `env:"AUTH_EDITOR_KEY,required"`
+	AuthViewerKey string        `env:"AUTH_VIEWER_KEY,required"`
 
 	GoogleApplicationCredentials string `env:"GOOGLE_APPLICATION_CREDENTIALS,required"`
 	PubSubProjectID              string `env:"PUBSUB_PROJECT_ID,required"`

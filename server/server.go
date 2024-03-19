@@ -26,7 +26,7 @@ type DBClient interface {
 type AuthClient interface {
 	handler.TokenCreator
 	handler.TokenRefresher
-	middleware.TokenParser
+	middleware.TokenChecker
 }
 
 type PubSubClient interface {

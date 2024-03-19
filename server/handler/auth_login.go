@@ -6,17 +6,15 @@ import (
 	"fmt"
 	"net/http"
 	"time"
-
-	"github.com/goodleby/golang-app/client"
 )
+
+type TokenCreator interface {
+	CreateRoleToken(ctx context.Context, role, key string) (token string, expires time.Time, err error)
+}
 
 type AuthLoginPayload struct {
 	Role string `json:"role"`
 	Key  string `json:"key"`
-}
-
-type TokenCreator interface {
-	NewToken(ctx context.Context, role, key string) (token string, expires time.Time, err error)
 }
 
 func AuthLogin(tokenCreator TokenCreator) http.HandlerFunc {
@@ -30,14 +28,9 @@ func AuthLogin(tokenCreator TokenCreator) http.HandlerFunc {
 			return
 		}
 
-		token, expires, err := tokenCreator.NewToken(ctx, payload.Role, payload.Key)
+		token, expires, err := tokenCreator.CreateRoleToken(ctx, payload.Role, payload.Key)
 		if err != nil {
-			switch err.(type) {
-			case *client.ErrUnauthorized:
-				HandleError(ctx, w, fmt.Errorf("error creating new auth token: %v", err), http.StatusUnauthorized, false)
-			default:
-				HandleError(ctx, w, fmt.Errorf("error creating new auth token: %v", err), http.StatusInternalServerError, true)
-			}
+			HandleError(ctx, w, fmt.Errorf("error creating role token: %v", err), http.StatusInternalServerError, true)
 			return
 		}
 
