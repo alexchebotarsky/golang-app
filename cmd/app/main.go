@@ -24,7 +24,7 @@ func main() {
 
 	logger.Init(env.LogLevel)
 
-	err = tracing.Init(env.ServiceName)
+	err = tracing.Init(ctx, env.ServiceName, env.Environment, env.TracingSampleRate)
 	if err != nil {
 		slog.Error(fmt.Sprintf("Error initializing tracing: %v", err))
 	}

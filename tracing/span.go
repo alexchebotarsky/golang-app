@@ -41,9 +41,9 @@ func StartSpan(ctx context.Context, name string) (context.Context, Span) {
 }
 
 func SpanFromContext(ctx context.Context) Span {
-	s := Span{
-		span: trace.SpanFromContext(ctx),
-	}
+	var s Span
+
+	s.span = trace.SpanFromContext(ctx)
 
 	return s
 }

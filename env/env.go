@@ -11,9 +11,10 @@ import (
 )
 
 type Config struct {
-	ServiceName string     `env:"SERVICE_NAME,default=unknown"`
-	Environment string     `env:"ENVIRONMENT,default=stage"`
-	LogLevel    slog.Level `env:"LOG_LEVEL,default=debug"`
+	ServiceName       string     `env:"SERVICE_NAME,default=unknown"`
+	Environment       string     `env:"ENVIRONMENT,default=stage"`
+	LogLevel          slog.Level `env:"LOG_LEVEL,default=debug"`
+	TracingSampleRate float64    `env:"TRACING_SAMPLE_RATE,default=1"`
 
 	Port          uint16 `env:"PORT,default=8000"`
 	AllowedOrigin string `env:"ALLOWED_ORIGIN,default=http://localhost:3000"`
