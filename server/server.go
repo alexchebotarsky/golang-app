@@ -15,28 +15,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-type DBClient interface {
-	handler.AllArticlesSelector
-	handler.ArticleSelector
-	handler.ArticleInserter
-	handler.ArticleUpdater
-	handler.ArticleDeleter
-}
-
-type AuthClient interface {
-	handler.TokenCreator
-	handler.TokenRefresher
-	middleware.TokenChecker
-}
-
-type PubSubClient interface {
-	handler.AddArticlePublisher
-}
-
-type ExampleClient interface {
-	handler.ExampleDataFetcher
-}
-
 type Server struct {
 	Port    uint16
 	Router  chi.Router
@@ -66,6 +44,28 @@ func New(ctx context.Context, port uint16, allowedOrigin string, db DBClient, au
 	s.setupRoutes(allowedOrigin)
 
 	return &s, nil
+}
+
+type DBClient interface {
+	handler.AllArticlesSelector
+	handler.ArticleSelector
+	handler.ArticleInserter
+	handler.ArticleUpdater
+	handler.ArticleDeleter
+}
+
+type AuthClient interface {
+	handler.TokenCreator
+	handler.TokenRefresher
+	middleware.TokenChecker
+}
+
+type PubSubClient interface {
+	handler.AddArticlePublisher
+}
+
+type ExampleClient interface {
+	handler.ExampleDataFetcher
 }
 
 func (s *Server) Start(ctx context.Context) {

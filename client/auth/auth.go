@@ -18,12 +18,6 @@ type Client struct {
 	SigningMethod jwt.SigningMethod
 }
 
-type Keys struct {
-	Admin  string
-	Editor string
-	Viewer string
-}
-
 func New(ctx context.Context, secret string, tokenTTL time.Duration, keys Keys) *Client {
 	var c Client
 
@@ -52,49 +46,16 @@ func New(ctx context.Context, secret string, tokenTTL time.Duration, keys Keys) 
 	return &c
 }
 
-type Claims struct {
-	RoleName    string `json:"roleName"`
-	AccessLevel int    `json:"accessLevel"`
-	jwt.RegisteredClaims
+type Keys struct {
+	Admin  string
+	Editor string
+	Viewer string
 }
 
-func (c *Client) createTokenWithClaims(ctx context.Context, claims jwt.Claims) (string, error) {
-	_, span := tracing.StartSpan(ctx, "createTokenWithClaims")
-	defer span.End()
-
-	token := jwt.NewWithClaims(c.SigningMethod, claims)
-
-	signedToken, err := token.SignedString(c.authSecret)
-	if err != nil {
-		return "", fmt.Errorf("error signing auth token: %v", err)
-	}
-
-	return signedToken, nil
-}
-
-func (c *Client) parseTokenClaims(ctx context.Context, tokenString string) (Claims, error) {
-	_, span := tracing.StartSpan(ctx, "parseTokenClaims")
-	defer span.End()
-
-	var claims Claims
-
-	token, err := jwt.ParseWithClaims(
-		tokenString,
-		&claims,
-		func(t *jwt.Token) (interface{}, error) {
-			return c.authSecret, nil
-		},
-		jwt.WithValidMethods([]string{c.SigningMethod.Alg()}),
-	)
-	if err != nil {
-		return Claims{}, fmt.Errorf("error parsing auth token: %v", err)
-	}
-
-	if !token.Valid {
-		return Claims{}, &client.ErrUnauthorized{Err: errors.New("invalid auth token")}
-	}
-
-	return claims, nil
+type Role struct {
+	Name        string
+	AccessLevel int
+	Key         string
 }
 
 func (c *Client) CreateRoleToken(ctx context.Context, roleName, roleKey string) (string, time.Time, error) {
@@ -161,12 +122,6 @@ func (c *Client) RefreshToken(ctx context.Context, tokenString string) (string, 
 	return token, expires, nil
 }
 
-type Role struct {
-	Name        string
-	AccessLevel int
-	Key         string
-}
-
 func (c *Client) findRole(roleName, roleKey string) (Role, error) {
 	for _, role := range c.roles {
 		if role.Name == roleName && role.Key == roleKey {
@@ -175,6 +130,51 @@ func (c *Client) findRole(roleName, roleKey string) (Role, error) {
 	}
 
 	return Role{}, errors.New("invalid role name or role key")
+}
+
+func (c *Client) createTokenWithClaims(ctx context.Context, claims jwt.Claims) (string, error) {
+	_, span := tracing.StartSpan(ctx, "createTokenWithClaims")
+	defer span.End()
+
+	token := jwt.NewWithClaims(c.SigningMethod, claims)
+
+	signedToken, err := token.SignedString(c.authSecret)
+	if err != nil {
+		return "", fmt.Errorf("error signing auth token: %v", err)
+	}
+
+	return signedToken, nil
+}
+
+func (c *Client) parseTokenClaims(ctx context.Context, tokenString string) (Claims, error) {
+	_, span := tracing.StartSpan(ctx, "parseTokenClaims")
+	defer span.End()
+
+	var claims Claims
+
+	token, err := jwt.ParseWithClaims(
+		tokenString,
+		&claims,
+		func(t *jwt.Token) (interface{}, error) {
+			return c.authSecret, nil
+		},
+		jwt.WithValidMethods([]string{c.SigningMethod.Alg()}),
+	)
+	if err != nil {
+		return Claims{}, fmt.Errorf("error parsing auth token: %v", err)
+	}
+
+	if !token.Valid {
+		return Claims{}, &client.ErrUnauthorized{Err: errors.New("invalid auth token")}
+	}
+
+	return claims, nil
+}
+
+type Claims struct {
+	RoleName    string `json:"roleName"`
+	AccessLevel int    `json:"accessLevel"`
+	jwt.RegisteredClaims
 }
 
 const AdminRole = "admin"

@@ -20,38 +20,6 @@ type ArticleStmt struct {
 	Update    *sqlx.NamedStmt
 }
 
-func (c *Client) prepareArticleStatements(ctx context.Context) (*ArticleStmt, error) {
-	var articleStmt ArticleStmt
-	var err error
-
-	articleStmt.SelectAll, err = c.prepareSelectAllArticles(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("error preparing select all articles statement: %v", err)
-	}
-
-	articleStmt.Select, err = c.prepareSelectArticle(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("error preparing select article statement: %v", err)
-	}
-
-	articleStmt.Insert, err = c.prepareInsertArticle(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("error preparing insert article statement: %v", err)
-	}
-
-	articleStmt.Delete, err = c.prepareDeleteArticle(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("error preparing delete article statement: %v", err)
-	}
-
-	articleStmt.Update, err = c.prepareUpdateArticle(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("error preparing update article statement: %v", err)
-	}
-
-	return &articleStmt, nil
-}
-
 func (articleStmt *ArticleStmt) Close() error {
 	errs := []error{}
 
@@ -85,6 +53,38 @@ func (articleStmt *ArticleStmt) Close() error {
 	}
 
 	return nil
+}
+
+func (c *Client) prepareArticleStatements(ctx context.Context) (*ArticleStmt, error) {
+	var articleStmt ArticleStmt
+	var err error
+
+	articleStmt.SelectAll, err = c.prepareSelectAllArticles(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("error preparing select all articles statement: %v", err)
+	}
+
+	articleStmt.Select, err = c.prepareSelectArticle(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("error preparing select article statement: %v", err)
+	}
+
+	articleStmt.Insert, err = c.prepareInsertArticle(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("error preparing insert article statement: %v", err)
+	}
+
+	articleStmt.Delete, err = c.prepareDeleteArticle(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("error preparing delete article statement: %v", err)
+	}
+
+	articleStmt.Update, err = c.prepareUpdateArticle(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("error preparing update article statement: %v", err)
+	}
+
+	return &articleStmt, nil
 }
 
 func (c *Client) prepareSelectAllArticles(ctx context.Context) (*sqlx.Stmt, error) {

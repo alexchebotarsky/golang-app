@@ -9,14 +9,6 @@ import (
 	"github.com/goodleby/golang-app/processor/middleware"
 )
 
-type PubSubClient interface {
-	Subscription(id string) *pubsub.Subscription
-}
-
-type DBClient interface {
-	event.ArticleInserter
-}
-
 type Processor struct {
 	Events      []event.Event
 	Middlewares []middleware.Middleware
@@ -35,6 +27,14 @@ func New(ctx context.Context, pubsub PubSubClient, db DBClient) (*Processor, err
 	p.setupMiddlewares()
 
 	return &p, nil
+}
+
+type PubSubClient interface {
+	Subscription(id string) *pubsub.Subscription
+}
+
+type DBClient interface {
+	event.ArticleInserter
 }
 
 func (p *Processor) Start(ctx context.Context) {

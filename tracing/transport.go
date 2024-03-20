@@ -12,6 +12,10 @@ type TracedTransport struct {
 	http.RoundTripper
 }
 
+func NewTracedTransport(base http.RoundTripper) *TracedTransport {
+	return &TracedTransport{otelhttp.NewTransport(base)}
+}
+
 func (tt *TracedTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	_, span := StartSpan(req.Context(), "RoundTrip")
 	defer span.End()
@@ -26,8 +30,4 @@ func (tt *TracedTransport) RoundTrip(req *http.Request) (*http.Response, error) 
 	span.SetTag("StatusCode", strconv.Itoa(res.StatusCode))
 
 	return res, err
-}
-
-func NewTracedTransport(base http.RoundTripper) *TracedTransport {
-	return &TracedTransport{otelhttp.NewTransport(base)}
 }

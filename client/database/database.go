@@ -34,26 +34,6 @@ func New(ctx context.Context, creds Credentials) (*Client, error) {
 	return &c, nil
 }
 
-func (c *Client) Close() error {
-	errs := []error{}
-
-	err := c.ArticleStmt.Close()
-	if err != nil {
-		errs = append(errs, fmt.Errorf("error closing article statements: %v", err))
-	}
-
-	err = c.DB.Close()
-	if err != nil {
-		errs = append(errs, err)
-	}
-
-	if len(errs) > 0 {
-		return &client.ErrMultiple{Errs: errs}
-	}
-
-	return nil
-}
-
 type Credentials struct {
 	User     string
 	Password string
@@ -72,4 +52,24 @@ func (c *Credentials) ToConnectionString() string {
 		c.Name,
 		c.Options,
 	)
+}
+
+func (c *Client) Close() error {
+	errs := []error{}
+
+	err := c.ArticleStmt.Close()
+	if err != nil {
+		errs = append(errs, fmt.Errorf("error closing article statements: %v", err))
+	}
+
+	err = c.DB.Close()
+	if err != nil {
+		errs = append(errs, err)
+	}
+
+	if len(errs) > 0 {
+		return &client.ErrMultiple{Errs: errs}
+	}
+
+	return nil
 }

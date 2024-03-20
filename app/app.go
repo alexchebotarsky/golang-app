@@ -17,6 +17,11 @@ import (
 	"github.com/goodleby/golang-app/server"
 )
 
+type App struct {
+	Services []Service
+	Clients  *Clients
+}
+
 type Service interface {
 	Start(context.Context)
 	Stop(context.Context) error
@@ -27,11 +32,6 @@ type Clients struct {
 	Auth    *auth.Client
 	PubSub  *pubsub.Client
 	Example *example.Client
-}
-
-type App struct {
-	Services []Service
-	Clients  *Clients
 }
 
 func New(ctx context.Context, env *env.Config) (*App, error) {
