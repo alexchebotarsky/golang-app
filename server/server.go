@@ -19,31 +19,14 @@ type Server struct {
 	Port    uint16
 	Router  chi.Router
 	HTTP    *http.Server
+	Clients Clients
+}
+
+type Clients struct {
 	DB      DBClient
 	Auth    AuthClient
 	PubSub  PubSubClient
 	Example ExampleClient
-}
-
-func New(ctx context.Context, port uint16, allowedOrigin string, db DBClient, auth AuthClient, pubsub PubSubClient, example ExampleClient) (*Server, error) {
-	var s Server
-
-	s.Port = port
-	s.Router = chi.NewRouter()
-	s.HTTP = &http.Server{
-		Addr:         fmt.Sprintf(":%d", s.Port),
-		Handler:      s.Router,
-		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 5 * time.Second,
-	}
-	s.DB = db
-	s.Auth = auth
-	s.PubSub = pubsub
-	s.Example = example
-
-	s.setupRoutes(allowedOrigin)
-
-	return &s, nil
 }
 
 type DBClient interface {
@@ -66,6 +49,24 @@ type PubSubClient interface {
 
 type ExampleClient interface {
 	handler.ExampleDataFetcher
+}
+
+func New(ctx context.Context, port uint16, allowedOrigin string, clients Clients) (*Server, error) {
+	var s Server
+
+	s.Port = port
+	s.Router = chi.NewRouter()
+	s.HTTP = &http.Server{
+		Addr:         fmt.Sprintf(":%d", s.Port),
+		Handler:      s.Router,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 5 * time.Second,
+	}
+	s.Clients = clients
+
+	s.setupRoutes(allowedOrigin)
+
+	return &s, nil
 }
 
 func (s *Server) Start(ctx context.Context) {
@@ -100,31 +101,31 @@ func (s *Server) setupRoutes(allowedOrigin string) {
 			AllowCredentials: true,
 		}))
 
-		r.Get("/example", handler.GetExampleData(s.Example))
-		r.Post("/pubsub/articles", handler.AddArticlePubSub(s.PubSub))
+		r.Get("/example", handler.GetExampleData(s.Clients.Example))
+		r.Post("/pubsub/articles", handler.AddArticlePubSub(s.Clients.PubSub))
 
 		// Auth routes
 		r.Group(func(r chi.Router) {
-			r.Post("/auth/login", handler.AuthLogin(s.Auth))
-			r.Post("/auth/refresh", handler.AuthRefresh(s.Auth))
+			r.Post("/auth/login", handler.AuthLogin(s.Clients.Auth))
+			r.Post("/auth/refresh", handler.AuthRefresh(s.Clients.Auth))
 			r.Post("/auth/logout", handler.AuthLogout)
 		})
 
 		// View articles
 		r.Group(func(r chi.Router) {
-			r.Use(middleware.Auth(s.Auth, auth.ViewerAccess))
+			r.Use(middleware.Auth(s.Clients.Auth, auth.ViewerAccess))
 
-			r.Get("/articles", handler.GetAllArticles(s.DB))
-			r.Get("/articles/{id}", handler.GetArticle(s.DB))
+			r.Get("/articles", handler.GetAllArticles(s.Clients.DB))
+			r.Get("/articles/{id}", handler.GetArticle(s.Clients.DB))
 		})
 
 		// Edit articles
 		r.Group(func(r chi.Router) {
-			r.Use(middleware.Auth(s.Auth, auth.EditorAccess))
+			r.Use(middleware.Auth(s.Clients.Auth, auth.EditorAccess))
 
-			r.Post("/articles", handler.AddArticle(s.DB))
-			r.Delete("/articles/{id}", handler.DeleteArticle(s.DB))
-			r.Put("/articles/{id}", handler.UpdateArticle(s.DB))
+			r.Post("/articles", handler.AddArticle(s.Clients.DB))
+			r.Delete("/articles/{id}", handler.DeleteArticle(s.Clients.DB))
+			r.Put("/articles/{id}", handler.UpdateArticle(s.Clients.DB))
 		})
 	})
 }

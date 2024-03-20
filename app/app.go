@@ -114,13 +114,21 @@ func setupClients(ctx context.Context, env *env.Config) (*Clients, error) {
 func setupServices(ctx context.Context, env *env.Config, clients *Clients) ([]Service, error) {
 	var services []Service
 
-	server, err := server.New(ctx, env.Port, env.AllowedOrigin, clients.DB, clients.Auth, clients.PubSub, clients.Example)
+	server, err := server.New(ctx, env.Port, env.AllowedOrigin, server.Clients{
+		DB:      clients.DB,
+		Auth:    clients.Auth,
+		PubSub:  clients.PubSub,
+		Example: clients.Example,
+	})
 	if err != nil {
 		return nil, fmt.Errorf("error creating new server: %v", err)
 	}
 	services = append(services, server)
 
-	processor, err := processor.New(ctx, clients.PubSub, clients.DB)
+	processor, err := processor.New(ctx, processor.Clients{
+		PubSub: clients.PubSub,
+		DB:     clients.DB,
+	})
 	if err != nil {
 		return nil, fmt.Errorf("error creating new processor: %v", err)
 	}

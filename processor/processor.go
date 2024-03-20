@@ -12,21 +12,12 @@ import (
 type Processor struct {
 	Events      []event.Event
 	Middlewares []middleware.Middleware
-	PubSub      PubSubClient
-	DB          DBClient
+	Clients     Clients
 }
 
-func New(ctx context.Context, pubsub PubSubClient, db DBClient) (*Processor, error) {
-	var p Processor
-
-	p.PubSub = pubsub
-	p.DB = db
-
-	// Order is important here, middlewares expect events to be setup first.
-	p.setupEvents()
-	p.setupMiddlewares()
-
-	return &p, nil
+type Clients struct {
+	PubSub PubSubClient
+	DB     DBClient
 }
 
 type PubSubClient interface {
@@ -35,6 +26,18 @@ type PubSubClient interface {
 
 type DBClient interface {
 	event.ArticleInserter
+}
+
+func New(ctx context.Context, clients Clients) (*Processor, error) {
+	var p Processor
+
+	p.Clients = clients
+
+	// Order is important here, middlewares expect events to be setup first.
+	p.setupEvents()
+	p.setupMiddlewares()
+
+	return &p, nil
 }
 
 func (p *Processor) Start(ctx context.Context) {
@@ -71,7 +74,7 @@ func (p *Processor) setupEvents() {
 
 	p.handle(event.Event{
 		Name:         "AddArticle",
-		Subscription: p.PubSub.Subscription("golang-app-add-article-sub"),
-		Handler:      event.AddArticle(p.DB),
+		Subscription: p.Clients.PubSub.Subscription("golang-app-add-article-sub"),
+		Handler:      event.AddArticle(p.Clients.DB),
 	})
 }
