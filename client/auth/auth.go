@@ -12,8 +12,9 @@ import (
 )
 
 type Client struct {
-	roles         []Role
 	authSecret    []byte
+	roles         []Role
+	TokenTTL      time.Duration
 	SigningMethod jwt.SigningMethod
 }
 
@@ -23,8 +24,8 @@ type Keys struct {
 	Viewer string
 }
 
-func New(ctx context.Context, secret string, keys Keys) (*Client, error) {
-	c := &Client{}
+func New(ctx context.Context, secret string, tokenTTL time.Duration, keys Keys) *Client {
+	var c Client
 
 	c.authSecret = []byte(secret)
 	c.roles = []Role{
@@ -44,9 +45,11 @@ func New(ctx context.Context, secret string, keys Keys) (*Client, error) {
 			Key:         keys.Viewer,
 		},
 	}
+
+	c.TokenTTL = tokenTTL
 	c.SigningMethod = jwt.SigningMethodHS256
 
-	return c, nil
+	return &c
 }
 
 type Claims struct {
@@ -55,18 +58,57 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-func (c *Client) NewToken(ctx context.Context, roleName, roleKey string) (string, time.Time, error) {
-	_, span := tracing.StartSpan(ctx, "NewToken")
+func (c *Client) createTokenWithClaims(ctx context.Context, claims jwt.Claims) (string, error) {
+	_, span := tracing.StartSpan(ctx, "createTokenWithClaims")
 	defer span.End()
 
-	role, err := c.validateRole(roleName, roleKey)
+	token := jwt.NewWithClaims(c.SigningMethod, claims)
+
+	signedToken, err := token.SignedString(c.authSecret)
+	if err != nil {
+		return "", fmt.Errorf("error signing auth token: %v", err)
+	}
+
+	return signedToken, nil
+}
+
+func (c *Client) parseTokenClaims(ctx context.Context, tokenString string) (Claims, error) {
+	_, span := tracing.StartSpan(ctx, "parseTokenClaims")
+	defer span.End()
+
+	var claims Claims
+
+	token, err := jwt.ParseWithClaims(
+		tokenString,
+		&claims,
+		func(t *jwt.Token) (interface{}, error) {
+			return c.authSecret, nil
+		},
+		jwt.WithValidMethods([]string{c.SigningMethod.Alg()}),
+	)
+	if err != nil {
+		return Claims{}, fmt.Errorf("error parsing auth token: %v", err)
+	}
+
+	if !token.Valid {
+		return Claims{}, &client.ErrUnauthorized{Err: errors.New("invalid auth token")}
+	}
+
+	return claims, nil
+}
+
+func (c *Client) CreateRoleToken(ctx context.Context, roleName, roleKey string) (string, time.Time, error) {
+	ctx, span := tracing.StartSpan(ctx, "CreateRoleToken")
+	defer span.End()
+
+	role, err := c.findRole(roleName, roleKey)
 	if err != nil {
 		return "", time.Time{}, &client.ErrUnauthorized{Err: err}
 	}
 
-	expires := time.Now().Add(TokenTTL)
+	expires := time.Now().Add(c.TokenTTL)
 
-	claims := &Claims{
+	claims := Claims{
 		RoleName:    role.Name,
 		AccessLevel: role.AccessLevel,
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -74,75 +116,49 @@ func (c *Client) NewToken(ctx context.Context, roleName, roleKey string) (string
 		},
 	}
 
-	token := jwt.NewWithClaims(c.SigningMethod, claims)
-
-	signedToken, err := token.SignedString(c.authSecret)
+	token, err := c.createTokenWithClaims(ctx, claims)
 	if err != nil {
-		return "", time.Time{}, fmt.Errorf("error creating jwt token: %v", err)
+		return "", time.Time{}, fmt.Errorf("error creating token with claims: %v", err)
 	}
 
-	return signedToken, expires, nil
+	return token, expires, nil
 }
 
-func (c *Client) ParseToken(ctx context.Context, tokenString string) (*Claims, error) {
-	_, span := tracing.StartSpan(ctx, "ParseToken")
+func (c *Client) CheckTokenAccess(ctx context.Context, tokenString string, expectedAccessLevel int) error {
+	ctx, span := tracing.StartSpan(ctx, "CheckTokenAccess")
 	defer span.End()
 
-	claims := &Claims{}
-
-	token, err := jwt.ParseWithClaims(
-		tokenString,
-		claims,
-		func(t *jwt.Token) (interface{}, error) {
-			return c.authSecret, nil
-		},
-		jwt.WithValidMethods([]string{c.SigningMethod.Alg()}),
-	)
+	claims, err := c.parseTokenClaims(ctx, tokenString)
 	if err != nil {
-		return nil, fmt.Errorf("error parsing auth token: %v", err)
+		return fmt.Errorf("error parsing token claims: %v", err)
 	}
 
-	if !token.Valid {
-		return nil, &client.ErrUnauthorized{Err: errors.New("invalid auth token")}
+	if claims.AccessLevel < expectedAccessLevel {
+		return &client.ErrForbidden{Err: errors.New("insufficient access level")}
 	}
 
-	return claims, nil
+	return nil
 }
 
 func (c *Client) RefreshToken(ctx context.Context, tokenString string) (string, time.Time, error) {
-	_, span := tracing.StartSpan(ctx, "RefreshToken")
+	ctx, span := tracing.StartSpan(ctx, "RefreshToken")
 	defer span.End()
 
-	claims := &Claims{}
-
-	oldToken, err := jwt.ParseWithClaims(
-		tokenString,
-		claims,
-		func(t *jwt.Token) (interface{}, error) {
-			return c.authSecret, nil
-		},
-		jwt.WithValidMethods([]string{c.SigningMethod.Alg()}),
-	)
+	claims, err := c.parseTokenClaims(ctx, tokenString)
 	if err != nil {
-		return "", time.Time{}, fmt.Errorf("error parsing auth token: %v", err)
+		return "", time.Time{}, fmt.Errorf("error parsing token claims: %v", err)
 	}
 
-	if !oldToken.Valid {
-		return "", time.Time{}, &client.ErrUnauthorized{Err: errors.New("invalid auth token")}
-	}
-
-	expires := time.Now().Add(TokenTTL)
+	expires := time.Now().Add(c.TokenTTL)
 
 	claims.ExpiresAt = jwt.NewNumericDate(expires)
 
-	token := jwt.NewWithClaims(c.SigningMethod, claims)
-
-	signedToken, err := token.SignedString(c.authSecret)
+	token, err := c.createTokenWithClaims(ctx, claims)
 	if err != nil {
-		return "", time.Time{}, fmt.Errorf("error creating jwt token: %v", err)
+		return "", time.Time{}, fmt.Errorf("error creating token with claims: %v", err)
 	}
 
-	return signedToken, expires, nil
+	return token, expires, nil
 }
 
 type Role struct {
@@ -151,14 +167,14 @@ type Role struct {
 	Key         string
 }
 
-func (c *Client) validateRole(roleName, roleKey string) (*Role, error) {
+func (c *Client) findRole(roleName, roleKey string) (Role, error) {
 	for _, role := range c.roles {
 		if role.Name == roleName && role.Key == roleKey {
-			return &role, nil
+			return role, nil
 		}
 	}
 
-	return nil, errors.New("invalid role name or role key")
+	return Role{}, errors.New("invalid role name or role key")
 }
 
 const AdminRole = "admin"
@@ -169,5 +185,3 @@ const EditorAccess = 20
 
 const ViewerRole = "viewer"
 const ViewerAccess = 10
-
-const TokenTTL = 1 * time.Hour

@@ -95,14 +95,11 @@ func setupClients(ctx context.Context, env *env.Config) (*Clients, error) {
 		return nil, fmt.Errorf("error creating database client: %v", err)
 	}
 
-	c.Auth, err = auth.New(ctx, env.AuthSecret, auth.Keys{
+	c.Auth = auth.New(ctx, env.AuthSecret, env.AuthTokenTTL, auth.Keys{
 		Admin:  env.AuthAdminKey,
 		Editor: env.AuthEditorKey,
 		Viewer: env.AuthViewerKey,
 	})
-	if err != nil {
-		return nil, fmt.Errorf("error creating auth client: %v", err)
-	}
 
 	c.PubSub, err = pubsub.New(ctx, env.PubSubProjectID, env.Environment)
 	if err != nil {
