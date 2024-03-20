@@ -20,7 +20,7 @@ type Config struct {
 
 	DatabaseUser     string `env:"DATABASE_USER,required"`
 	DatabasePassword string `env:"DATABASE_PASSWORD,required"`
-	DatabaseHost     string `env:"DATABASE_HOST,default=localhost"`
+	DatabaseHost     string `env:"DATABASE_HOST,default=127.0.0.1"`
 	DatabasePort     uint16 `env:"DATABASE_PORT,default=5432"`
 	DatabaseName     string `env:"DATABASE_NAME,required"`
 	DatabaseOptions  string `env:"DATABASE_OPTIONS,default=?sslmode=disable"`
@@ -34,7 +34,7 @@ type Config struct {
 	GoogleApplicationCredentials string `env:"GOOGLE_APPLICATION_CREDENTIALS,required"`
 	PubSubProjectID              string `env:"PUBSUB_PROJECT_ID,required"`
 
-	ExampleEndpoint string `env:"EXAMPLE_ENDPOINT,default=https://swapi.dev/api/people/1"`
+	ExampleEndpoint string `env:"EXAMPLE_ENDPOINT,required"`
 }
 
 func LoadConfig(ctx context.Context) (*Config, error) {
