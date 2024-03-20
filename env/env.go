@@ -34,6 +34,7 @@ type Config struct {
 
 	GoogleApplicationCredentials string `env:"GOOGLE_APPLICATION_CREDENTIALS,required"`
 	PubSubProjectID              string `env:"PUBSUB_PROJECT_ID,required"`
+	TraceProjectID               string `env:"TRACE_PROJECT_ID,required"`
 
 	ExampleEndpoint string `env:"EXAMPLE_ENDPOINT,required"`
 }

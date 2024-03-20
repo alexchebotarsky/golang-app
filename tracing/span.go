@@ -3,6 +3,7 @@ package tracing
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -35,7 +36,10 @@ func (s *Span) RecordError(err error) {
 func StartSpan(ctx context.Context, name string) (context.Context, Span) {
 	var s Span
 
-	ctx, s.span = otel.Tracer(tracerName).Start(ctx, name)
+	// It is ok if serviceName is empty, it will use default tracer name instead
+	serviceName, _ := os.LookupEnv("SERVICE_NAME")
+
+	ctx, s.span = otel.Tracer(serviceName).Start(ctx, name)
 
 	return ctx, s
 }
