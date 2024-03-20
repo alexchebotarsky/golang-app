@@ -13,10 +13,12 @@ func Trace(next http.Handler) http.Handler {
 		ctx, span := tracing.StartSpan(r.Context(), "Root")
 		defer span.End()
 
+		span.SetTag("http.method", r.Method)
+		span.SetTag("http.url", r.URL.String())
+
 		next.ServeHTTP(w, r.WithContext(ctx))
 
 		routeID := fmt.Sprintf("%s %s", r.Method, chi.RouteContext(ctx).RoutePattern())
 		span.SetName(routeID)
-		span.SetTag("RequestURI", r.RequestURI)
 	})
 }
