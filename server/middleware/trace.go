@@ -10,7 +10,7 @@ import (
 
 func Trace(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx, span := tracing.StartSpan(r.Context(), "Root")
+		ctx, span := tracing.StartSpan(r.Context(), "GenericHandlerSpan")
 		defer span.End()
 
 		span.SetTag("http.method", r.Method)
