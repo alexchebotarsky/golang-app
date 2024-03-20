@@ -43,7 +43,8 @@ func (c *Client) send(ctx context.Context, topicID string, data []byte) error {
 	results = append(results, res)
 
 	for _, r := range results {
-		if _, err := r.Get(ctx); err != nil {
+		_, err := r.Get(ctx)
+		if err != nil {
 			return fmt.Errorf("error publishing to pubsub: %v", err)
 		}
 	}
