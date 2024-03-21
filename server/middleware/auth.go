@@ -28,9 +28,9 @@ func Auth(tokenChecker TokenChecker, expectedAccessLevel int) func(next http.Han
 			if err != nil {
 				switch err.(type) {
 				case *client.ErrUnauthorized:
-					handler.HandleError(ctx, w, fmt.Errorf("error checking token access: %v", err), http.StatusUnauthorized, false)
+					handler.HandleError(ctx, w, fmt.Errorf("error checking token access: unauthorized: %v", err), http.StatusUnauthorized, false)
 				case *client.ErrForbidden:
-					handler.HandleError(ctx, w, fmt.Errorf("error checking token access"), http.StatusForbidden, false)
+					handler.HandleError(ctx, w, fmt.Errorf("error checking token access: forbidden: %v", err), http.StatusForbidden, false)
 				default:
 					handler.HandleError(ctx, w, fmt.Errorf("error checking token access: %v", err), http.StatusInternalServerError, true)
 				}

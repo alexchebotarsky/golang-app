@@ -3,7 +3,6 @@ package database
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 
 	"github.com/goodleby/golang-app/article"
@@ -186,7 +185,7 @@ func (c *Client) DeleteArticle(ctx context.Context, id int) error {
 	}
 
 	if rows == 0 {
-		return &client.ErrNotFound{Err: errors.New("no rows to delete")}
+		return &client.ErrNotFound{Err: fmt.Errorf("no article with id %d to delete", id)}
 	}
 
 	return nil
@@ -217,7 +216,7 @@ func (c *Client) UpdateArticle(ctx context.Context, id int, payload article.Payl
 	if err != nil {
 		switch err {
 		case sql.ErrNoRows:
-			return nil, &client.ErrNotFound{Err: fmt.Errorf("article with id %d not found: %v", id, err)}
+			return nil, &client.ErrNotFound{Err: fmt.Errorf("no article with id %d to update: %v", id, err)}
 		default:
 			return nil, fmt.Errorf("error updating article with id %d: %v", id, err)
 		}

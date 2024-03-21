@@ -34,7 +34,7 @@ func AuthLogin(tokenCreator TokenCreator) http.HandlerFunc {
 		if err != nil {
 			switch err.(type) {
 			case *client.ErrUnauthorized:
-				HandleError(ctx, w, fmt.Errorf("error creating role token: %v", err), http.StatusUnauthorized, false)
+				HandleError(ctx, w, fmt.Errorf("error creating role token: unauthorized: %v", err), http.StatusUnauthorized, false)
 			default:
 				HandleError(ctx, w, fmt.Errorf("error creating role token: %v", err), http.StatusInternalServerError, true)
 			}

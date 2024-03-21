@@ -27,7 +27,7 @@ func AuthRefresh(tokenRefresher TokenRefresher) http.HandlerFunc {
 		if err != nil {
 			switch err.(type) {
 			case *client.ErrUnauthorized:
-				HandleError(ctx, w, fmt.Errorf("error refreshing token: %v", err), http.StatusUnauthorized, false)
+				HandleError(ctx, w, fmt.Errorf("error refreshing token: unauthorized: %v", err), http.StatusUnauthorized, false)
 			default:
 				HandleError(ctx, w, fmt.Errorf("error refreshing token: %v", err), http.StatusInternalServerError, true)
 			}

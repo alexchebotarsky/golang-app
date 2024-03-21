@@ -47,7 +47,7 @@ func UpdateArticle(articleUpdater ArticleUpdater) http.HandlerFunc {
 		if err != nil {
 			switch err.(type) {
 			case *client.ErrNotFound:
-				HandleError(ctx, w, fmt.Errorf("error updating article: %v", err), http.StatusNotFound, false)
+				HandleError(ctx, w, fmt.Errorf("error updating article: not found: %v", err), http.StatusNotFound, false)
 			default:
 				HandleError(ctx, w, fmt.Errorf("error updating article: %v", err), http.StatusInternalServerError, true)
 			}
