@@ -2,18 +2,20 @@ package middleware
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 
 	"github.com/goodleby/golang-app/client"
+	"github.com/goodleby/golang-app/client/auth"
 	"github.com/goodleby/golang-app/server/handler"
 )
 
-type TokenChecker interface {
-	CheckTokenAccess(ctx context.Context, token string, expectedAccessLevel int) error
+type TokenAccessReader interface {
+	ReadTokenAccess(ctx context.Context, token string) (auth.AccessLevel, error)
 }
 
-func Auth(tokenChecker TokenChecker, expectedAccessLevel int) func(next http.Handler) http.Handler {
+func Auth(tokenReader TokenAccessReader, expectedAccess auth.AccessLevel) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
@@ -24,16 +26,19 @@ func Auth(tokenChecker TokenChecker, expectedAccessLevel int) func(next http.Han
 				return
 			}
 
-			err = tokenChecker.CheckTokenAccess(ctx, tokenCookie.Value, expectedAccessLevel)
+			tokenAccess, err := tokenReader.ReadTokenAccess(ctx, tokenCookie.Value)
 			if err != nil {
 				switch err.(type) {
 				case *client.ErrUnauthorized:
 					handler.HandleError(ctx, w, fmt.Errorf("error checking token access: unauthorized: %v", err), http.StatusUnauthorized, false)
-				case *client.ErrForbidden:
-					handler.HandleError(ctx, w, fmt.Errorf("error checking token access: forbidden: %v", err), http.StatusForbidden, false)
 				default:
 					handler.HandleError(ctx, w, fmt.Errorf("error checking token access: %v", err), http.StatusInternalServerError, true)
 				}
+				return
+			}
+
+			if tokenAccess < expectedAccess {
+				handler.HandleError(ctx, w, errors.New("insufficient access level"), http.StatusForbidden, false)
 				return
 			}
 

@@ -40,7 +40,7 @@ type DBClient interface {
 type AuthClient interface {
 	handler.TokenCreator
 	handler.TokenRefresher
-	middleware.TokenChecker
+	middleware.TokenAccessReader
 }
 
 type PubSubClient interface {

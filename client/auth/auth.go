@@ -54,9 +54,11 @@ type Keys struct {
 
 type Role struct {
 	Name        string
-	AccessLevel int
+	AccessLevel AccessLevel
 	Key         string
 }
+
+type AccessLevel int
 
 func (c *Client) CreateRoleToken(ctx context.Context, roleName, roleKey string) (string, time.Time, error) {
 	ctx, span := tracing.StartSpan(ctx, "CreateRoleToken")
@@ -85,20 +87,16 @@ func (c *Client) CreateRoleToken(ctx context.Context, roleName, roleKey string) 
 	return token, expires, nil
 }
 
-func (c *Client) CheckTokenAccess(ctx context.Context, tokenString string, expectedAccessLevel int) error {
+func (c *Client) ReadTokenAccess(ctx context.Context, tokenString string) (AccessLevel, error) {
 	ctx, span := tracing.StartSpan(ctx, "CheckTokenAccess")
 	defer span.End()
 
 	claims, err := c.parseTokenClaims(ctx, tokenString)
 	if err != nil {
-		return fmt.Errorf("error parsing token claims: %v", err)
+		return 0, fmt.Errorf("error parsing token claims: %v", err)
 	}
 
-	if claims.AccessLevel < expectedAccessLevel {
-		return &client.ErrForbidden{Err: errors.New("insufficient access level")}
-	}
-
-	return nil
+	return claims.AccessLevel, nil
 }
 
 func (c *Client) RefreshToken(ctx context.Context, tokenString string) (string, time.Time, error) {
@@ -172,16 +170,16 @@ func (c *Client) parseTokenClaims(ctx context.Context, tokenString string) (Clai
 }
 
 type Claims struct {
-	RoleName    string `json:"roleName"`
-	AccessLevel int    `json:"accessLevel"`
+	RoleName    string      `json:"roleName"`
+	AccessLevel AccessLevel `json:"accessLevel"`
 	jwt.RegisteredClaims
 }
 
 const AdminRole = "admin"
-const AdminAccess = 30
+const AdminAccess AccessLevel = 30
 
 const EditorRole = "editor"
-const EditorAccess = 20
+const EditorAccess AccessLevel = 20
 
 const ViewerRole = "viewer"
-const ViewerAccess = 10
+const ViewerAccess AccessLevel = 10

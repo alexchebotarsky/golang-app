@@ -29,18 +29,6 @@ func (e *ErrUnauthorized) Unwrap() error {
 	return e.Err
 }
 
-type ErrForbidden struct {
-	Err error
-}
-
-func (e *ErrForbidden) Error() string {
-	return e.Err.Error()
-}
-
-func (e *ErrForbidden) Unwrap() error {
-	return e.Err
-}
-
 type ErrMultiple struct {
 	Errs []error
 }
