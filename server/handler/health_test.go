@@ -16,7 +16,7 @@ func TestHealth(t *testing.T) {
 		name       string
 		args       args
 		wantStatus int
-		wantBody   *HealthStatus
+		wantBody   *healthResponse
 	}{
 		{
 			name: "should return status OK",
@@ -24,7 +24,7 @@ func TestHealth(t *testing.T) {
 				req: httptest.NewRequest(http.MethodGet, "/_healthz", nil),
 			},
 			wantStatus: http.StatusOK,
-			wantBody: &HealthStatus{
+			wantBody: &healthResponse{
 				Status: http.StatusText(http.StatusOK),
 			},
 		},
@@ -39,7 +39,7 @@ func TestHealth(t *testing.T) {
 				t.Fatalf("Health() status = %v, want %v", w.Code, tt.wantStatus)
 			}
 
-			var resBody HealthStatus
+			var resBody healthResponse
 			err := json.NewDecoder(w.Body).Decode(&resBody)
 			if err != nil {
 				t.Fatalf("Health() error json decoding response body: %v", err)
