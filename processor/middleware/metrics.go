@@ -16,6 +16,6 @@ func Metrics(name string, next event.Handler) event.Handler {
 		duration := time.Since(start)
 
 		metrics.RecordEventProcessed(name)
-		metrics.ObserveEventDuration(duration.Seconds())
+		metrics.ObserveEventDuration(duration)
 	}
 }

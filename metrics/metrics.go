@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"strconv"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 )
@@ -69,6 +70,6 @@ func RecordEventProcessed(eventID string) {
 	eventProcessed.WithLabelValues(eventID).Inc()
 }
 
-func ObserveEventDuration(seconds float64) {
-	eventDuration.Observe(seconds)
+func ObserveEventDuration(duration time.Duration) {
+	eventDuration.Observe(duration.Seconds())
 }
