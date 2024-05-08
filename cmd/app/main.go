@@ -22,7 +22,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	logger.Init(env.LogLevel)
+	logger.Init(env.LogLevel, env.LogFormat)
 
 	err = tracing.Init(ctx, env.TraceProjectID, env.ServiceName, env.Environment, env.TracingSampleRate)
 	if err != nil {

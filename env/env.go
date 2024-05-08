@@ -14,6 +14,7 @@ type Config struct {
 	ServiceName       string     `env:"SERVICE_NAME,default=unknown"`
 	Environment       string     `env:"ENVIRONMENT,default=stage"`
 	LogLevel          slog.Level `env:"LOG_LEVEL,default=debug"`
+	LogFormat         string     `env:"LOG_FORMAT,default=json"`
 	TracingSampleRate float64    `env:"TRACING_SAMPLE_RATE,default=1"`
 
 	Port          uint16 `env:"PORT,default=8000"`

@@ -6,12 +6,24 @@ import (
 	"log/slog"
 )
 
-func Init(level slog.Level) {
+func Init(level slog.Level, format string) {
 	opts := &slog.HandlerOptions{
 		ReplaceAttr: renameMessageKey,
 		Level:       level,
 	}
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, opts))
+
+	var handler slog.Handler
+	switch format {
+	case "text":
+		handler = slog.NewTextHandler(os.Stdout, opts)
+	case "json":
+		fallthrough
+	default:
+		handler = slog.NewJSONHandler(os.Stdout, opts)
+	}
+
+	logger := slog.New(handler)
+
 	slog.SetDefault(logger)
 }
 
