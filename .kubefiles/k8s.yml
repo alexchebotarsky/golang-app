@@ -45,13 +45,9 @@ spec:
                       values:
                         - ${APP_NAME}
                 topologyKey: kubernetes.io/hostname
-      tolerations:
-        - key: cloud.google.com/gke-preemptible
-          operator: Equal
-          value: 'true'
-          effect: NoSchedule
       nodeSelector:
-        cloud.google.com/gke-preemptible: 'true'
+        cloud.google.com/gke-spot: 'true'
+      terminationGracePeriodSeconds: 25
       containers:
         - name: container
           image: ${DOCKER_IMAGE}
