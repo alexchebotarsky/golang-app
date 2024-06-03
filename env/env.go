@@ -24,8 +24,8 @@ type Config struct {
 	DatabasePassword string `env:"DATABASE_PASSWORD,required"`
 	DatabaseHost     string `env:"DATABASE_HOST,default=127.0.0.1"`
 	DatabasePort     uint16 `env:"DATABASE_PORT,default=5432"`
-	DatabaseName     string `env:"DATABASE_NAME,required"`
-	DatabaseOptions  string `env:"DATABASE_OPTIONS,default=?sslmode=disable"`
+	DatabaseName     string `env:"DATABASE_NAME,default=postgres"`
+	DatabaseOptions  string `env:"DATABASE_OPTIONS,default="`
 
 	AuthSecret    string        `env:"AUTH_SECRET,required"`
 	AuthTokenTTL  time.Duration `env:"AUTH_TOKEN_TTL,default=20m"`
