@@ -4,10 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"os"
-	"os/signal"
 	"time"
 
+	"github.com/goodleby/golang-app/client"
 	"github.com/goodleby/golang-app/client/auth"
 	"github.com/goodleby/golang-app/client/database"
 	"github.com/goodleby/golang-app/client/example"
@@ -34,6 +33,25 @@ type Clients struct {
 	Example *example.Client
 }
 
+func (c *Clients) Close() error {
+	var errors []error
+
+	slog.Debug("Clients are closing...")
+
+	err := c.DB.Close()
+	if err != nil {
+		errors = append(errors, fmt.Errorf("error closing database client: %v", err))
+	}
+
+	if len(errors) > 0 {
+		return &client.ErrMultiple{Errs: errors}
+	}
+
+	slog.Debug("Clients closing complete")
+
+	return nil
+}
+
 func New(ctx context.Context, env *env.Config) (*App, error) {
 	var app App
 	var err error
@@ -52,16 +70,15 @@ func New(ctx context.Context, env *env.Config) (*App, error) {
 }
 
 func (app *App) Launch(ctx context.Context) {
-	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt, os.Kill)
-	defer cancel()
-
 	for _, service := range app.Services {
 		go service.Start(ctx)
 	}
 
 	<-ctx.Done()
 
-	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
+	slog.Debug("App is shutting down...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	for _, service := range app.Services {
@@ -71,12 +88,12 @@ func (app *App) Launch(ctx context.Context) {
 		}
 	}
 
-	err := app.Clients.DB.Close()
+	err := app.Clients.Close()
 	if err != nil {
-		slog.Error(fmt.Sprintf("Error closing database client: %v", err))
+		slog.Error(fmt.Sprintf("Error closing app clients: %v", err))
 	}
 
-	slog.Debug("App has stopped gracefully")
+	slog.Debug("App shutdown complete")
 }
 
 func setupClients(ctx context.Context, env *env.Config) (*Clients, error) {

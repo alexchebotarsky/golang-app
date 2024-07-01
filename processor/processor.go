@@ -48,7 +48,7 @@ func (p *Processor) Start(ctx context.Context) {
 }
 
 func (p *Processor) Stop(ctx context.Context) error {
-	slog.Debug("Processor has stopped gracefully")
+	slog.Debug("Processor shutdown complete")
 
 	return nil
 }

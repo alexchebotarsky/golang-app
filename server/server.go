@@ -78,12 +78,14 @@ func (s *Server) Start(ctx context.Context) {
 }
 
 func (s *Server) Stop(ctx context.Context) error {
+	slog.Debug("Server is shutting down...")
+
 	err := s.HTTP.Shutdown(ctx)
 	if err != nil {
 		return fmt.Errorf("error shutting down http server: %v", err)
 	}
 
-	slog.Debug("Server has stopped gracefully")
+	slog.Debug("Server shutdown complete")
 
 	return nil
 }
