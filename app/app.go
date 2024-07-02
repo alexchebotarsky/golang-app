@@ -76,6 +76,37 @@ func (app *App) Launch(ctx context.Context) {
 	}
 }
 
+type Service interface {
+	Start(context.Context, chan<- error)
+	Stop(context.Context) error
+}
+
+func setupServices(ctx context.Context, env *env.Config, clients *Clients) ([]Service, error) {
+	var services []Service
+
+	server, err := server.New(ctx, env.Port, env.AllowedOrigins, server.Clients{
+		DB:      clients.DB,
+		Auth:    clients.Auth,
+		PubSub:  clients.PubSub,
+		Example: clients.Example,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error creating new server: %v", err)
+	}
+	services = append(services, server)
+
+	processor, err := processor.New(ctx, processor.Clients{
+		PubSub: clients.PubSub,
+		DB:     clients.DB,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error creating new processor: %v", err)
+	}
+	services = append(services, processor)
+
+	return services, nil
+}
+
 type Clients struct {
 	DB      *database.Client
 	Auth    *auth.Client
@@ -128,35 +159,4 @@ func (c *Clients) Close() error {
 	}
 
 	return nil
-}
-
-type Service interface {
-	Start(context.Context, chan<- error)
-	Stop(context.Context) error
-}
-
-func setupServices(ctx context.Context, env *env.Config, clients *Clients) ([]Service, error) {
-	var services []Service
-
-	server, err := server.New(ctx, env.Port, env.AllowedOrigins, server.Clients{
-		DB:      clients.DB,
-		Auth:    clients.Auth,
-		PubSub:  clients.PubSub,
-		Example: clients.Example,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("error creating new server: %v", err)
-	}
-	services = append(services, server)
-
-	processor, err := processor.New(ctx, processor.Clients{
-		PubSub: clients.PubSub,
-		DB:     clients.DB,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("error creating new processor: %v", err)
-	}
-	services = append(services, processor)
-
-	return services, nil
 }
