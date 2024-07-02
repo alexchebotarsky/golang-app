@@ -127,8 +127,6 @@ func (c *Clients) Close() error {
 		return &client.ErrMultiple{Errs: errors}
 	}
 
-	slog.Debug("Clients have been successfully closed")
-
 	return nil
 }
 

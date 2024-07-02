@@ -70,7 +70,7 @@ func New(ctx context.Context, port uint16, allowedOrigins []string, clients Clie
 }
 
 func (s *Server) Start(ctx context.Context, errc chan<- error) {
-	slog.Info(fmt.Sprintf("Server is listening on port: %d", s.Port))
+	slog.Info(fmt.Sprintf("Server is listening on port %d", s.Port))
 	err := s.HTTP.ListenAndServe()
 	if err != http.ErrServerClosed {
 		errc <- fmt.Errorf("Error listening and serving: %v", err)
@@ -78,14 +78,10 @@ func (s *Server) Start(ctx context.Context, errc chan<- error) {
 }
 
 func (s *Server) Stop(ctx context.Context) error {
-	slog.Debug("Server is shutting down...")
-
 	err := s.HTTP.Shutdown(ctx)
 	if err != nil {
 		return fmt.Errorf("error shutting down http server: %v", err)
 	}
-
-	slog.Debug("Server shutdown complete")
 
 	return nil
 }

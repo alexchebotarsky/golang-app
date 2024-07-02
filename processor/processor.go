@@ -48,8 +48,6 @@ func (p *Processor) Start(ctx context.Context, errc chan<- error) {
 }
 
 func (p *Processor) Stop(ctx context.Context) error {
-	slog.Debug("Processor shutdown complete")
-
 	return nil
 }
 
