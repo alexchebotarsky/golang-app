@@ -69,11 +69,11 @@ func New(ctx context.Context, port uint16, allowedOrigins []string, clients Clie
 	return &s, nil
 }
 
-func (s *Server) Start(ctx context.Context) {
+func (s *Server) Start(ctx context.Context, errc chan<- error) {
 	slog.Info(fmt.Sprintf("Server is listening on port: %d", s.Port))
 	err := s.HTTP.ListenAndServe()
 	if err != http.ErrServerClosed {
-		slog.Error(fmt.Sprintf("Error listening and serving: %v", err))
+		errc <- fmt.Errorf("Error listening and serving: %v", err)
 	}
 }
 

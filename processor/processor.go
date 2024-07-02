@@ -40,7 +40,7 @@ func New(ctx context.Context, clients Clients) (*Processor, error) {
 	return &p, nil
 }
 
-func (p *Processor) Start(ctx context.Context) {
+func (p *Processor) Start(ctx context.Context, errc chan<- error) {
 	slog.Info("Processor has started listening to events")
 	for _, event := range p.Events {
 		go event.Listen(ctx)

@@ -21,37 +21,6 @@ type App struct {
 	Clients  *Clients
 }
 
-type Service interface {
-	Start(context.Context)
-	Stop(context.Context) error
-}
-
-type Clients struct {
-	DB      *database.Client
-	Auth    *auth.Client
-	PubSub  *pubsub.Client
-	Example *example.Client
-}
-
-func (c *Clients) Close() error {
-	var errors []error
-
-	slog.Debug("Clients are closing...")
-
-	err := c.DB.Close()
-	if err != nil {
-		errors = append(errors, fmt.Errorf("error closing database client: %v", err))
-	}
-
-	if len(errors) > 0 {
-		return &client.ErrMultiple{Errs: errors}
-	}
-
-	slog.Debug("Clients closing complete")
-
-	return nil
-}
-
 func New(ctx context.Context, env *env.Config) (*App, error) {
 	var app App
 	var err error
@@ -70,13 +39,20 @@ func New(ctx context.Context, env *env.Config) (*App, error) {
 }
 
 func (app *App) Launch(ctx context.Context) {
+	errc := make(chan error, 1)
+
 	for _, service := range app.Services {
-		go service.Start(ctx)
+		go service.Start(ctx, errc)
 	}
 
-	<-ctx.Done()
+	select {
+	case <-ctx.Done():
+		slog.Debug("Context is cancelled")
+	case err := <-errc:
+		slog.Error(fmt.Sprintf("Critical service error: %v", err))
+	}
 
-	slog.Debug("App is shutting down...")
+	var errors []error
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -84,16 +60,27 @@ func (app *App) Launch(ctx context.Context) {
 	for _, service := range app.Services {
 		err := service.Stop(ctx)
 		if err != nil {
-			slog.Error(fmt.Sprintf("Error stopping a service: %v", err))
+			errors = append(errors, fmt.Errorf("error stopping a service: %v", err))
 		}
 	}
 
 	err := app.Clients.Close()
 	if err != nil {
-		slog.Error(fmt.Sprintf("Error closing app clients: %v", err))
+		errors = append(errors, fmt.Errorf("error closing app clients: %v", err))
 	}
 
-	slog.Debug("App shutdown complete")
+	if len(errors) > 0 {
+		slog.Error(fmt.Sprintf("Error gracefully shutting down: %v", &client.ErrMultiple{Errs: errors}))
+	} else {
+		slog.Debug("App has been gracefully shut down")
+	}
+}
+
+type Clients struct {
+	DB      *database.Client
+	Auth    *auth.Client
+	PubSub  *pubsub.Client
+	Example *example.Client
 }
 
 func setupClients(ctx context.Context, env *env.Config) (*Clients, error) {
@@ -126,6 +113,28 @@ func setupClients(ctx context.Context, env *env.Config) (*Clients, error) {
 	c.Example = example.New(env.ExampleEndpoint)
 
 	return &c, nil
+}
+
+func (c *Clients) Close() error {
+	var errors []error
+
+	err := c.DB.Close()
+	if err != nil {
+		errors = append(errors, fmt.Errorf("error closing database client: %v", err))
+	}
+
+	if len(errors) > 0 {
+		return &client.ErrMultiple{Errs: errors}
+	}
+
+	slog.Debug("Clients have been successfully closed")
+
+	return nil
+}
+
+type Service interface {
+	Start(context.Context, chan<- error)
+	Stop(context.Context) error
 }
 
 func setupServices(ctx context.Context, env *env.Config, clients *Clients) ([]Service, error) {
