@@ -51,7 +51,7 @@ type ExampleClient interface {
 	handler.ExampleDataFetcher
 }
 
-func New(ctx context.Context, port uint16, allowedOrigin string, clients Clients) (*Server, error) {
+func New(ctx context.Context, port uint16, allowedOrigins []string, clients Clients) (*Server, error) {
 	var s Server
 
 	s.Port = port
@@ -64,7 +64,7 @@ func New(ctx context.Context, port uint16, allowedOrigin string, clients Clients
 	}
 	s.Clients = clients
 
-	s.setupRoutes(allowedOrigin)
+	s.setupRoutes(allowedOrigins)
 
 	return &s, nil
 }
@@ -90,7 +90,7 @@ func (s *Server) Stop(ctx context.Context) error {
 	return nil
 }
 
-func (s *Server) setupRoutes(allowedOrigin string) {
+func (s *Server) setupRoutes(allowedOrigins []string) {
 	s.Router.Get("/_healthz", handler.Health)
 	s.Router.Handle("/metrics", promhttp.Handler())
 
@@ -98,7 +98,7 @@ func (s *Server) setupRoutes(allowedOrigin string) {
 		r.Use(middleware.Trace, middleware.Metrics)
 
 		r.Use(cors.Handler(cors.Options{
-			AllowedOrigins:   []string{allowedOrigin},
+			AllowedOrigins:   allowedOrigins,
 			AllowedMethods:   []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodOptions},
 			AllowCredentials: true,
 		}))

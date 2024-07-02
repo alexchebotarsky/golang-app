@@ -17,8 +17,8 @@ type Config struct {
 	LogFormat         string     `env:"LOG_FORMAT,default=json"`
 	TracingSampleRate float64    `env:"TRACING_SAMPLE_RATE,default=1"`
 
-	Port          uint16 `env:"PORT,default=8000"`
-	AllowedOrigin string `env:"ALLOWED_ORIGIN,default=http://localhost:3000"`
+	Port           uint16   `env:"PORT,default=8000"`
+	AllowedOrigins []string `env:"ALLOWED_ORIGINS,default=http://localhost:3000"`
 
 	DatabaseUser     string `env:"DATABASE_USER,required"`
 	DatabasePassword string `env:"DATABASE_PASSWORD,required"`

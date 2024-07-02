@@ -131,7 +131,7 @@ func setupClients(ctx context.Context, env *env.Config) (*Clients, error) {
 func setupServices(ctx context.Context, env *env.Config, clients *Clients) ([]Service, error) {
 	var services []Service
 
-	server, err := server.New(ctx, env.Port, env.AllowedOrigin, server.Clients{
+	server, err := server.New(ctx, env.Port, env.AllowedOrigins, server.Clients{
 		DB:      clients.DB,
 		Auth:    clients.Auth,
 		PubSub:  clients.PubSub,
