@@ -3,17 +3,16 @@ package middleware
 import (
 	"context"
 
-	"cloud.google.com/go/pubsub"
 	"github.com/goodleby/golang-app/processor/event"
 	"github.com/goodleby/golang-app/tracing"
 )
 
 func Trace(name string, next event.Handler) event.Handler {
-	return func(ctx context.Context, msg *pubsub.Message) {
+	return func(ctx context.Context, msg *event.Message) {
 		ctx, span := tracing.StartSpanFromCarrier(ctx, msg.Attributes, name)
 		defer span.End()
 
-		span.SetTag("EventName", name)
+		span.SetTag("event.name", name)
 
 		next(ctx, msg)
 	}

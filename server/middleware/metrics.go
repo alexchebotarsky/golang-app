@@ -18,10 +18,10 @@ func Metrics(next http.Handler) http.Handler {
 
 		duration := time.Since(start)
 
-		routeID := fmt.Sprintf("%s %s", r.Method, chi.RouteContext(r.Context()).RoutePattern())
+		routeName := fmt.Sprintf("%s %s", r.Method, chi.RouteContext(r.Context()).RoutePattern())
 
-		metrics.RecordRequestStatusCode(crw.status, routeID)
-		metrics.ObserveRequestDuration(duration.Seconds())
+		metrics.RecordRequestStatusCode(crw.status, routeName)
+		metrics.ObserveRequestDuration(duration)
 	})
 }
 

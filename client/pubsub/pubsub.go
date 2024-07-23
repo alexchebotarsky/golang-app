@@ -10,14 +10,11 @@ import (
 
 type Client struct {
 	*pubsub.Client
-	envTag string
 }
 
-func New(ctx context.Context, projectID, envTag string) (*Client, error) {
+func New(ctx context.Context, projectID string) (*Client, error) {
 	var c Client
 	var err error
-
-	c.envTag = envTag
 
 	c.Client, err = pubsub.NewClient(ctx, projectID)
 	if err != nil {
@@ -28,33 +25,21 @@ func New(ctx context.Context, projectID, envTag string) (*Client, error) {
 }
 
 func (c *Client) Subscription(id string) *pubsub.Subscription {
-	return c.Client.Subscription(c.withEnvTag(id))
+	return c.Client.Subscription(id)
 }
 
 func (c *Client) send(ctx context.Context, topicID string, data []byte) error {
 	ctx, span := tracing.StartSpan(ctx, topicID)
 	defer span.End()
 
-	topic := c.Client.Topic(c.withEnvTag(topicID))
+	topic := c.Client.Topic(topicID)
 	defer topic.Stop()
 
-	var results []*pubsub.PublishResult
-	res := topic.Publish(ctx, &pubsub.Message{Data: data, Attributes: tracing.NewCarrier(ctx)})
-	results = append(results, res)
-
-	for _, r := range results {
-		_, err := r.Get(ctx)
-		if err != nil {
-			return fmt.Errorf("error publishing to pubsub: %v", err)
-		}
+	result := topic.Publish(ctx, &pubsub.Message{Data: data, Attributes: tracing.NewCarrier(ctx)})
+	id, err := result.Get(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to publish message %s to topic %q: %v", id, topicID, err)
 	}
+
 	return nil
-}
-
-func (c *Client) withEnvTag(id string) string {
-	if c.envTag == "" || id == "" {
-		return id
-	}
-
-	return fmt.Sprintf("%s-%s", id, c.envTag)
 }

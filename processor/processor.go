@@ -2,16 +2,18 @@ package processor
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 
 	"cloud.google.com/go/pubsub"
 	"github.com/goodleby/golang-app/processor/event"
+	"github.com/goodleby/golang-app/processor/handler"
 	"github.com/goodleby/golang-app/processor/middleware"
 )
 
 type Processor struct {
 	Events      []event.Event
-	Middlewares []middleware.Middleware
+	Middlewares []event.Middleware
 	Clients     Clients
 }
 
@@ -25,7 +27,7 @@ type PubSubClient interface {
 }
 
 type DBClient interface {
-	event.ArticleInserter
+	handler.ArticleInserter
 }
 
 func New(ctx context.Context, clients Clients) (*Processor, error) {
@@ -33,46 +35,51 @@ func New(ctx context.Context, clients Clients) (*Processor, error) {
 
 	p.Clients = clients
 
-	// Order is important here, middlewares expect events to be setup first.
 	p.setupEvents()
-	p.setupMiddlewares()
 
 	return &p, nil
 }
 
 func (p *Processor) Start(ctx context.Context, errc chan<- error) {
-	slog.Info("Processor has started listening to events")
-	for _, event := range p.Events {
-		go event.Listen(ctx)
+	for _, e := range p.Events {
+		// Gather global processor middlewares and event specific middlewares.
+		middlewares := make([]event.Middleware, 0, len(p.Middlewares)+len(e.Middlewares))
+		middlewares = append(middlewares, p.Middlewares...)
+		middlewares = append(middlewares, e.Middlewares...)
+
+		// Apply relevant middlewares before listening to the event.
+		for _, middleware := range middlewares {
+			e.Handler = middleware(e.Name, e.Handler)
+		}
+
+		go e.Listen(ctx, errc)
 	}
+
+	slog.Info(fmt.Sprintf("PubSub event processor listening to %d events", len(p.Events)))
 }
 
 func (p *Processor) Stop(ctx context.Context) error {
 	return nil
 }
 
-func (p *Processor) handle(event event.Event) {
-	p.Events = append(p.Events, event)
+func (p *Processor) handle(e event.Event) {
+	e.Subscription = p.Clients.PubSub.Subscription(e.SubscriptionID)
+	e.Subscription.ReceiveSettings.MaxOutstandingMessages = e.Throttle
+
+	p.Events = append(p.Events, e)
 }
 
-func (p *Processor) use(middlewares ...middleware.Middleware) {
-	p.Middlewares = append(middlewares, middlewares...)
-}
-
-func (p *Processor) setupMiddlewares() {
-	for _, event := range p.Events {
-		for _, middleware := range p.Middlewares {
-			event.Handler = middleware(event.Name, event.Handler)
-		}
-	}
+func (p *Processor) use(middlewares ...event.Middleware) {
+	p.Middlewares = append(p.Middlewares, middlewares...)
 }
 
 func (p *Processor) setupEvents() {
 	p.use(middleware.Trace, middleware.Metrics)
 
 	p.handle(event.Event{
-		Name:         "AddArticle",
-		Subscription: p.Clients.PubSub.Subscription("golang-app-add-article-sub"),
-		Handler:      event.AddArticle(p.Clients.DB),
+		Name:           "AddArticle",
+		SubscriptionID: "golang-app-add-article-sub",
+		Handler:        handler.AddArticle(p.Clients.DB),
+		Throttle:       1,
 	})
 }

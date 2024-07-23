@@ -10,66 +10,68 @@ import (
 )
 
 var (
-	requestStatusCode = prometheus.NewCounterVec(prometheus.CounterOpts{
-		Name: "request_status_code",
-		Help: "Status codes returned by the API",
+	requestsHandled = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name: "requests_handled",
+		Help: "Handled requests counter and metadata associated with them",
 	},
-		[]string{"status_code", "route_id"},
+		[]string{"status_code", "route_name"},
 	)
-	requestDuration = prometheus.NewHistogram(prometheus.HistogramOpts{
-		Name:    "request_duration",
+	requestsDuration = prometheus.NewHistogram(prometheus.HistogramOpts{
+		Name:    "requests_duration",
 		Help:    "Time spent processing requests",
 		Buckets: []float64{.005, .01, .025, .05, .075, .1, .25, .5, .75, 1.0, 2.5, 5.0, 7.5, 10.0, math.Inf(1)},
 	})
-	eventProcessed = prometheus.NewCounterVec(prometheus.CounterOpts{
-		Name: "event_processed",
-		Help: "Number of PubSub events processed",
+	eventsHandled = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name: "events_processed",
+		Help: "Handled PubSub events counter and metadata associated with them",
 	},
-		[]string{"event_id"},
+		[]string{"event_name", "status"},
 	)
-	eventDuration = prometheus.NewHistogram(prometheus.HistogramOpts{
-		Name:    "event_duration",
+	eventsDuration = prometheus.NewHistogramVec(prometheus.HistogramOpts{
+		Name:    "events_duration",
 		Help:    "Time spent processing events",
-		Buckets: []float64{.001, .002, .003, .004, .005, .01, .02, .03, .04, .05, .1, .2, .3, .4, .5},
-	})
+		Buckets: []float64{.005, .01, .025, .05, .075, .1, .25, .5, .75, 1.0, 2.5, 5.0, 7.5, 10.0, math.Inf(1)},
+	},
+		[]string{"event_name"},
+	)
 )
 
 func Init() error {
-	err := prometheus.Register(requestStatusCode)
+	err := prometheus.Register(requestsHandled)
 	if err != nil {
-		return fmt.Errorf("error registering requestStatusCodes metrics collector: %v", err)
+		return fmt.Errorf("error registering requestsHandled metrics collector: %v", err)
 	}
 
-	err = prometheus.Register(requestDuration)
+	err = prometheus.Register(requestsDuration)
 	if err != nil {
-		return fmt.Errorf("error registering timeToProcessRequest metrics collector: %v", err)
+		return fmt.Errorf("error registering requestsDuration metrics collector: %v", err)
 	}
 
-	err = prometheus.Register(eventProcessed)
+	err = prometheus.Register(eventsHandled)
 	if err != nil {
-		return fmt.Errorf("error registering eventProcessed metrics collector: %v", err)
+		return fmt.Errorf("error registering eventsHandled metrics collector: %v", err)
 	}
 
-	err = prometheus.Register(eventDuration)
+	err = prometheus.Register(eventsDuration)
 	if err != nil {
-		return fmt.Errorf("error registering eventDuration metrics collector: %v", err)
+		return fmt.Errorf("error registering eventsDuration metrics collector: %v", err)
 	}
 
 	return nil
 }
 
-func RecordRequestStatusCode(statusCode int, routeID string) {
-	requestStatusCode.WithLabelValues(strconv.Itoa(statusCode), routeID).Inc()
+func RecordRequestStatusCode(statusCode int, routeName string) {
+	requestsHandled.WithLabelValues(strconv.Itoa(statusCode), routeName).Inc()
 }
 
-func ObserveRequestDuration(seconds float64) {
-	requestDuration.Observe(seconds)
+func ObserveRequestDuration(duration time.Duration) {
+	requestsDuration.Observe(duration.Seconds())
 }
 
-func RecordEventProcessed(eventID string) {
-	eventProcessed.WithLabelValues(eventID).Inc()
+func RecordEventProcessed(eventName, status string) {
+	eventsHandled.WithLabelValues(eventName, status).Inc()
 }
 
-func ObserveEventDuration(duration time.Duration) {
-	eventDuration.Observe(duration.Seconds())
+func ObserveEventDuration(eventName string, duration time.Duration) {
+	eventsDuration.WithLabelValues(eventName).Observe(duration.Seconds())
 }
