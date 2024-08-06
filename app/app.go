@@ -136,7 +136,7 @@ func setupClients(ctx context.Context, env *env.Config) (*Clients, error) {
 		Viewer: env.AuthViewerKey,
 	})
 
-	c.PubSub, err = pubsub.New(ctx, env.PubSubProjectID, env.Environment)
+	c.PubSub, err = pubsub.New(ctx, env.PubSubProjectID)
 	if err != nil {
 		return nil, fmt.Errorf("error creating example client: %v", err)
 	}
