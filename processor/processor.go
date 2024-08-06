@@ -8,7 +8,6 @@ import (
 	"cloud.google.com/go/pubsub"
 	"github.com/goodleby/golang-app/processor/event"
 	"github.com/goodleby/golang-app/processor/handler"
-	"github.com/goodleby/golang-app/processor/middleware"
 )
 
 type Processor struct {
@@ -71,15 +70,4 @@ func (p *Processor) handle(e event.Event) {
 
 func (p *Processor) use(middlewares ...event.Middleware) {
 	p.Middlewares = append(p.Middlewares, middlewares...)
-}
-
-func (p *Processor) setupEvents() {
-	p.use(middleware.Trace, middleware.Metrics)
-
-	p.handle(event.Event{
-		Name:           "AddArticle",
-		SubscriptionID: "golang-app-add-article-sub",
-		Handler:        handler.AddArticle(p.Clients.DB),
-		Throttle:       1,
-	})
 }
