@@ -45,7 +45,7 @@ func LoadConfig(ctx context.Context) (*Config, error) {
 	// We are loading env variables from .env file only for local development
 	err := godotenv.Load(".env")
 	if err != nil {
-		slog.Debug("error loading .env file: %v", err)
+		slog.Debug(fmt.Sprintf("error loading .env file: %v", err))
 	}
 
 	err = envconfig.Process(ctx, &c)

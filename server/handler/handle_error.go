@@ -28,7 +28,7 @@ func HandleError(ctx context.Context, w http.ResponseWriter, err error, statusCo
 	w.WriteHeader(statusCode)
 
 	err = json.NewEncoder(w).Encode(errorResponse{
-		Error:      fmt.Sprintf("%v", err),
+		Error:      fmt.Sprintf("%s: %d", http.StatusText(statusCode), statusCode),
 		StatusCode: statusCode,
 	})
 	handleWritingErr(err)

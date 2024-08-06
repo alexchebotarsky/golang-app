@@ -22,15 +22,15 @@ func TestHandleError(t *testing.T) {
 		wantBody   *errorResponse
 	}{
 		{
-			name: "should set passed status and write passed error",
+			name: "should set passed status and write status text error",
 			args: args{
-				err:        errors.New("test error"),
+				err:        errors.New("Test error"),
 				statusCode: 500,
 				shouldLog:  false,
 			},
 			wantStatus: 500,
 			wantBody: &errorResponse{
-				Error:      "test error",
+				Error:      "Internal Server Error: 500",
 				StatusCode: 500,
 			},
 		},
