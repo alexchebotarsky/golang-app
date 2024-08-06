@@ -8,8 +8,8 @@ import (
 	"strconv"
 
 	chi "github.com/go-chi/chi/v5"
-	"github.com/goodleby/golang-app/article"
 	"github.com/goodleby/golang-app/client"
+	"github.com/goodleby/golang-app/model/article"
 	"github.com/goodleby/golang-app/tracing"
 )
 

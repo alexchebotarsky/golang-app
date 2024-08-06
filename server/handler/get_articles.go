@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/goodleby/golang-app/article"
+	"github.com/goodleby/golang-app/model/article"
 )
 
 type AllArticlesSelector interface {

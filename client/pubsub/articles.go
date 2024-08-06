@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/goodleby/golang-app/article"
+	"github.com/goodleby/golang-app/model/article"
 )
 
 func (c *Client) PublishAddArticle(ctx context.Context, payload article.Payload) error {

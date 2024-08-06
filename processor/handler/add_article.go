@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/goodleby/golang-app/article"
+	"github.com/goodleby/golang-app/model/article"
 	"github.com/goodleby/golang-app/processor/event"
 )
 

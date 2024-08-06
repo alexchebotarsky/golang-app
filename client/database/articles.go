@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/goodleby/golang-app/article"
 	"github.com/goodleby/golang-app/client"
+	"github.com/goodleby/golang-app/model/article"
 	"github.com/goodleby/golang-app/tracing"
 	"github.com/jmoiron/sqlx"
 )
