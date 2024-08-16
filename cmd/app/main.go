@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
-	"os/signal"
 
 	"github.com/goodleby/golang-app/app"
 	"github.com/goodleby/golang-app/env"
@@ -15,8 +14,7 @@ import (
 )
 
 func main() {
-	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, os.Kill)
-	defer cancel()
+	ctx := context.Background()
 
 	env, err := env.LoadConfig(ctx)
 	if err != nil {
