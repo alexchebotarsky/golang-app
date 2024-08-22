@@ -12,7 +12,6 @@ import (
 func HandleError(ctx context.Context, msg *event.Message, err error, retry bool) {
 	span := tracing.SpanFromContext(ctx)
 
-	span.SetTag("event.status", msg.Status)
 	span.RecordError(err)
 
 	if retry {

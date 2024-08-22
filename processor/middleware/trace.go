@@ -15,5 +15,7 @@ func Trace(name string, next event.Handler) event.Handler {
 		span.SetTag("event.name", name)
 
 		next(ctx, msg)
+
+		span.SetTag("event.status", msg.Status)
 	}
 }
