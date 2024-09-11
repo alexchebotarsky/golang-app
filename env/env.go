@@ -17,6 +17,7 @@ type Config struct {
 	LogFormat         string     `env:"LOG_FORMAT,default=json"`
 	TracingSampleRate float64    `env:"TRACING_SAMPLE_RATE,default=1"`
 
+	Host           string   `env:"HOST,default=0.0.0.0"`
 	Port           uint16   `env:"PORT,default=8000"`
 	AllowedOrigins []string `env:"ALLOWED_ORIGINS,default=http://localhost:3000"`
 

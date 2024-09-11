@@ -89,7 +89,7 @@ type Service interface {
 func setupServices(ctx context.Context, env *env.Config, clients *Clients) ([]Service, error) {
 	var services []Service
 
-	server, err := server.New(ctx, env.Port, env.AllowedOrigins, server.Clients{
+	server, err := server.New(ctx, env.Host, env.Port, env.AllowedOrigins, server.Clients{
 		DB:      clients.DB,
 		Auth:    clients.Auth,
 		PubSub:  clients.PubSub,
