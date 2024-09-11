@@ -18,8 +18,8 @@ spec:
       labels:
         app: ${APP_NAME}
       annotations:
-        prometheus.io/scrape: 'true'
-        cluster-autoscaler.kubernetes.io/safe-to-evict: 'true'
+        prometheus.io/scrape: "true"
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
     spec:
       # Affinity to make sure that multiple pods does not run on the same node
       affinity:
@@ -46,18 +46,18 @@ spec:
                         - ${APP_NAME}
                 topologyKey: kubernetes.io/hostname
       nodeSelector:
-        cloud.google.com/gke-spot: 'true'
+        cloud.google.com/gke-spot: "true"
       terminationGracePeriodSeconds: 25
       containers:
         - name: container
           image: ${DOCKER_IMAGE}
           resources:
             limits:
-              cpu: '${APP_CPU_LIMIT}m'
-              memory: '${APP_MEM_LIMIT}Mi'
+              cpu: "${APP_CPU_LIMIT}m"
+              memory: "${APP_MEM_LIMIT}Mi"
             requests:
-              cpu: '${APP_CPU_REQUEST}m'
-              memory: '${APP_MEM_REQUEST}Mi'
+              cpu: "${APP_CPU_REQUEST}m"
+              memory: "${APP_MEM_REQUEST}Mi"
           envFrom:
             - configMapRef:
                 name: ${APP_NAME}-config

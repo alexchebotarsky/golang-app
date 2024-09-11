@@ -4,7 +4,7 @@ workflows:
   main:
     jobs:
       - build:
-          context: 'main'
+          context: "main"
       - test
       - approve_deploy_stage:
           type: approval
@@ -13,7 +13,7 @@ workflows:
               ignore:
                 - main
       - deploy_stage:
-          context: 'main'
+          context: "main"
           requires:
             - build
             - test
@@ -23,7 +23,7 @@ workflows:
               ignore:
                 - main
       - deploy_prod:
-          context: 'main'
+          context: "main"
           requires:
             - build
             - test
@@ -32,8 +32,8 @@ workflows:
               only:
                 - main
       - deploy_stage:
-          name: 'deploy_stage_from_prod'
-          context: 'main'
+          name: "deploy_stage_from_prod"
+          context: "main"
           requires:
             - build
             - test
@@ -73,46 +73,46 @@ commands:
   setup_docker:
     steps:
       - setup_remote_docker:
-          version: 'docker23'
+          version: "docker23"
   docker_login:
     steps:
       - run:
-          name: 'Docker login with Google Cloud service account credentials'
+          name: "Docker login with Google Cloud service account credentials"
           command: echo $GCR_CREDENTIALS | docker login -u _json_key --password-stdin https://$GCR
   docker_build:
     steps:
       - run:
-          name: 'Docker build app image'
+          name: "Docker build app image"
           command: docker build --tag $GCR/$CIRCLE_PROJECT_REPONAME:$CIRCLE_SHA1 .
   docker_push:
     steps:
       - run:
-          name: 'Docker push image to Google Cloud Artifact Registry'
+          name: "Docker push image to Google Cloud Artifact Registry"
           command: docker push --all-tags $GCR/$CIRCLE_PROJECT_REPONAME
   go_test:
     steps:
       - run:
-          name: 'Run go test'
+          name: "Run go test"
           command: go test -race ./...
   deploy_to_env:
     parameters:
       env:
         default: stage
         type: enum
-        enum: ['stage', 'prod']
+        enum: ["stage", "prod"]
     steps:
       - run:
-          name: 'Install required dependencies'
+          name: "Install required dependencies"
           command: apt-get install -y gettext
       - run:
-          name: 'Authorize gcloud and kubectl'
+          name: "Authorize gcloud and kubectl"
           command: |
             echo $GKE_CREDENTIALS | gcloud auth activate-service-account --quiet --key-file=-
             gcloud config set project $GKE_PROJECT --quiet
             gcloud config set compute/region $GKE_REGION --quiet
             gcloud container clusters get-credentials $GKE_CLUSTER --quiet
       - run:
-          name: 'Deploy to GKE'
+          name: "Deploy to GKE"
           command: |
             export ENVIRONMENT="<< parameters.env >>"
             export APP_NAME=$CIRCLE_PROJECT_REPONAME
@@ -133,10 +133,10 @@ commands:
 executors:
   docker_executor:
     docker:
-      - image: 'docker:23.0.6'
+      - image: "docker:23.0.6"
   golang_executor:
     docker:
-      - image: 'golang:1.22'
+      - image: "golang:1.22"
   gcloud_executor:
     docker:
-      - image: 'google/cloud-sdk:468.0.0'
+      - image: "google/cloud-sdk:468.0.0"
