@@ -20,7 +20,7 @@ func Metrics(next http.Handler) http.Handler {
 
 		routeName := fmt.Sprintf("%s %s", r.Method, chi.RouteContext(r.Context()).RoutePattern())
 
-		metrics.RecordRequestStatusCode(crw.status, routeName)
+		metrics.RecordRequestHandled(crw.status, routeName)
 		metrics.ObserveRequestDuration(duration)
 	})
 }
