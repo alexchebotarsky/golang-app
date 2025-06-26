@@ -5,8 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"os"
-	"os/signal"
 	"time"
 
 	"github.com/goodleby/golang-app/client/auth"
@@ -41,9 +39,6 @@ func New(ctx context.Context, env *env.Config) (*App, error) {
 }
 
 func (app *App) Launch(ctx context.Context) {
-	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt, os.Kill)
-	defer cancel()
-
 	errc := make(chan error, 1)
 
 	for _, service := range app.Services {
@@ -59,7 +54,8 @@ func (app *App) Launch(ctx context.Context) {
 
 	var errs []error
 
-	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
+	// New context for graceful shutdown
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	for _, service := range app.Services {
