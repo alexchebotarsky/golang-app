@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/goodleby/golang-app/processor/event"
+	"github.com/goodleby/golang-app/service/processor/event"
 	"github.com/goodleby/golang-app/tracing"
 )
 

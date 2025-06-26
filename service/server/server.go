@@ -8,8 +8,8 @@ import (
 	"time"
 
 	chi "github.com/go-chi/chi/v5"
-	"github.com/goodleby/golang-app/server/handler"
-	"github.com/goodleby/golang-app/server/middleware"
+	"github.com/goodleby/golang-app/service/server/handler"
+	"github.com/goodleby/golang-app/service/server/middleware"
 )
 
 type Server struct {

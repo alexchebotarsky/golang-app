@@ -1,9 +1,9 @@
 package processor
 
 import (
-	"github.com/goodleby/golang-app/processor/event"
-	"github.com/goodleby/golang-app/processor/handler"
-	"github.com/goodleby/golang-app/processor/middleware"
+	"github.com/goodleby/golang-app/service/processor/event"
+	"github.com/goodleby/golang-app/service/processor/handler"
+	"github.com/goodleby/golang-app/service/processor/middleware"
 )
 
 func (p *Processor) setupEvents() {

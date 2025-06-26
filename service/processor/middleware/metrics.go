@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/goodleby/golang-app/metrics"
-	"github.com/goodleby/golang-app/processor/event"
+	"github.com/goodleby/golang-app/service/processor/event"
 )
 
 func Metrics(eventName string, next event.Handler) event.Handler {

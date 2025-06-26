@@ -6,8 +6,8 @@ import (
 	"log/slog"
 
 	"cloud.google.com/go/pubsub"
-	"github.com/goodleby/golang-app/processor/event"
-	"github.com/goodleby/golang-app/processor/handler"
+	"github.com/goodleby/golang-app/service/processor/event"
+	"github.com/goodleby/golang-app/service/processor/handler"
 )
 
 type Processor struct {

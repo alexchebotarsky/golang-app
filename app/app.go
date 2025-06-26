@@ -12,8 +12,8 @@ import (
 	"github.com/goodleby/golang-app/client/example"
 	"github.com/goodleby/golang-app/client/pubsub"
 	"github.com/goodleby/golang-app/env"
-	"github.com/goodleby/golang-app/processor"
-	"github.com/goodleby/golang-app/server"
+	"github.com/goodleby/golang-app/service/processor"
+	"github.com/goodleby/golang-app/service/server"
 )
 
 type App struct {

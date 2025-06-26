@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/goodleby/golang-app/model/article"
-	"github.com/goodleby/golang-app/processor/event"
+	"github.com/goodleby/golang-app/service/processor/event"
 )
 
 type ArticleInserter interface {

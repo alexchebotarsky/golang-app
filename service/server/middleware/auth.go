@@ -8,7 +8,7 @@ import (
 
 	"github.com/goodleby/golang-app/client"
 	"github.com/goodleby/golang-app/client/auth"
-	"github.com/goodleby/golang-app/server/handler"
+	"github.com/goodleby/golang-app/service/server/handler"
 )
 
 type TokenAccessReader interface {
