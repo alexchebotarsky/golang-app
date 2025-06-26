@@ -2,10 +2,10 @@ package database
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/url"
 
-	"github.com/goodleby/golang-app/client"
 	"github.com/jmoiron/sqlx"
 
 	// Postgres driver
@@ -68,7 +68,7 @@ func (c *Client) Close() error {
 	}
 
 	if len(errs) > 0 {
-		return &client.ErrMultiple{Errs: errs}
+		return errors.Join(errs...)
 	}
 
 	return nil

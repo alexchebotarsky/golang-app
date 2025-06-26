@@ -1,9 +1,9 @@
 package metrics
 
 import (
+	"errors"
 	"fmt"
 
-	"github.com/goodleby/golang-app/client"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -25,7 +25,7 @@ func Init() error {
 	}
 
 	if len(errs) > 0 {
-		return &client.ErrMultiple{Errs: errs}
+		return errors.Join(errs...)
 	}
 
 	return nil

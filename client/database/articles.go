@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/goodleby/golang-app/client"
@@ -48,7 +49,7 @@ func (articleStmt *ArticleStmt) Close() error {
 	}
 
 	if len(errs) > 0 {
-		return &client.ErrMultiple{Errs: errs}
+		return errors.Join(errs...)
 	}
 
 	return nil
