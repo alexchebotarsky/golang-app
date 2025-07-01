@@ -72,7 +72,7 @@ func (s *Server) Start(ctx context.Context, errc chan<- error) {
 	slog.Info(fmt.Sprintf("Server is listening at %s:%d", s.Host, s.Port))
 	err := s.HTTP.ListenAndServe()
 	if err != http.ErrServerClosed {
-		errc <- fmt.Errorf("Error listening and serving: %v", err)
+		errc <- fmt.Errorf("error listening and serving: %v", err)
 	}
 }
 

@@ -23,7 +23,7 @@ type Middleware func(eventName string, next Handler) Handler
 
 func (e *Event) Listen(ctx context.Context, errc chan<- error) {
 	if e.Subscription == nil {
-		errc <- fmt.Errorf("Subscription %q is nil", e.Name)
+		errc <- fmt.Errorf("subscription %q is nil", e.Name)
 		return
 	}
 
@@ -31,7 +31,7 @@ func (e *Event) Listen(ctx context.Context, errc chan<- error) {
 		e.Handler(ctx, &Message{Message: msg})
 	})
 	if err != nil {
-		errc <- fmt.Errorf("Error listening to %q subscription: %v", e.Name, err)
+		errc <- fmt.Errorf("error listening to %q subscription: %v", e.Name, err)
 		return
 	}
 }
