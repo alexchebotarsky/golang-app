@@ -1,6 +1,8 @@
 package article
 
-import "errors"
+import (
+	"errors"
+)
 
 type Article struct {
 	Payload
